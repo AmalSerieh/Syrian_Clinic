@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'login_success' => 'Google login successful!',
+    'login_successfully' => 'You have successfully logged in!',
+    'login_failed' => 'Login failed!',
+    'fetch_failed' => 'Failed to fetch user info!',
+    'exchange_failed' => 'Failed to exchange code!',
+    'register_success' => 'Registration successful!',
+    'language_changed' => 'Language updated.',
+    'password_changed' => 'Password changed successfully!',
+    'password_mismatch' => 'Current password is incorrect.',
+    'otp_sent' => 'The verification code has been sent to your email.',
+    'name' => 'Name',
+    'email' => 'Email',
+    'password' => 'Password',
+    'email_used' => 'The email has already been taken.',
+    'invalid_otp' => 'The verification otp is incorrect or expired.',
+    'otp_verified' => 'Verification code has been successfully verified.',
+    'invalid_credentials' => 'Invalid email or password.',
+    'session_expired' => 'Session expired. Please try again.',
+    'user_not_found' => 'User not found.',
+    'password_reset_successfully' => 'Your password has been reset successfully.',
+    'current_password_incorrect' => 'The current password is incorrect.',
+    'password_changed_successfully' => 'Password changed successfully.',
+    'unauthenticated' => 'Unauthenticated. Please login first.',
+
+];
