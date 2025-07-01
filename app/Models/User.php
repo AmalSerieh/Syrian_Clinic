@@ -26,6 +26,9 @@ class User extends Authenticatable
         'role',
         'google_id',
         'phone',
+        'created_by',
+        'created_by_user_id',
+        'fcm_token'
     ];
 
     /**
@@ -50,6 +53,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function isPatient()
+    {
+        return $this->role === 'patient';
+    }
     public function isDoctor()
     {
         return $this->role === 'doctor';
@@ -61,12 +68,34 @@ class User extends Authenticatable
     }
     public function patient()
     {
-        return $this->hasOne(Patient::class,'user_id');
+        return $this->hasOne(Patient::class, 'user_id');
 
     }
-      public function doctor()
+    public function doctor()
     {
-        return $this->hasOne(Doctor::class,'user_id');
+        return $this->hasOne(Doctor::class, 'user_id');
 
+    }
+      public function secretary()
+    {
+        return $this->hasOne(Secretary::class, 'user_id');
+
+    }
+    // الشخص الذي أنشأ هذا المستخدم
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    // الأشخاص الذين أنشأهم هذا المستخدم
+    public function createdUsers()
+    {
+        return $this->hasMany(User::class, 'created_by_user_id');
+    }
+
+    // فحص هل الحساب تم إنشاؤه من شخص آخر
+    public function wasCreatedByAnother()
+    {
+        return !is_null($this->created_by);
     }
 }

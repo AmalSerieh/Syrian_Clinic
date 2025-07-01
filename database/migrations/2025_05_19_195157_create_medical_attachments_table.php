@@ -10,13 +10,15 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('tests', function (Blueprint $table) {
+        Schema::create('medical_attachments', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('patient_record_id')->nullable();
             $table->foreign('patient_record_id')->references('id')->on('patient_records')->onDelete('set null');
-            $table->string('test_name')->nullable();
-            $table->text('test_result')->nullable();//ممكن كنابة أو صورة
-            $table->date('test_date')->nullable();
+            $table->string('ray_name')->nullable();
+            $table->string('ray_laboratory')->nullable();
+            $table->date('ray_date')->nullable();
+            $table->string('ray_image')->nullable();//ممكن كنابة أو صورة
+
             $table->timestamps();
         });
     }

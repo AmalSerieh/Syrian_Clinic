@@ -171,6 +171,15 @@ class RegisterWithOtpController extends Controller
         ]);
 
     }
+    public function resendOtp(Request $request)
+    {
+        $result = $this->authService->resendOtp();
+
+        return response()->json([
+            'message' => $result['message'],
+        ], $result['code']);
+    }
+
     protected function parseLanguageHeader(?string $header): string
     {
         if (!$header)

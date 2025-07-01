@@ -39,9 +39,16 @@ class AuthLoginService
                     'data' => null
                 ];
             }
+            $isCreatedBySecretary = false;
+
+            if ($user->role === 'patient' && $user->created_by === 'secretary') {
+                $isCreatedBySecretary = true;
+            }
 
             $this->updateUserLanguage($user, $language);
             Auth::login($user);
+            $isCreatedBySecretary = $user->role === 'patient' && $user->created_by === 'secretary';
+
 
             return [
                 'success' => true,
@@ -49,7 +56,10 @@ class AuthLoginService
                 'message' => __('auth.login_successfully'),
                 'data' => [
                     'user' => $user,
-                    'token' => $user->createToken('auth_token')->plainTextToken
+                    'token' => $user->createToken('auth_token')->plainTextToken,
+                    'created_by_secretary' => $isCreatedBySecretary,
+                    'redirect_route' => $isCreatedBySecretary ? route('patient.profile.edit') : null, // 👈
+
                 ],
                 'patient' => $user->role === 'patient' ? $user->patient : null
             ];

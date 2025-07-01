@@ -20,6 +20,10 @@ return new class extends Migration {
             $table->enum('role', ['admin', 'secretary', 'doctor', 'patient'])->default('patient'); // نوع المستخدم
             $table->string('phone')->nullable(); // en or ar
             $table->string('google_id')->nullable();
+            // معلومات من أنشأ الحساب
+            $table->enum('created_by', ['admin', 'secretary'])->nullable();
+            $table->foreignId('created_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('fcm_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

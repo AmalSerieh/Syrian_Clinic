@@ -14,12 +14,13 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('patient_record_id')->nullable()->constrained('patient_records')->onDelete('set null');
             $table->enum('gender', ['male', 'female'])->default('male');
-            $table->date('date_birth')->nullable();
+            $table->date('date_birth')->nullable();//y,m,d
             $table->string('height')->nullable();
             $table->string('weight')->nullable();
-            $table->enum('blood_type', ['A+', 'B+', 'O+', 'AB+', 'A-', 'B-', 'O-', 'AB-'])->default('O+');
+            $table->enum('blood_type', ['A+', 'B+', 'O+', 'AB+', 'A-', 'B-', 'O-', 'AB-','Gwada-'])->default('O+');
             $table->boolean('smoker')->default(0);
             $table->boolean('alcohol')->default(0);
+            $table->boolean('drug')->default(0);
             $table->enum('matital_status', ['single', 'married', 'widower', 'divorced'])->default('single'); // نوع المستخدم
             $table->timestamps();
         });
@@ -32,4 +33,5 @@ return new class extends Migration {
     {
         Schema::dropIfExists('patient_profiles');
     }
+    //حساب العمر ب السنة و كم شهر و اليوم
 };

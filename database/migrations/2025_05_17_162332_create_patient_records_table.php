@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->boolean('profile_submitted')->default(false);
             $table->boolean('diseases_submitted')->default(false);
             $table->boolean('operations_submitted')->default(false);
-            $table->boolean('tests_submitted')->default(false);
+            $table->boolean('medicalAttachments_submitted')->default(false);
             $table->boolean('allergies_submitted')->default(false);
             $table->boolean('family_history_submitted')->default(false);
             $table->boolean('medications_submitted')->default(false);

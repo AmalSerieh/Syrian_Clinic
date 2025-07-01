@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Allergy;
 use App\Models\Disease;
 use App\Models\FamilyHistory;
+use App\Models\MedicalAttachment;
 use App\Models\MedicalFile;
 use App\Models\Medication;
 use App\Models\Operation;
@@ -12,12 +13,18 @@ use App\Models\Patient_profile;
 use App\Models\Patient_record;
 use App\Models\Test;
 use App\Policies\AllergiesPolicy;
+use App\Policies\Api\PatientRecord\AllergyPolicy;
+use App\Policies\Api\PatientRecord\DiseasePolicy;
+use App\Policies\Api\PatientRecord\MedicalAttachmentPolicy;
+use App\Policies\Api\PatientRecord\MedicalFilePolicy;
+use App\Policies\Api\PatientRecord\MedicationPolicy;
+use App\Policies\Api\PatientRecord\OperationPolicy;
 use App\Policies\DiseasesPolicy;
 use App\Policies\FamilyHistoriesPolicy;
 use App\Policies\MedicalFilesPolicy;
 use App\Policies\MedicationsPolicy;
 use App\Policies\OperationsPolicy;
-use App\Policies\PatientProfilePolicy;
+use \App\Policies\Api\PatientRecord\PatientProfilePolicy;
 use App\Policies\PatientRecordPolicy;
 use App\Policies\TestsPolicy;
 use Illuminate\Support\Facades\Gate;
@@ -34,6 +41,14 @@ class AuthServiceProvider extends ServiceProvider
 
     protected $policies = [
         Operation::class => OperationsPolicy::class,
+        Patient_profile::class => PatientProfilePolicy::class,
+        Allergy::class => AllergyPolicy::class,
+        MedicalFile::class => MedicalFilePolicy::class,
+        MedicalAttachment::class => MedicalAttachmentPolicy::class,
+        Disease::class => DiseasePolicy::class,
+        Medication::class => MedicationPolicy::class,
+        Operation::class => OperationPolicy::class,
+
     ];
 
     /**
@@ -51,13 +66,13 @@ class AuthServiceProvider extends ServiceProvider
     {
         Gate::policy(Patient_record::class, PatientRecordPolicy::class);
         Gate::policy(Patient_profile::class, PatientProfilePolicy::class);
-        Gate::policy(Disease::class, DiseasesPolicy::class);
-        Gate::policy(Medication::class, MedicationsPolicy::class);
-        Gate::policy(Operation::class, OperationsPolicy::class);
-        Gate::policy(Test::class, TestsPolicy::class);
-        Gate::policy(Allergy::class, AllergiesPolicy::class);
-        Gate::policy(FamilyHistory::class, FamilyHistoriesPolicy::class);
-        Gate::policy(MedicalFile::class, MedicalFilesPolicy::class);
+        Gate::policy(Allergy::class, AllergyPolicy::class);
+        Gate::policy(MedicalFile::class, MedicalFilePolicy::class);
+        Gate::policy(MedicalAttachment::class, MedicalAttachmentPolicy::class);
+        Gate::policy(Disease::class, DiseasePolicy::class);
+        Gate::policy(Medication::class, MedicationPolicy::class);
+        Gate::policy(Operation::class, OperationPolicy::class);
+
     }
 
 }

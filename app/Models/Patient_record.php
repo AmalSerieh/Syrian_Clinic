@@ -11,7 +11,7 @@ class Patient_record extends Model
         'profile_submitted',
         'diseases_submitted',
         'operations_submitted',
-        'tests_submitted',
+        'medicalAttachments_submitted',
         'allergies_submitted',
         'family_history_submitted',
         'medications_submitted',
@@ -46,9 +46,9 @@ class Patient_record extends Model
 
     }
     //الفحوصات الطبية
-    public function tests()
+    public function medicalAttachment()
     {
-        return $this->hasMany(Test::class);
+        return $this->hasMany(MedicalAttachment::class);
     }
 
     //الحساسيات

@@ -67,6 +67,7 @@ class LoginController extends Controller
             ], 500);
         }
 
+
         // إذا كانت الاستجابة ناجحة
         if ($response['success'] === true) {
             if (!isset($response['data']['user'], $response['data']['token'])) {
@@ -80,7 +81,8 @@ class LoginController extends Controller
                 'message' => $response['message'],
                 'user' => new UserResource($response['data']['user']),
                 'patient' => $response['patient'] ? new PatientResource($response['patient']) : null,
-
+                'created_by_secretary' => $response['data']['created_by_secretary'],
+                'redirect_route' => $response['data']['redirect_route'], // 👈
                 'token' => $response['data']['token']
             ], $response['status']);
         }

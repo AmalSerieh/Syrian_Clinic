@@ -1,0 +1,30 @@
+'gender' => 'male,female',
+'blood_type' => 'A+,B+,O+,AB+,A-,B-,O-,AB-,Gwada-',
+'matital_status' => 'single,married,widower,divorced',
+'aller_power' => strong,medium,weak,
+'aller_type' => animal,pollen,Food,dust,mold,medicine,seasons,other,
+'d_type' => current,chronic,
+'med_type' => chronic,current,
+'med_frequency' => once_daily,twice_daily,three_times_daily,daily,weekly,monthly,yearly,
+'med_dosage_form' => tablet,capsule,pills,syrup,liquid,drops,sprays,patches,injections,
+'med_timing' => before_food,after_food,morinng,
+
+
+
+| الحقل                      | مثال                  | الشرح                                                                                                                                      |
+| -------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`                       | `11`                  | رقم تسلسلي (ID) لهذا الدواء في قاعدة البيانات.                                                                                             |
+| `med_name`                 | `"Aspirin 81"`        | اسم الدواء الذي أدخله المريض (أو الطبيب).                                                                                                  |
+| `med_type`                 | `"chronic"`           | نوع الدواء: `chronic` يعني دواء دائم (يأخذه المريض لفترة غير محدودة)، أو `current` يعني دواء مؤقت لفترة محددة.                             |
+| `start_date`               | `"2025-07-02"`        | تاريخ بدء تناول الدواء.                                                                                                                    |
+| `end_date`                 | `null`                | تاريخ انتهاء تناول الدواء؛ في حالة الدواء الدائم `chronic` يكون `null` لأنه بدون نهاية.                                                    |
+| `frequency`                | `"weekly"`            | تكرار أخذ الدواء: مثلًا `weekly` يعني مرة كل أسبوع، `daily` يعني يوميًا، `twice_daily` مرتين في اليوم... إلخ.                              |
+| `med_frequency_value`      | `0.14285714285714285` | قيمة رقمية تُستخدم لحساب الكمية الإجمالية: مثلًا `weekly` = 1/7 ≈ 0.14، تعني أن المريض يأخذ الجرعة بمعدل 0.14 مرة في اليوم.                |
+| `dosage_form`              | `"drops"`             | شكل الدواء: مثلًا `tablet`, `capsule`, `syrup`, `drops`, `injections`... إلخ.                                                              |
+| `dose`                     | `"100"`               | كمية الجرعة الواحدة: مثلًا 100 مل، أو 1 حبة... يعتمد على نوع الدواء.                                                                       |
+| `quantity_per_dose`        | `"100"`               | نفس قيمة الجرعة (للتوحيد)، أي كم يأخذ في كل مرة.                                                                                           |
+| `timing`                   | `"before_food"`       | متى يُؤخذ الدواء: مثلًا قبل الأكل، بعد الأكل، قبل النوم... إلخ.                                                                            |
+| `med_total_quantity`       | `4`                   | العدد الكلي للدواء المتوقع استهلاكه خلال المدة المحددة (يُحسب تلقائيًا). مثلًا هنا: أخذ الدواء أسبوعيًا لمدة معينة → النتيجة كانت 4 جرعات. |
+| `med_prescribed_by_doctor` | `"Dr. Ali"`           | اسم الطبيب الذي وصف الدواء.                                                                                                                |
+| `is_active`                | `true`                | حالة الدواء: هل الدواء حاليًا نشط ويأخذه المريض (`true`) أم توقف (`false`).                                                                |
+

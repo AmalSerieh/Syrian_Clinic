@@ -6,7 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Operation extends Model
 {
-     protected $fillable = ['patient_record_id', 'op_name', 'op_doctor_name','op_date'];
+    protected $fillable = [
+        'patient_record_id',
+        'op_name',
+        'op_doctor_name',
+        'op_hospital_name',
+        'op_date'
+    ];
 
     public function patientRecord()
     {

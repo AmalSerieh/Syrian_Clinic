@@ -6,7 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Allergy extends Model
 {
-    protected $fillable = ['patient_record_id', 'aller_name', 'aller_reaction'];
+    protected $fillable = [
+        'patient_record_id',
+        'aller_power',
+        'aller_name',
+        'aller_type',
+        'aller_cause',//المسبب
+        'aller_treatment',//العلاج
+        'aller_pervention',//المنوعات
+        'aller_reasons'//الأسباب
+    ];
 
     public function patientRecord()
     {

@@ -38,7 +38,7 @@ class AuthService
              ['otp' => $otp, 'expired_at' => Carbon::now()->addMinutes(10)]
          );
 
-         // Mail::to($request->email)->send(new EmailOtpMail($otp)); // افعلها عند الحاجة
+         //// Mail::to($request->email)->send(new EmailOtpMail($otp)); // افعلها عند الحاجة
 
          $request->session()->put([
              'register_email' => $request->email,
@@ -123,13 +123,13 @@ class AuthService
             ];
         }
 
-        $otp = rand(100000, 999999);
+        $otp = rand(10000, 99999);
         EmailOtp::updateOrCreate(
             ['email' => $data['email']],
             ['otp' => $otp, 'expired_at' => Carbon::now()->addMinutes(10)]
         );
 
-          Mail::to($data['email'])->send(new EmailOtpMail($otp));
+        Mail::to($data['email'])->send(new EmailOtpMail($otp));
 
         // Store session data
         Session::put('register_email', $data['email']);
@@ -222,5 +222,44 @@ class AuthService
             'patient_record' => $patient_record,
         ];
     }
+    public function resendOtp(): array
+    {
+        $email = auth()->check() ? auth()->user()->email : Session::get('register_email');
+
+        if (!$email) {
+            return [
+                'status' => false,
+                'code' => 400,
+                'message' => __('auth.session_expired'),
+            ];
+        }
+
+        // التحقق من كود OTP الحالي
+        $otpRecord = EmailOtp::where('email', $email)->first();
+
+        if ($otpRecord && now()->lt($otpRecord->expired_at)) {
+            return [
+                'status' => false,
+                'code' => 429,
+                'message' => __('auth.wait_before_resend'),
+            ];
+        }
+
+        // توليد وإرسال OTP جديد
+        $otp = rand(10000, 99999);
+        EmailOtp::updateOrCreate(
+            ['email' => $email],
+            ['otp' => $otp, 'expired_at' => now()->addMinutes(10)]
+        );
+
+        Mail::to($email)->send(new EmailOtpMail($otp));
+
+        return [
+            'status' => true,
+            'code' => 200,
+            'message' => __('auth.otp_resent'),
+        ];
+    }
+
 }
 

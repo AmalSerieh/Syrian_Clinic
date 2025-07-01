@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم العيادة</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #f8f9fc;
+            --sidebar-bg: #2e3a4d;
+            --sidebar-active: #3c4b64;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* تصميم الشريط الجانبي */
+        .sidebar {
+            background-color: var(--sidebar-bg);
+            color: #fff;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 260px;
+            padding-top: 20px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .sidebar .logo {
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 25px;
+            margin: 5px 0;
+            border-radius: 0;
+            transition: all 0.3s;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: var(--sidebar-active);
+            color: white;
+        }
+
+        .sidebar .nav-link i {
+            margin-left: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* تصميم الشريط العلوي */
+        .topbar {
+            background-color: white;
+            height: 70px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .topbar .search-bar {
+            width: 400px;
+            position: relative;
+        }
+
+        .topbar .search-bar input {
+            padding-right: 45px;
+            border-radius: 30px;
+        }
+
+        .topbar .search-bar i {
+            position: absolute;
+            left: 20px;
+            top: 12px;
+            color: #aaa;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-left: 15px;
+        }
+
+        /* تصميم المحتوى الرئيسي */
+        .main-content {
+            margin-right: 260px;
+            padding: 20px;
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, #4e73df 0%, #3a56c5 100%);
+            color: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .welcome-card .pattern {
+            position: absolute;
+            right: 0;
+            top: 0;
+            opacity: 0.1;
+            height: 100%;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: none;
+            margin-bottom: 25px;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            font-weight: 600;
+            padding: 15px 20px;
+        }
+
+        .doctor-card {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .doctor-card .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .doctor-card .specialty {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .doctor-card .btn-action {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .stats-card {
+            text-align: center;
+            border-top: 3px solid var(--primary-color);
+        }
+
+        .stats-card .number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stats-card .title {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .add-doctor-card {
+            background-color: #f8f9fc;
+            border: 2px dashed #d1d3e2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            min-height: 200px;
+            transition: all 0.3s;
+        }
+
+        .add-doctor-card:hover {
+            background-color: #eef2f7;
+            border-color: var(--primary-color);
+        }
+
+        .add-doctor-card i {
+            font-size: 3rem;
+            color: #4e73df;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+            }
+            .sidebar .logo-text,
+            .sidebar .nav-link span {
+                display: none;
+            }
+            .sidebar .nav-link {
+                text-align: center;
+            }
+            .sidebar .nav-link i {
+                margin-left: 0;
+                font-size: 1.2rem;
+            }
+            .main-content {
+                margin-right: 70px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .topbar .search-bar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- الشريط الجانبي -->
+    <div class="sidebar">
+        <div class="logo">
+            <h4 class="logo-text"><i class="fas fa-clinic-medical"></i> إدارة العيادة</h4>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">
+                    <i class="fas fa-home"></i>
+                    <span>الرئيسية</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-user-md"></i>
+                    <span>الأطباء</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-user-tie"></i>
+                    <span>السكرتارية</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>التقارير</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>المواعيد</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-users"></i>
+                    <span>المرضى</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-cog"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="main-content">
+        <!-- الشريط العلوي -->
+        <nav class="topbar navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <div class="search-bar">
+                    <input type="text" class="form-control" placeholder="ابحث عن المرضى...">
+                    <i class="fas fa-search"></i>
+                </div>
+
+                <div class="user-profile">
+                    <div class="user-info">
+                        <span class="d-block fw-bold">Andrew Smith</span>
+                        <small class="text-muted">ADMIN CLINIC</small>
+                    </div>
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="صورة المستخدم">
+                </div>
+            </div>
+        </nav>
+
+        <!-- بطاقة الترحيب -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card welcome-card">
+                    <div class="card-body position-relative">
+                        <svg class="pattern" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="100%" height="100%" fill="none"/>
+                            <path d="M0,0 L200,200" stroke="white" stroke-width="2"/>
+                            <path d="M200,0 L0,200" stroke="white" stroke-width="2"/>
+                        </svg>
+                        <h3>مرحبًا بعودتك، علي</h3>
+                        <p class="mb-4">هذه هي التحديثات والأحداث الأخيرة في عيادتك اليوم.</p>
+                        <button class="btn btn-light">
+                            <i class="fas fa-calendar me-2"></i> عرض المواعيد
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- إحصائيات سريعة -->
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="number">632</div>
+                        <div class="title">المرضى الجدد</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="number">124</div>
+                        <div class="title">المواعيد اليوم</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="number">32</div>
+                        <div class="title">الأطباء المتاحين</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="number">$8,250</div>
+                        <div class="title">الإيرادات الشهرية</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- قائمة الأطباء -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">إدارة الأطباء</h5>
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus me-1"></i> إضافة طبيب جديد
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- بطاقة إضافة طبيب -->
+                            <div class="col-lg-3 col-md-6 mb-4">
+                                <div class="card add-doctor-card">
+                                    <div class="text-center">
+                                        <i class="fas fa-user-plus mb-3"></i>
+                                        <h5>إضافة طبيب</h5>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- بطاقات الأطباء -->
+                            <div class="col-lg-3 col-md-6 mb-4">
+                                <div class="card doctor-card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <img src="https://randomuser.me/api/portraits/men/41.jpg" alt="صورة الطبيب" class="avatar">
+                                            <div class="ms-3">
+                                                <h5 class="mb-0">عليام كولتر</h5>
+                                                <p class="specialty mb-0">طبيب عام</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-muted small">
+                                            <i class="fas fa-envelope me-1"></i> aliam.colter@clinic.com
+                                        </p>
+                                        <div class="d-flex justify-content-between mt-3">
+                                            <button class="btn btn-outline-primary btn-action">
+                                                <i class="fas fa-eye me-1"></i> التفاصيل
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-action">
+                                                <i class="fas fa-trash me-1"></i> حذف
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3 col-md-6 mb-4">
+                                <div class="card doctor-card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="صورة الطبيب" class="avatar">
+                                            <div class="ms-3">
+                                                <h5 class="mb-0">عمار علي</h5>
+                                                <p class="specialty mb-0">طبيب أسنان</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-muted small">
+                                            <i class="fas fa-envelope me-1"></i> amar.ali@clinic.com
+                                        </p>
+                                        <div class="d-flex justify-content-between mt-3">
+                                            <button class="btn btn-outline-primary btn-action">
+                                                <i class="fas fa-eye me-1"></i> التفاصيل
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-action">
+                                                <i class="fas fa-trash me-1"></i> حذف
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3 col-md-6 mb-4">
+                                <div class="card doctor-card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="صورة الطبيب" class="avatar">
+                                            <div class="ms-3">
+                                                <h5 class="mb-0">عمر أبو هوى</h5>
+                                                <p class="specialty mb-0">جراح</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-muted small">
+                                            <i class="fas fa-envelope me-1"></i> omar.abohawa@clinic.com
+                                        </p>
+                                        <div class="d-flex justify-content-between mt-3">
+                                            <button class="btn btn-outline-primary btn-action">
+                                                <i class="fas fa-eye me-1"></i> التفاصيل
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-action">
+                                                <i class="fas fa-trash me-1"></i> حذف
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // كود جافاسكربت للربط مع Laravel API
+        document.addEventListener('DOMContentLoaded', function() {
+            // هنا يمكنك إضافة كود لجلب البيانات من Laravel API
+            console.log('الصفحة جاهزة للربط مع Laravel API');
+
+            // مثال لجلب بيانات الأطباء
+            fetch('/api/doctors')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('بيانات الأطباء:', data);
+                    // يمكنك هنا معالجة البيانات وعرضها في الواجهة
+                })
+                .catch(error => {
+                    console.error('حدث خطأ في جلب البيانات:', error);
+                });
+
+            // إضافة مستمع للأحداث للأزرار
+            document.querySelectorAll('.btn-action').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const action = this.querySelector('i').classList.contains('fa-eye') ? 'view' : 'delete';
+                    const doctorName = this.closest('.doctor-card').querySelector('h5').textContent;
+
+                    if (action === 'view') {
+                        alert(`عرض تفاصيل الطبيب: ${doctorName}`);
+                    } else {
+                        if (confirm(`هل أنت متأكد من حذف الطبيب ${doctorName}؟`)) {
+                            alert(`جاري حذف الطبيب: ${doctorName}`);
+                        }
+                    }
+                });
+            });
+
+            // حدث إضافة طبيب جديد
+            document.querySelector('.add-doctor-card').addEventListener('click', function() {
+                alert('فتح نموذج إضافة طبيب جديد');
+            });
+        });
+    </script>
+</body>
+</html>

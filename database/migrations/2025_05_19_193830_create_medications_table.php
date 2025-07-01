@@ -14,7 +14,20 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('patient_record_id')->nullable();
             $table->foreign('patient_record_id')->references('id')->on('patient_records')->onDelete('set null');
-            $table->string('med_name')->nullable();//العلمي
+            $table->enum('med_type', ['current', 'chronic'])->default('current');
+            $table->string('med_name')->nullable();
+            $table->date('med_start_date')->nullable();
+            $table->date('med_end_date')->nullable(); // null للدواء الدائم
+            $table->enum('med_frequency', ['once_daily', 'twice_daily', 'three_times_daily', 'daily', 'weekly', 'monthly', 'yearly'])->default('once_daily');
+            $table->decimal('med_frequency_value', 8, 2)->default(1); // رقم لحساب الكمية المستهلكة تلقائيًا
+            $table->enum('med_dosage_form', ['tablet', 'capsule', 'syrup', 'liquid', 'powder', 'pills', 'drops', 'sprays', 'patches', 'injections'])->default('pills');
+            $table->decimal('med_dose', 8, 2)->nullable();
+            $table->enum('med_timing', ['before_food', 'after_food', 'morinng'])->nullable();
+            $table->decimal('med_quantity_per_dose', 8, 2)->nullable(); // تُحسب تلقائياً
+             $table->string('med_prescribed_by_doctor')->nullable();
+            $table->decimal('med_total_quantity')->nullable();// إجمالي الكمية المحسوبة
+            // إجمالي الكمية المتوفرة للمريض من الدواء (يُستخدم للحساب)
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -27,3 +40,23 @@ return new class extends Migration {
         Schema::dropIfExists('medications');
     }
 };
+/* public function withValidator($validator)
+{
+    $validator->after(function ($validator) {
+        $form = $this->input('med_dosage_form');
+        $dose = $this->input('med_dose');
+
+        if (in_array($form, ['tablet', 'capsule', 'pills'])) {
+            $allowed = ['0.5', '1', '1.5', '2', '2.5'];
+        } elseif (in_array($form, ['syrup', 'liquid', 'drops'])) {
+            $allowed = ['5', '10', '15', '20', '25', '50', '100', '200'];
+        } else {
+            $allowed = []; // يمكن تركه مفتوح أو نرفض
+        }
+
+        if (!in_array((string)$dose, $allowed)) {
+            $validator->errors()->add('med_dose', 'الجرعة المختارة غير مناسبة لنوع الدواء.');
+        }
+    });
+}
+ */

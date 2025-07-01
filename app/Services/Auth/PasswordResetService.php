@@ -48,7 +48,7 @@ class PasswordResetService
         // حفظ البريد في الجلسة
         $request->session()->put('reset_password_email', $email);
 
-        Mail::to($email)->send(new ResetPasswordOtpMail($otp));
+      //  Mail::to($email)->send(new ResetPasswordOtpMail($otp));
 
         return [
             'success' => true,
@@ -126,7 +126,7 @@ class PasswordResetService
 
     private function generateOtp(): int
     {
-        return rand(100000, 999999);
+        return rand(10000, 99999);
     }
 
     protected function parseLanguageHeader(?string $header): string

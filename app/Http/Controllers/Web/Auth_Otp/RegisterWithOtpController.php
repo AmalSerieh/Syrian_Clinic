@@ -106,12 +106,12 @@ class RegisterWithOtpController extends Controller
         if ($user->role === 'doctor') {
             $doctor = Doctor::create([
                 'user_id' => $user->id,
-                'photo' => 'avatars/6681221.png',
+                'photo' => 'certificates/doctor.jpg',
             ]);
 
-            $doctor_record = DoctorProfile::create([
+    /*    $doctor_record = DoctorProfile::create([
                 'doctor_id' => $doctor->id,
-            ]);
+            ]); */
         }
         $emailotp->delete();
         $request->session()->forget('register_email');
@@ -125,7 +125,8 @@ class RegisterWithOtpController extends Controller
 
         // إعادة التوجيه حسب الدور
         return match ($user->role) {
-            'doctor' => redirect()->route('doctor.dashboard'),
+            'doctor' => redirect()->route('doctor-profile.create'),
+            //'doctor' => redirect()->route('doctor.dashboard'),
             'secretary' => redirect()->route('secretary.dashboard'),
             default => abort(403)
         };
