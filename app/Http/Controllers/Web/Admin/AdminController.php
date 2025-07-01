@@ -34,15 +34,15 @@ class AdminController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', 'min:8', Password::defaults()],
             'phone' => ['required', 'digits:10', 'numeric'],
-            //'role' => ['required', 'in:secretary'],
             'date_of_appointment' => ['required', 'date'],
         ]);
 
-        if ($validated['role'] === 'secretary' && User::where('role', 'secretary')->exists()) {
+        if (User::where('role', 'secretary')->exists()) {
             return back()
                 ->withErrors(['role' => 'يوجد بالفعل حساب سكرتيرة في النظام'])
                 ->withInput();
         }
+
 
         DB::beginTransaction();
 
@@ -87,11 +87,11 @@ class AdminController extends Controller
     public function secretary_update(Request $request)
     {
         $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', 'max:255'],
-            'phone' => ['sometimes', 'digits:10'],
-            'password' => ['sometimes', 'confirmed', 'min:8'], // الباسوورد اختياري في التعديل
-            'date_of_appointment' => ['sometimes', 'date'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['required', 'digits:10'],
+            'password' => ['required', 'confirmed', 'min:8'], // الباسوورد اختياري في التعديل
+            'date_of_appointment' => ['required', 'date'],
         ]);
 
         $secretary = User::where('role', 'secretary')->first();
@@ -151,7 +151,6 @@ class AdminController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', 'min:8', Password::defaults()],
             'phone' => ['required', 'digits:10', 'numeric'],
-           // 'role' => ['required', 'in:doctor'],
             'date_of_appointment' => ['required', 'date'],
             'room_id' => 'required|exists:rooms,id',
         ]);
@@ -246,7 +245,7 @@ class AdminController extends Controller
 
         return redirect()->route('admin.doctor')->with('message', 'تم حذف الطبيب بنجاح!');
     }
-    
+
 
 
 

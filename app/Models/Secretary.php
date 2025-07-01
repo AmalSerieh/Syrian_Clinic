@@ -9,7 +9,8 @@ class Secretary extends Model
     protected $fillable = [
         'user_id',
         'photo',
-        'date_of_appointment'
+        'date_of_appointment',
+        'gender'
     ];
     public function user()
     {

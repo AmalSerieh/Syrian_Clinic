@@ -15,8 +15,8 @@ return new class extends Migration {
             $table->foreignId('patient_record_id')->nullable()->constrained('patient_records')->onDelete('set null');
             $table->enum('gender', ['male', 'female'])->default('male');
             $table->date('date_birth')->nullable();//y,m,d
-            $table->string('height')->nullable();
-            $table->string('weight')->nullable();
+            $table->text('height')->nullable();
+            $table->text('weight')->nullable();
             $table->enum('blood_type', ['A+', 'B+', 'O+', 'AB+', 'A-', 'B-', 'O-', 'AB-','Gwada-'])->default('O+');
             $table->boolean('smoker')->default(0);
             $table->boolean('alcohol')->default(0);

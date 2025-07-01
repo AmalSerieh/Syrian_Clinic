@@ -52,18 +52,13 @@
                 <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
             </div>
 
-            <div class="mt-4">
+           {{--  <div class="mt-4">
                 <!-- العنوان فوق المربع -->
                 <x-input-label for="role" :value="__('Select role:')" class="mb-2 text-lg font-semibold text-gray-800" />
 
                 <!-- المربع الأبيض -->
                 <div class="bg-white border border-gray-300 rounded-xl shadow-sm p-4">
                     <div class="flex space-x-6 ">
-                        {{-- <div class="flex items-center ">
-                        <input type="radio" id="role_admin" name="role" value="admin" required
-                            class="mr-2 text-indigo-600 focus:ring-indigo-500 " checked>
-                        <label for="role_admin" class="text-gray-700">admin</label>
-                    </div> --}}
 
                         @php
                             $existingadmin = \App\Models\User::where('role', 'admin')->exists();
@@ -78,11 +73,9 @@
                         @endif
                     </div>
                     <x-input-error :messages="$errors->get('role')" class="mt-2" />
-                    {{-- @error('role')
-                    <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
-                @enderror --}}
+
                 </div>
-            </div>
+            </div> --}}
 
 
 

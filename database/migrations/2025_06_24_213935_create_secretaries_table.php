@@ -15,6 +15,8 @@ return new class extends Migration {
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('photo')->nullable();
             $table->date('date_of_appointment')->nullable();
+            $table->enum('gender', ['male', 'female'])->default('male');
+
             $table->timestamps();
         });
     }

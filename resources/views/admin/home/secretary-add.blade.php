@@ -55,25 +55,33 @@
 
                 <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
             </div>
+             <!-- Date of appointment -->
+            <div class="mt-4">
+                <x-input-label for="date_of_appointment" :value="__('Date of appointment')" />
+
+                <x-text-input id="date_of_appointment" class="block mt-1 w-full" type="date" name="date_of_appointment" required
+                    autocomplete="new-date" />
+
+                <x-input-error :messages="$errors->get('date_of_appointment')" class="mt-2" />
+            </div>
 
             <div class="mt-4">
                 <!-- العنوان فوق المربع -->
-                <x-input-label for="role" :value="__('Select role:')" class="mb-2 text-lg font-semibold text-gray-800" />
+                <x-input-label for="gender" :value="__('Select Gender:')" class="mb-2 text-lg font-semibold text-gray-800" />
 
                 <!-- المربع الأبيض -->
                 <div class="bg-white border border-gray-300 rounded-xl shadow-sm p-4">
                     <div class="flex space-x-6 ">
-                        @php
-                            $existingsecretary = \App\Models\User::where('role', 'secretary')->exists();
-                        @endphp
-
-                        @if (!$existingsecretary)
                             <div class="flex items-center ">
-                                <input type="radio" id="role_secretary" name="role" value="secretary" required
+                                <input type="radio" id="gender_secretary" name="gender" value="male" required
                                     class="mr-2 text-indigo-600 focus:ring-indigo-500 " checked>
-                                <label for="role_secretary" class="text-gray-700">secretary</label>
+                                <label for="gender_secretary" class="text-gray-700">male</label>
                             </div>
-                        @endif
+                            <div class="flex items-center ">
+                                <input type="radio" id="gender_secretary" name="gender" value="female" required
+                                    class="mr-2 text-indigo-600 focus:ring-indigo-500 ">
+                                <label for="gender_secretary" class="text-gray-700">female
+
                     </div>
                     <x-input-error :messages="$errors->get('role')" class="mt-2" />
 

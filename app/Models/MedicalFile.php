@@ -31,5 +31,36 @@ class MedicalFile extends Model
             default => 'other',
         };
     }
+    // ✅ الحقول التي تحتاج تشفير
+    protected $encryptable = [
+        'test_name',
+        'test_laboratory',
+        'test_image_pdf'
+    ];
+    // 🔐 التعامل مع التشفير قبل التخزين
+    public function setAttribute($key, $value)
+    {
+        if (in_array($key, $this->encryptable) && !is_null($value)) {
+            $value = encrypt($value);
+        }
+        return parent::setAttribute($key, $value);
+    }
+
+    // 🔐 فك التشفير عند الجلب
+    public function getAttribute($key)
+    {
+        $value = parent::getAttribute($key);
+        if (in_array($key, $this->encryptable) && !is_null($value)) {
+            try {
+                return decrypt($value);
+            } catch (\Exception $e) {
+                return $value; // في حال كان النص غير مشفر
+            }
+        }
+        return $value;
+    }
+
+
+
 
 }

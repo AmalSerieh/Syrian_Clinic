@@ -14,10 +14,10 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('patient_record_id')->nullable();
             $table->foreign('patient_record_id')->references('id')->on('patient_records')->onDelete('set null');
-            $table->string('ray_name')->nullable();
-            $table->string('ray_laboratory')->nullable();
+            $table->text('ray_name')->nullable();
+            $table->text('ray_laboratory')->nullable();
             $table->date('ray_date')->nullable();
-            $table->string('ray_image')->nullable();//ممكن كنابة أو صورة
+            $table->text('ray_image')->nullable();//ممكن كنابة أو صورة
 
             $table->timestamps();
         });

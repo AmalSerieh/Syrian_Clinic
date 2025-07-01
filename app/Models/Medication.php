@@ -27,7 +27,7 @@ class Medication extends Model
     {
         return $this->belongsTo(Patient_record::class);
     }
-     protected $appends = ['is_active', 'total_quantity'];
+    protected $appends = ['is_active', 'total_quantity'];
 
     public function getIsActiveAttribute()
     {
@@ -50,4 +50,34 @@ class Medication extends Model
         return ceil($days * $this->med_frequency_value);
     }
  */
+    // ✅ الحقول التي تحتاج تشفير
+    protected $encryptable = [
+        'med_name',
+        'med_prescribed_by_doctor',
+    ];
+    // 🔐 التعامل مع التشفير قبل التخزين
+    public function setAttribute($key, $value)
+    {
+        if (in_array($key, $this->encryptable) && !is_null($value)) {
+            $value = encrypt($value);
+        }
+        return parent::setAttribute($key, $value);
+    }
+
+    // 🔐 فك التشفير عند الجلب
+    public function getAttribute($key)
+    {
+        $value = parent::getAttribute($key);
+        if (in_array($key, $this->encryptable) && !is_null($value)) {
+            try {
+                return decrypt($value);
+            } catch (\Exception $e) {
+                return $value; // في حال كان النص غير مشفر
+            }
+        }
+        return $value;
+    }
+
+
+
 }

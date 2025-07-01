@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('patient_record_id')->nullable();
             $table->foreign('patient_record_id')->references('id')->on('patient_records')->onDelete('set null');
             $table->enum('med_type', ['current', 'chronic'])->default('current');
-            $table->string('med_name')->nullable();
+            $table->text('med_name')->nullable();
             $table->date('med_start_date')->nullable();
             $table->date('med_end_date')->nullable(); // null للدواء الدائم
             $table->enum('med_frequency', ['once_daily', 'twice_daily', 'three_times_daily', 'daily', 'weekly', 'monthly', 'yearly'])->default('once_daily');
@@ -24,7 +24,7 @@ return new class extends Migration {
             $table->decimal('med_dose', 8, 2)->nullable();
             $table->enum('med_timing', ['before_food', 'after_food', 'morinng'])->nullable();
             $table->decimal('med_quantity_per_dose', 8, 2)->nullable(); // تُحسب تلقائياً
-             $table->string('med_prescribed_by_doctor')->nullable();
+             $table->text('med_prescribed_by_doctor')->nullable();
             $table->decimal('med_total_quantity')->nullable();// إجمالي الكمية المحسوبة
             // إجمالي الكمية المتوفرة للمريض من الدواء (يُستخدم للحساب)
             $table->softDeletes();
@@ -54,7 +54,7 @@ return new class extends Migration {
             $allowed = []; // يمكن تركه مفتوح أو نرفض
         }
 
-        if (!in_array((string)$dose, $allowed)) {
+        if (!in_array((text)$dose, $allowed)) {
             $validator->errors()->add('med_dose', 'الجرعة المختارة غير مناسبة لنوع الدواء.');
         }
     });

@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('patient_record_id')->nullable();
             $table->foreign('patient_record_id')->references('id')->on('patient_records')->onDelete('set null');
-            $table->string('family_name')->nullable();
+            $table->text('family_name')->nullable();
             $table->enum('kinship', ['father', 'mother', 'sister', 'son', 'daughter', 'brother', 'grand_mother', 'grand_father'])->default('father');
             $table->timestamps();
         });

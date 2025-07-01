@@ -15,9 +15,9 @@ return new class extends Migration {
             $table->unsignedBigInteger('patient_record_id')->nullable();
             $table->foreign('patient_record_id')->references('id')->on('patient_records')->onDelete('set null');
             $table->enum('d_type', ['current', 'chronic'])->default('current');
-            $table->string('d_name')->nullable();
+            $table->text('d_name')->nullable();
             $table->date('d_diagnosis_date')->nullable();
-            $table->string('d_doctor')->nullable();
+            $table->text('d_doctor')->nullable();
             $table->text('d_advice')->nullable();
             $table->text('d_prohibitions')->nullable();
             $table->timestamps();

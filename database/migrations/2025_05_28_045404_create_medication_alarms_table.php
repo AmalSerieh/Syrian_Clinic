@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->foreign('patient_record_id')->references('id')->on('patient_records')->onDelete('set null');
             $table->foreignId('medication_id')->constrained('medications')->onDelete('cascade');
             $table->time('alarm_time');         // الوقت
-            $table->string('redundancy');       // التكرار: يوميًا، أسبوعيًا...
+            $table->text('redundancy');       // التكرار: يوميًا، أسبوعيًا...
             $table->integer('quantity');        // الكمية: عدد الحبوب
             $table->timestamps();
         });

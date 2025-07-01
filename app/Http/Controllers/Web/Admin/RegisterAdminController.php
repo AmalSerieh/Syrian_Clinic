@@ -37,22 +37,23 @@ class RegisterAdminController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', 'min:8', Password::defaults()],
             'phone' => ['required', 'digits:10', 'numeric'],
-            'role' => ['required', 'in:admin'],
+          //  'role' => ['required', 'in:admin'],
         ]);
 
         // تحقق من وجود أدمن قبل الإنشاء
-        if ($validated['role'] === 'admin' && User::where('role', 'admin')->exists()) {
+        if ( User::where('role', 'admin')->exists()) {
             return back()
                 ->withErrors(['role' => 'يوجد بالفعل حساب آدمن في النظام'])
                 ->withInput();
         }
+        
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'phone' => $validated['phone'],
-            'role' => $validated['role'], // تأكد من استخدام القيمة المصدقة
+            'role' => 'admin', // تأكد من استخدام القيمة المصدقة
         ]);
 
         return redirect()->route('admin.login');
