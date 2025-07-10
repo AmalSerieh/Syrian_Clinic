@@ -1,142 +1,145 @@
-<x-app-layout>
-    @php
-        $existingsecretary = \App\Models\User::where('role', 'secretary')->exists();
-    @endphp
+@php
+    $existingsecretary = \App\Models\User::where('role', 'secretary')->exists();
+@endphp
+@extends('layouts.admin.header')
+@section('content')
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
     @if (!$existingsecretary)
-        <form method="POST" action="{{ route('admin.secretary.store') }}">
-            @csrf
+        <div class="h-screen flex items-center justify-end"
+            style="background-image: url('{{ asset('images/admin/secretary/secretary.png') }}'); background-size: cover; background-position: center;">
+            <form method="POST" action="{{ route('admin.secretary.store') }}"
+                  onsubmit="return validatePasswords();"
+                  class="bg-gray-700 bg-opacity-70 shadow-lg text-white p-6 m-8 w-full md:w-1/2 lg:w-1/3 rounded-[50px] ml-16">
+                @csrf
 
-            <!-- Name -->
-            <div>
-                <x-input-label for="name" :value="__('Name')" />
-                <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')"
-                    required autofocus autocomplete="name" />
-                <x-input-error :messages="$errors->get('name')" class="mt-2" />
-            </div>
+                <h1 class="text-2xl font-bold mb-6 text-center flex items-center justify-center text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                         class="mr-3 text-blue-500">
+                        <path d="M2 21a8 8 0 0 1 13.292-6" />
+                        <circle cx="10" cy="8" r="5" />
+                        <path d="M19 16v6" />
+                        <path d="M22 19h-6" />
+                    </svg>
+                    Add Secretary
+                </h1>
 
-            <!-- Email Address -->
-            <div class="mt-4">
-                <x-input-label for="email" :value="__('Email')" />
-                <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')"
-                    required autocomplete="username" />
-                <x-input-error :messages="$errors->get('email')" class="mt-2" />
-            </div>
-            <!-- Phone Address -->
-            <div class="mt-4">
+                <div class="space-y-4">
 
-
-                <x-input-label for="phone" :value="__('Phone')" />
-                <input id="phone" type="tel" name="phone" class="form-control" required>
-               {{--  <x-text-input id="phone" class="block mt-1 w-full" type="phone" name="phone" :value="old('phone')"
-                    required autocomplete="username" />
-                <x-input-error :messages="$errors->get('phone')" class="mt-2" /> --}}
-            </div>
-
-
-            <!-- Password -->
-            <div class="mt-4">
-                <x-input-label for="password" :value="__('Password')" />
-
-                <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required
-                    autocomplete="new-password" />
-
-                <x-input-error :messages="$errors->get('password')" class="mt-2" />
-            </div>
-
-
-            <!-- Confirm Password -->
-            <div class="mt-4">
-                <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-                <x-text-input id="password_confirmation" class="block mt-1 w-full" type="password"
-                    name="password_confirmation" required autocomplete="new-password" />
-
-                <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-            </div>
-             <!-- Date of appointment -->
-            <div class="mt-4">
-                <x-input-label for="date_of_appointment" :value="__('Date of appointment')" />
-
-                <x-text-input id="date_of_appointment" class="block mt-1 w-full" type="date" name="date_of_appointment" required
-                    autocomplete="new-date" />
-
-                <x-input-error :messages="$errors->get('date_of_appointment')" class="mt-2" />
-            </div>
-
-            <div class="mt-4">
-                <!-- العنوان فوق المربع -->
-                <x-input-label for="gender" :value="__('Select Gender:')" class="mb-2 text-lg font-semibold text-gray-800" />
-
-                <!-- المربع الأبيض -->
-                <div class="bg-white border border-gray-300 rounded-xl shadow-sm p-4">
-                    <div class="flex space-x-6 ">
-                            <div class="flex items-center ">
-                                <input type="radio" id="gender_secretary" name="gender" value="male" required
-                                    class="mr-2 text-indigo-600 focus:ring-indigo-500 " checked>
-                                <label for="gender_secretary" class="text-gray-700">male</label>
-                            </div>
-                            <div class="flex items-center ">
-                                <input type="radio" id="gender_secretary" name="gender" value="female" required
-                                    class="mr-2 text-indigo-600 focus:ring-indigo-500 ">
-                                <label for="gender_secretary" class="text-gray-700">female
-
+                    <!-- Secretary Name -->
+                    <div>
+                        <label for="name" class="flex items-center mb-1 text-sm font-medium">Secretary Name</label>
+                        <input id="name" type="text" name="name" :value="old('name')" required autofocus
+                               class="w-full text-sm py-1.5 px-2 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-50 text-blue-500">
+                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
                     </div>
-                    <x-input-error :messages="$errors->get('role')" class="mt-2" />
 
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="flex items-center mb-1 text-sm font-medium">Secretary Email</label>
+                        <input id="email" type="email" name="email" :value="old('email')" required
+                               class="w-full text-sm py-1.5 px-2 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-50 text-blue-500">
+                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div>
+                        <label for="phone" class="flex items-center mb-1 text-sm font-medium">Phone Number</label>
+                        <input id="phone" type="tel" name="phone" required
+                               class="w-full text-sm py-1.5 px-2 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-50 text-blue-500">
+                        <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                    </div>
+
+                    <!-- Password + Confirm -->
+                    <div class="flex gap-4">
+                        <div class="w-1/2 relative">
+                            <label for="password" class="flex items-center mb-1 text-sm font-medium">Password</label>
+                            <input id="password" type="password" name="password" required autocomplete="new-password"
+                                   class="w-full text-sm py-1.5 px-2 pr-10 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-50 text-blue-500">
+                            <button type="button" onclick="togglePassword('password')"
+                                    class="absolute right-2 top-8 text-white">
+                                    <!-- Eye Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                    class="text-blue-500" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                                👁️
+                            </button>
+                        </div>
+
+                        <div class="w-1/2 relative">
+                            <label for="password_confirmation" class="flex items-center mb-1 text-sm font-medium">Confirm</label>
+                            <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
+                                   class="w-full text-sm py-1.5 px-2 pr-10 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-50 text-blue-500">
+                            <button type="button" onclick="togglePassword('password_confirmation')"
+                                    class="absolute right-2 top-8 text-white">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+                    <p id="passwordError" class="text-red-400 mt-2 text-sm"></p>
+
+                    <!-- Gender -->
+                    <div>
+                        <label for="gender" class="flex items-center mb-1 text-sm font-medium">Gender</label>
+                        <select id="gender" name="gender" required
+                                class="w-full text-sm py-1.5 px-2 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-10 text-blue-500">
+                            <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
+                            <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('gender')" class="mt-2" />
+                    </div>
+
+                    <!-- Date -->
+                    <div>
+                        <label for="date_of_appointment" class="flex items-center mb-1 text-sm font-medium">Date of Appointment</label>
+                        <input id="date_of_appointment" type="date" name="date_of_appointment" required
+                               class="w-full text-sm py-1.5 px-2 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-10 text-blue-500">
+                        <x-input-error :messages="$errors->get('date_of_appointment')" class="mt-2" />
+                    </div>
+
+                    <button type="submit"
+                            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-2xl w-full flex items-center justify-center gap-2">
+                        ➕ Add Secretary
+                    </button>
                 </div>
-            </div>
-
-
-
-
-            <div class="flex items-center justify-end mt-4">
-
-
-                <x-primary-button class="ms-4">
-                    {{ __('Add Secretary') }}
-                </x-primary-button>
-            </div>
-        </form>
+            </form>
+        </div>
     @else
-        <!-- إذا يوجد Admin -->
         <div class="p-6 bg-red-100 border border-red-300 rounded-lg text-red-700 text-center">
             ⚠️ تم إنشاء حساب السكرتيرة مسبقًا. اضغط ل رؤية السكرتيرة .
             <br>
-            <a class="underline text-sm text-gray-600 hover:text-blue-800 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                href="{{ route('admin.secretary') }}">
-                {{ __('Already Added Secretary ?Show Secretary') }}
+            <a class="underline text-sm text-gray-600 hover:text-blue-800"
+               href="{{ route('admin.secretary') }}">
+                Already Added Secretary? Show Secretary
             </a>
         </div>
     @endif
-    <!-- CSS الخاص بالمكتبة -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css"/>
 
-<!-- JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <!-- Scripts -->
+    <script>
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            input.type = input.type === "password" ? "text" : "password";
+        }
 
-<script>
-    const phoneInput = document.querySelector("#phone");
+        function validatePasswords() {
+            const password = document.getElementById("password").value;
+            const confirm = document.getElementById("password_confirmation").value;
+            const errorText = document.getElementById("passwordError");
 
-    const iti = window.intlTelInput(phoneInput, {
-        preferredCountries: ["sy", "sa", "eg", "jo"],
-        initialCountry: "auto",
-        geoIpLookup: function(callback) {
-            fetch("https://ipinfo.io/json?token=YOUR_TOKEN_HERE") // يمكنك حذف هذا السطر لجعلها default
-                .then(resp => resp.json())
-                .then(resp => callback(resp.country))
-                .catch(() => callback("sy"));
-        },
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"
-    });
-
-    // عند إرسال النموذج، نحصل على الرقم الدولي ونرسله
-    document.querySelector("form").addEventListener("submit", function(e) {
-        const phoneInputField = document.querySelector("#phone");
-        const fullNumber = iti.getNumber();
-        phoneInputField.value = fullNumber;
-    });
-</script>
-
-</x-app-layout>
+            if (password !== confirm) {
+                errorText.textContent = "Passwords do not match!";
+                return false;
+            } else if (password.length < 6) {
+                errorText.textContent = "Password must be at least 6 characters.";
+                return false;
+            } else {
+                errorText.textContent = "";
+                return true;
+            }
+        }
+    </script>
+@endsection

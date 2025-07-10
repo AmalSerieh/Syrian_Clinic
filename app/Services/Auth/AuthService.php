@@ -129,7 +129,7 @@ class AuthService
             ['otp' => $otp, 'expired_at' => Carbon::now()->addMinutes(10)]
         );
 
-        Mail::to($data['email'])->send(new EmailOtpMail($otp));
+      //  Mail::to($data['email'])->send(new EmailOtpMail($otp));
 
         // Store session data
         Session::put('register_email', $data['email']);
@@ -190,7 +190,7 @@ class AuthService
         if ($user->role === 'patient') {
             $patient = Patient::create([
                 'user_id' => $user->id,
-                'photo' => 'avatars/6681221.png',
+                'photo' => 'avatars/default.png',
             ]);
 
             $patient_record = Patient_record::create([
@@ -252,7 +252,7 @@ class AuthService
             ['otp' => $otp, 'expired_at' => now()->addMinutes(10)]
         );
 
-        Mail::to($email)->send(new EmailOtpMail($otp));
+        //Mail::to($email)->send(new EmailOtpMail($otp));
 
         return [
             'status' => true,

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     /**
      * Run the migrations.
-     */
+     *///database\migrations\2025_05_19_193830_create_medications_table.php clinic_test 
     public function up(): void
     {
         Schema::create('medications', function (Blueprint $table) {
@@ -26,7 +26,7 @@ return new class extends Migration {
             $table->decimal('med_quantity_per_dose', 8, 2)->nullable(); // تُحسب تلقائياً
              $table->text('med_prescribed_by_doctor')->nullable();
             $table->decimal('med_total_quantity')->nullable();// إجمالي الكمية المحسوبة
-            // إجمالي الكمية المتوفرة للمريض من الدواء (يُستخدم للحساب)
+            $table->decimal('med_taken_quantity')->nullable();// الكمية يلي صرت آخذ منو
             $table->softDeletes();
             $table->timestamps();
         });

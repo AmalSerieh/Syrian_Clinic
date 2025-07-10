@@ -30,6 +30,7 @@ class PatientProfileResource extends JsonResource
         }
         return [
             'id' => $this->id,
+            'name'=>auth()->user()->name,
             'date_birth' => $this->date_birth,
             'age' => [
                 'years' => $diff->y,
@@ -39,7 +40,7 @@ class PatientProfileResource extends JsonResource
             ],
             'weight' => $this->weight,
             'height' => $this->height,
-            'bmi' => $bmi, 
+            'bmi' => $bmi,
             'gender' => __('patientProfile.gender.' . $this->gender),
             'matital_status' => __('patientProfile.matital_status.' . $this->matital_status),
             'blood_type' => $this->blood_type,

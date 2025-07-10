@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->text('test_name')->nullable();
             $table->text('test_laboratory')->nullable();
             $table->date('test_date')->nullable();
-            $table->json('test_image_pdf')->nullable();
+            $table->longText('test_image_pdf')->nullable();
             $table->timestamps();
         });
     }

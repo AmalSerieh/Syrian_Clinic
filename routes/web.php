@@ -21,8 +21,21 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    if (auth()->check()) {
+        $user = auth()->user();
+        if ($user->hasRole('admin')) {
+            return redirect()->route('admin.index');
+        } elseif ($user->hasRole('doctor')) {
+            return redirect()->route('doctor.dashboard');
+        } elseif ($user->hasRole('secretary')) {
+            return redirect()->route('secretary.dashboard');
+        } else {
+            abort(403, 'Unauthorized.');
+        }
+    }
+    return redirect()->route('login');
 });
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -36,14 +49,14 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisterAdminController::class, 'create'])/* ->name('admin.register') */;
+    Route::get('register', [RegisterAdminController::class, 'create']);
     Route::post('register', [RegisterAdminController::class, 'store'])->name('admin.register');
     Route::get('login', [LoginAdminController::class, 'create'])->name('admin.login');
     Route::post('login', [LoginAdminController::class, 'store'])->name('admin.login');
     Route::get('login', [LoginAdminController::class, 'create'])->name('login');
 
 });
-Route::middleware(['auth', 'role:admin', 'verified'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.index');
     Route::get('/admin/secretary', [AdminController::class, 'secretary'])->name('admin.secretary');
     Route::get('/admin/secretary/add', [AdminController::class, 'secretary_add'])->name('admin.secretary.add');
@@ -54,6 +67,7 @@ Route::middleware(['auth', 'role:admin', 'verified'])->group(function () {
     Route::get('/admin/doctor', [AdminController::class, 'doctor'])->name('admin.doctor');
     Route::get('/admin/doctor/{id}/details', [AdminController::class, 'doctor_details'])->name('admin.doctor.details');
     Route::get('/admin/doctor/add', [AdminController::class, 'doctor_add'])->name('admin.doctor.add');
+    Route::post('/admin/doctor/store', [AdminController::class, 'doctor_store'])->name('admin.doctor.store');
     Route::get('/admin/doctor/{id}/edit', [AdminController::class, 'doctor_edit'])->name('admin.doctor.edit');
     Route::put('/admin/doctor/{id}/update', [AdminController::class, 'doctor_update'])->name('admin.doctor.update');
     Route::delete('/admin/doctor/{id}/delete', [AdminController::class, 'doctor_delete'])->name('admin.doctor.delete');
@@ -61,6 +75,9 @@ Route::middleware(['auth', 'role:admin', 'verified'])->group(function () {
 });
 
 
+/* Route::get('/admin/doctor/add', function() {
+    return 'doctor add page test';
+})->name('admin.doctor.add'); */
 
 
 

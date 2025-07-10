@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\Medication\HasMedication;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class Medication extends Model
 {
+    use HasMedication;
     protected $fillable = [
         'patient_record_id',
         'med_type',
@@ -20,25 +22,25 @@ class Medication extends Model
         'med_timing',
         'med_quantity_per_dose',
         'med_prescribed_by_doctor',
-        'med_total_quantity'
+        'med_total_quantity',
+        'med_taken_quantity'
     ];
 
     public function patientRecord()
     {
         return $this->belongsTo(Patient_record::class);
     }
-    protected $appends = ['is_active', 'total_quantity'];
-
+    public function alarm()
+    {
+        return $this->hasMany(MedicationAlarm::class);
+    }
     public function getIsActiveAttribute()
     {
-        if ($this->med_type === 'chronic') {
-            return true;
-        }
-        if ($this->med_end_date && now()->lte($this->med_end_date)) {
-            return true;
-        }
-        return false;
+        return $this->med_start_date && $this->med_end_date && $this->med_frequency_value > 0;
     }
+    protected $appends = ['is_active', 'total_quantity'];
+
+
     /*  public function getTotalQuantityAttribute()
     {
         $start = Carbon::parse($this->med_start_date);
@@ -79,5 +81,49 @@ class Medication extends Model
     }
 
 
+    /*  public function calculateProgressDetailed1()
+     {
+         if ($this->med_type !== 'current' || !$this->med_end_date || !$this->med_start_date) {
+             return [
+                 'progress' => null,
+                 'taken_till_now' => 0,
+             ];
+         }
+
+         $start = \Carbon\Carbon::parse($this->med_start_date);
+         $end = \Carbon\Carbon::parse($this->med_end_date);
+         $now = \Carbon\Carbon::now();
+
+         if ($now->lt($start)) {
+             return [
+                 'progress' => 0,
+                 'taken_till_now' => 0,
+             ];
+         }
+
+         if ($now->gt($end)) {
+             return [
+                 'progress' => 100,
+                 'taken_till_now' => $this->med_total_quantity, // المفروض أخذ كل الجرعات
+             ];
+         }
+
+         // عدد الأيام الإجمالية
+         $totalDays = $start->diffInDays($end) + 1;
+
+         // عدد الأيام التي مضت
+         $passedDays = $start->diffInDays($now) + 1;
+
+         // عدد الجرعات حتى اليوم
+         $takenTillNow = $passedDays * floatval($this->med_frequency_value);
+
+         // النسبة:
+         $progress = min(100, ($takenTillNow / $this->med_total_quantity) * 100);
+
+         return [
+             'progress' => round($progress, 2),
+             'taken_till_now' => round($takenTillNow), // أو ممكن round فقط إذا كانت حبات
+         ];
+     } */
 
 }

@@ -23,7 +23,7 @@ class MedicalFileController extends Controller
         if (!$record) {
             return response()->json(['message' => trans('message.no_record')], 404);
         }
-if ($record->medicalfiles_submitted) {
+        if ($record->medicalfiles_submitted) {
             return response()->json(['message' => trans('message.submitted_already')], 403);
         }
         $this->authorize('create', MedicalFile::class);

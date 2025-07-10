@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'auth_not' => 'User is not logged in.',
+    'unauthenticated' => 'User is not logged in.',
     'patient_not'=>'This user does not have permission to add a patient file.',
     'login_success' => 'Google login successful!',
     'login_successfully' => 'You have successfully logged in!',

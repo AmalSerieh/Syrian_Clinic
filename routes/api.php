@@ -8,6 +8,7 @@ use App\Http\Controllers\API\PatientRecord\DiseaseController;
 use App\Http\Controllers\API\PatientRecord\MediactionController;
 use App\Http\Controllers\API\PatientRecord\MedicalAttachmentController;
 use App\Http\Controllers\API\PatientRecord\MedicalFileController;
+use App\Http\Controllers\Api\PatientRecord\MedicationAlarmController;
 use App\Http\Controllers\API\PatientRecord\OperationController;
 use App\Http\Controllers\Auth_Otp\LoginController;
 use App\Http\Controllers\Auth_Otp\ResetPasswordController;
@@ -51,12 +52,12 @@ Route::middleware([SetLocale::class])->group(function () {
 
     });
 });
-Route::middleware(['auth:sanctum', SetLocale::class])->group(function () {
+Route::middleware([SetLocale::class,'auth:sanctum'])->group(function () {
     Route::post('profile', [ProfileController::class, 'update'])->name('patient.profile.edit');
     Route::get('get_profile', [ProfileController::class, 'show']);
 
 });
-Route::middleware(['auth:sanctum', SetLocale::class])->group(function () {
+Route::middleware([SetLocale::class,'auth:sanctum'])->group(function () {
     Route::post('change-password', [ResetPasswordController::class, 'changePassword']);
     //السجل الطبي
 /*     Route::get('/patient-records/{id}', [PatientRecordController::class, 'show']);
@@ -91,6 +92,11 @@ Route::middleware(['auth:sanctum', SetLocale::class])->group(function () {
     Route::get('/patient-record/operations', [OperationController::class, 'index']);
     //PatientRecordSave
     Route::post('/patient-record/PatientRecordSave', [PatientProfileController::class, 'saveRecord']);
+    //MedicationAlarm
+    //Route::apiResource('medication-alarms', MedicationAlarmController::class)->only(['index', 'store', 'destroy']);
+    Route::post('medication-alarms', [MedicationAlarmController::class, 'store']);
+    Route::get('medication-alarms', [MedicationAlarmController::class, 'index']);
+    Route::delete('medication-alarms', [MedicationAlarmController::class, 'destroy']);
 
 
 

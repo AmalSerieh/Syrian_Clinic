@@ -6,6 +6,7 @@ use App\Repositories\Api\PateintRecord\AllergyRepositoryInterface;
 use App\Repositories\Api\PateintRecord\DiseaseRepositoryInterface;
 use App\Repositories\Api\PateintRecord\MedicalAttachmentRepositoryInterface;
 use App\Repositories\Api\PateintRecord\MedicalFileRepositoryInterface;
+use App\Repositories\Api\PateintRecord\MedicationAlarmInterface;
 use App\Repositories\Api\PateintRecord\MedicationRepositoryInterface;
 use App\Repositories\Api\PateintRecord\OperationRepositoryInterface;
 use App\Repositories\Api\PateintRecord\PatientProfileRepositoryInterface;
@@ -15,6 +16,7 @@ use App\Repositories\Eloquent\Api\PateintRecord\AllergyRepository;
 use App\Repositories\Eloquent\Api\PateintRecord\DiseaseRepository;
 use App\Repositories\Eloquent\Api\PateintRecord\MedicalAttachmentRepository;
 use App\Repositories\Eloquent\Api\PateintRecord\MedicalFileRepository;
+use App\Repositories\Eloquent\Api\PateintRecord\MedicationAlarmRepository;
 use App\Repositories\Eloquent\Api\PateintRecord\MedicationRepository;
 use App\Repositories\Eloquent\Api\PateintRecord\OperationRepository;
 use App\Repositories\Eloquent\Api\PateintRecord\PatientProfileRepository;
@@ -27,6 +29,7 @@ use App\Repositories\Eloquent\AuthRepository;
 use App\Repositories\Auth\UserRepositoryInterface;
 use App\Repositories\Profile\FileStorageInterface;
 use App\Repositories\Profile\PatientRepositoryInterface;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Symfony\Component\HttpKernel\Profiler\ProfilerStorageInterface;
 
@@ -49,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DiseaseRepositoryInterface::class, DiseaseRepository::class);
         $this->app->bind(MedicationRepositoryInterface::class, MedicationRepository::class);
         $this->app->bind(OperationRepositoryInterface::class, OperationRepository::class);
+        $this->app->bind(MedicationAlarmInterface::class, MedicationAlarmRepository::class);
 
 
 
@@ -57,8 +61,14 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+
+    // في app/Providers/AppServiceProvider.php
+    public function boot()
     {
-        //
+        // إجبار المنفذ 8000 في بيئة التطوير
+        if (app()->environment('local')) {
+            URL::forceRootUrl(config('app.url') . ':8000');
+        }
     }
 }
+

@@ -19,7 +19,8 @@ class ProfileService
 
 
 
-    public function updateProfile(User $user, array $data): array
+   /*  public function updateProfile(User $user, array $data): array
+
     {
         $changes = [];
         $userData = [];
@@ -55,7 +56,53 @@ class ProfileService
             'user' => $user,
             'changes' => $changes
         ];
+    } */
+   public function updateProfile(User $user, array $data): array
+{
+    $changes = [];
+    $userData = [];
+
+    // تحديث الحقول الأساسية
+    foreach (['name', 'email', 'phone'] as $field) {
+        if (isset($data[$field]) && $user->$field !== $data[$field]) {
+            $userData[$field] = $data[$field];
+            $changes[$field] = $data[$field];
+        }
     }
+
+    if (!empty($userData)) {
+        $user = $this->repository->updateUserProfile($user, $userData);
+    }
+
+    if (isset($data['photo'])) {
+        // حذف الصورة القديمة إذا كانت موجودة
+        if ($user->patient && $user->patient->photo) {
+            $this->fileStorage->deleteOldAvatar($user->patient->photo);
+        }
+
+        // حفظ الصورة الجديدة
+        $path = $this->fileStorage->storeAvatar($data['photo']);
+
+        // إنشاء المريض إذا لم يكن موجوداً
+        if (!$user->patient) {
+            $patient = new Patient();
+            $patient->user_id = $user->id;
+            $patient->save();
+            $user->refresh(); // تحديث علاقة المريض
+        }
+
+        // تحديث مسار الصورة
+        $this->repository->updatePatientProfile($user->patient, ['photo' => $path]);
+
+        // الحصول على رابط كامل مع المنفذ
+        $changes['photo'] = $this->fileStorage->getFullUrl($path);
+    }
+
+    return [
+        'user' => $user,
+        'changes' => $changes
+    ];
+}
 
     public function updateAvatar(Patient $patient, $image): string
     {

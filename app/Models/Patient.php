@@ -21,8 +21,17 @@ class Patient extends Model
 
     }
     // app/Models/Patient.php
-    public function getPhotoUrlAttribute()
+    public function getPhotoUrlAttribute1()
     {
         return $this->photo ? Storage::disk('public')->url($this->photo) : null;
+    }
+    // في app/Models/Patient.php
+    public function getPhotoUrlAttribute()
+    {
+        if (!$this->photo) {
+            return null;
+        }
+
+        return "http://localhost:8000/storage/{$this->photo}";
     }
 }

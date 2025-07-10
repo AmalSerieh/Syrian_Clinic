@@ -46,7 +46,7 @@ class RegisterAdminController extends Controller
                 ->withErrors(['role' => 'يوجد بالفعل حساب آدمن في النظام'])
                 ->withInput();
         }
-        
+
 
         $user = User::create([
             'name' => $validated['name'],
@@ -56,7 +56,7 @@ class RegisterAdminController extends Controller
             'role' => 'admin', // تأكد من استخدام القيمة المصدقة
         ]);
 
-        return redirect()->route('admin.login');
+        return redirect()->route('admin.index');
     }
 
 

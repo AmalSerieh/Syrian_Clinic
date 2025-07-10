@@ -27,7 +27,7 @@ class MedicationRequest extends FormRequest
             'med_start_date' => 'required|date',
             'med_end_date' => 'nullable|date|after_or_equal:med_start_date',
             'med_frequency' => 'required|in:once_daily,twice_daily,three_times_daily,daily,weekly,monthly,yearly',
-            'med_dosage_form' => 'required|in:tablet,capsule,pills,syrup,liquid,drops,sprays,patches,injections',
+            'med_dosage_form' => 'required|in:tablet,capsule,pills,syrup,liquid,drops,sprays,patches,injections','powder',
             'med_dose' => 'required|numeric|min:0.1|max:1000',
             'med_timing' => 'nullable|in:before_food,after_food,morinng',
             'med_prescribed_by_doctor' => 'nullable|string|max:255',
@@ -37,9 +37,17 @@ class MedicationRequest extends FormRequest
         'tablet' => ['0.5', '1', '1.5', '2', '2.5'],
         'capsule' => ['0.5', '1', '1.5', '2', '2.5'],
         'pills' => ['0.5', '1', '1.5', '2', '2.5'],
-        'syrup' => ['5', '10', '15', '20', '25', '50', '100', '200'],
-        'liquid' => ['5', '10', '15', '20', '25', '50', '100', '200'],
-        'drops' => ['5', '10', '15', '20', '25', '50', '100', '200'],
+
+        'syrup' => ['5', '10', '15', '20', '25', '50', '100', '200'], // ml
+        'liquid' => ['5', '10', '15', '20', '25', '50', '100', '200'], // ml
+        'drops' => ['1', '2', '3', '4', '5', '10', '15', '20'],       // number of drops
+
+        'sprays' => ['1', '2', '3', '4', '5'],                         // number of sprays per use
+        'patches' => ['0.5', '1', '2'],                                 // usually 1 patch or half patch
+        'injections' => ['0.25', '0.5', '1', '2', '5', '10'],              // usually volume in ml
+
+        'powder' => ['0.5', '1', '1.5', '2', '2.5', '5', '10'], // عادةً بالغرام (g)
+
     ];
     public function withValidator($validator)
     {
@@ -57,7 +65,7 @@ class MedicationRequest extends FormRequest
         });
     }
 
- public function messages(): array
+    public function messages(): array
     {
         return [
             // عربي

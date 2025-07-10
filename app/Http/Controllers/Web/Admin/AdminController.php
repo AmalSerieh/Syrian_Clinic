@@ -17,7 +17,8 @@ class AdminController extends Controller
 {
     public function index()
     {
-        return view('admin.home.dashboard');
+        $secretary = User::where('role', 'secretary')->latest()->first(); // فقط سكرتيرة واحدة
+        return view('admin.home.dashboard', compact('secretary'));
     }
     public function secretary_add()
     {
@@ -28,13 +29,14 @@ class AdminController extends Controller
     }
 
     public function secretary_store(Request $request)
-    {
+    {//dd($request);
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', 'min:8', Password::defaults()],
             'phone' => ['required', 'digits:10', 'numeric'],
             'date_of_appointment' => ['required', 'date'],
+            'gender' => 'required|string|in:male,female',
         ]);
 
         if (User::where('role', 'secretary')->exists()) {
@@ -59,12 +61,12 @@ class AdminController extends Controller
 
             Secretary::create([
                 'user_id' => $user->id,
-                'photo' => 'avatars/6681221.png',
+                'photo' => 'avatars/defaults.jpg',
+                'gender' => $validated['gender'],
                 'date_of_appointment' => $validated['date_of_appointment'],
             ]);
 
             DB::commit();
-
             return redirect()->route('admin.secretary')->with('message', 'تمت إضافة السكرتيرة بنجاح!');
         } catch (\Exception $e) {
             DB::rollback();
@@ -75,13 +77,11 @@ class AdminController extends Controller
     public function secretary()
     {
         $secretary = User::where('role', 'secretary')->latest()->first(); // فقط سكرتيرة واحدة
-
         return view('admin.home.secretary', compact('secretary'));
     }
     public function secretary_replace($id)
     {
         $secretary = User::where('id', $id)->where('role', 'secretary')->firstOrFail();
-
         return view('admin.home.secretary-edit', compact('secretary'));
     }
     public function secretary_update(Request $request)
@@ -125,24 +125,28 @@ class AdminController extends Controller
     {
         $language = app()->getLocale(); // 'ar' أو 'en'
 
+
         // جلب كل الغرف مع عدد الأطباء الموجودين
         $rooms = Room::withCount('doctors')->get();
+
         // فلترة الغرف المتاحة فقط (التي لم تصل للحد الأقصى من الأطباء)
         $availableRooms = $rooms->filter(function ($room) {
             return $room->doctors_count <= $room->room_capacity;
         })->map(function ($room) use ($language) {
             return [
                 'id' => $room->id,
-                'name' => $language === 'ar' ? $room->name_ar : $room->name_en,
-                'specialty' => $language === 'ar' ? $room->specialty_ar : $room->specialty_en,
+                'name' => $language === 'ar' ? $room->room_name_ar : $room->room_name_en,
+                'specialty' => $language === 'ar' ? $room->room_specialty_ar : $room->room_specialty_en,
             ];
         });
+        //    dd($availableRooms);
+
         // إذا لم يكن هناك أي غرف متاحة → رجوع برسالة خطأ
         if ($availableRooms->isEmpty()) {
             return redirect()->back()->withErrors(['room' => 'لا توجد غرف متاحة حالياً. تم الوصول إلى الحد الأقصى لعدد الأطباء في جميع الغرف.']);
         }
 
-        return view('admin.doctor.doctor-add', ['rooms' => $availableRooms]);
+        return view('admin.doctor.add-doctor', ['rooms' => $availableRooms]);
     }
     public function doctor_store(Request $request)
     {
@@ -153,8 +157,9 @@ class AdminController extends Controller
             'phone' => ['required', 'digits:10', 'numeric'],
             'date_of_appointment' => ['required', 'date'],
             'room_id' => 'required|exists:rooms,id',
+            'gender' => ['required', 'in:male,female'],
         ]);
-
+        //dd($validated);
 
 
         DB::beginTransaction();
@@ -163,7 +168,8 @@ class AdminController extends Controller
             $room = Room::findOrFail($validated['room_id']);
 
             // تحقق من السعة
-            if ($room->doctors()->count() >= $room->capacity) {
+            if ($room->doctors()->count() >= $room->room_capacity) {
+               // dd('الغرفة ممتلئة',$room->room_capacity); // هنا
                 return back()->withErrors(['room_id' => 'هذه الغرفة ممتلئة بالفعل بـ 3 أطباء.'])->withInput();
             }
             $user = User::create([
@@ -176,20 +182,23 @@ class AdminController extends Controller
                 'created_by_user_id' => auth()->id(),
             ]);
 
+
             $doctor = Doctor::create([
                 'user_id' => $user->id,
-                'photo' => 'doctor-profile-photos/FWwTAhMEke2R8fM2CpSZ4NBN2IXWACAD9v1eVbdc.jpg',
+                'photo' => 'doctor-profile-photos/default.jpg',
+                'room_id' => $validated['room_id'],
                 'date_of_appointment' => $validated['date_of_appointment'],
             ]);
             DoctorProfile::create([
                 'doctor_id' => $doctor->id,
-                'specialty_ar' => $room->specialty_ar,
-                'specialty_en' => $room->specialty_en,
+                'specialty_ar' => $room->room_specialty_ar,
+                'specialty_en' => $room->room_specialty_en,
+                'gender' => $validated['gender'],
             ]);
 
             DB::commit();
-
-            return redirect()->route('admin.doctor')->with('message', 'تمت إضافة الطبيب بنجاح!');
+            //return back()->with(['message' => 'yes yes ']);
+            return redirect()->route('admin.doctor')->with('status', 'تمت إضافة الطبيب بنجاح!');
         } catch (\Exception $e) {
             DB::rollback();
             return back()->withErrors(['error' => 'حدث خطأ أثناء إضافة الطبيب'])->withInput();
@@ -199,7 +208,7 @@ class AdminController extends Controller
     {
         $doctors = Doctor::with(['user', 'doctorProfile', 'room'])->get();
 
-        return view('admin.home.doctor', compact('doctor'));
+        return view('admin.doctor.doctor', compact('doctors'));
     }
     public function doctor_details($id)
     {

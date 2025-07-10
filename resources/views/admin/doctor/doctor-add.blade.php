@@ -1,117 +1,51 @@
+<!-- resources/views/admin/doctor/add.blade.php -->
 <x-app-layout>
-    {{-- <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow">
-        <h2 class="text-xl font-bold mb-6">إضافة طبيب جديد</h2>
 
-        @if(session('error'))
-            <div class="bg-red-100 text-red-800 p-3 rounded mb-4">{{ session('error') }}</div>
-        @endif
+    @section('content')
+        <div class="add-doctor-form">
+            <h2>➕ Add Doctor</h2>
 
-        <form action="{{ route('admin.doctors.store') }}" method="POST" enctype="multipart/form-data">
-            @csrf
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            <!-- Session Status -->
+            <x-auth-session-status class="mb-4" :status="session('message')" />
 
-            <!-- بيانات المستخدم -->
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label>الاسم</label>
-                    <input type="text" name="name" class="w-full border rounded p-2" required>
-                </div>
-                <div>
-                    <label>الإيميل</label>
-                    <input type="email" name="email" class="w-full border rounded p-2" required>
-                </div>
-                <div>
-                    <label>رقم الهاتف</label>
-                    <input type="text" name="phone" class="w-full border rounded p-2" required>
-                </div>
-                <div>
-                    <label>كلمة السر</label>
-                    <input type="password" name="password" class="w-full border rounded p-2" required>
-                </div>
-                <div>
-                    <label>تأكيد كلمة السر</label>
-                    <input type="password" name="password_confirmation" class="w-full border rounded p-2" required>
-                </div>
-                <div>
-                    <label>صورة الطبيب (اختياري)</label>
-                    <input type="file" name="photo" class="w-full">
-                </div>
-            </div>
+            <form action="{{ route('admin.doctor.store') }}" method="POST">
+                @method('POST')
+                @csrf
 
-            <!-- بيانات الملف المهني -->
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label>الاختصاص</label>
-                    <input type="text" name="specialist" class="w-full border rounded p-2" required>
-                </div>
-                <div>
-                    <label>مكان الحصول على الشهادة</label>
-                    <input type="text" name="cer_place" class="w-full border rounded p-2">
-                </div>
-                <div>
-                    <label>اسم الشهادة</label>
-                    <input type="text" name="cer_name" class="w-full border rounded p-2">
-                </div>
-                <div>
-                    <label>صورة الشهادة</label>
-                    <input type="file" name="cer_images" class="w-full">
-                </div>
-                <div>
-                    <label>تاريخ الشهادة</label>
-                    <input type="date" name="cer_date" class="w-full border rounded p-2">
-                </div>
-                <div>
-                    <label>مكان الخبرة</label>
-                    <input type="text" name="exp_place" class="w-full border rounded p-2">
-                </div>
-                <div>
-                    <label>سنوات الخبرة</label>
-                    <input type="number" name="exp_years" class="w-full border rounded p-2">
-                </div>
-                <div>
-                    <label>الجنس</label>
-                    <select name="gender" class="w-full border rounded p-2">
-                        <option value="ذكر">ذكر</option>
-                        <option value="أنثى">أنثى</option>
-                    </select>
-                </div>
-                <div>
-                    <label>تاريخ الميلاد</label>
-                    <input type="date" name="date_birth" class="w-full border rounded p-2">
-                </div>
-                <div class="col-span-2">
-                    <label>السيرة الذاتية</label>
-                    <textarea name="biography" rows="3" class="w-full border rounded p-2"></textarea>
-                </div>
-            </div>
+                <input type="text" name="name" placeholder="Doctor name" value="{{ old('name') }}" required>
+                <input type="email" name="email" placeholder="Doctor email" value="{{ old('email') }}" required>
+                <input type="text" name="phone" placeholder="Phone Number" value="{{ old('phone') }}" required>
 
-            <!-- اختيار الغرفة -->
-            <div class="mb-4">
-                <label for="room_id">اختر الغرفة:</label>
-                <select name="room_id" class="w-full border rounded p-2" required>
-                    <option value="">-- اختر غرفة --</option>
+                <input type="password" name="password" placeholder="Password" required>
+                <input type="password" name="password_confirmation" placeholder="Confirm Password" required>
+
+                <select name="room_id" required>
+                    <option value="">Select Room</option>
                     @foreach ($rooms as $room)
-                        @php
-                            $doctorCount = \App\Models\Doctor::where('room_id', $room->id)->count();
-                        @endphp
-                        @if ($doctorCount < $room->capacity)
-                            <option value="{{ $room->id }}">
-                                {{ $room->name }} ({{ $doctorCount }}/{{ $room->capacity }})
-                            </option>
-                        @endif
+                        <option value="{{ $room['id'] }}">{{ $room['name'] }}"{{ $room['specialty'] }}"</option>
                     @endforeach
                 </select>
-            </div>
 
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">إضافة الطبيب</button>
-        </form>
-    </div> --}}
-    <select name="room_id" required class="w-full border rounded p-2">
-    <option value="">اختر الغرفة</option>
-    @foreach ($rooms as $room)
-        <option value="{{ $room['id'] }}">
-            {{ $room['name'] }} - {{ $room['specialty'] }}
-        </option>
-    @endforeach
-</select>
 
-</x-app-layout>
+
+                <input type="date" name="date_of_appointment" value="{{ old('date_of_appointment') }}" required>
+
+                <select name="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
+                    <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                </select>
+
+                <button type="submit">➕ Add</button>
+            </form>
+        </div>
+    </x-app-layout>

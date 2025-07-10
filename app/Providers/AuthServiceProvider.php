@@ -8,6 +8,7 @@ use App\Models\FamilyHistory;
 use App\Models\MedicalAttachment;
 use App\Models\MedicalFile;
 use App\Models\Medication;
+use App\Models\MedicationAlarm;
 use App\Models\Operation;
 use App\Models\Patient_profile;
 use App\Models\Patient_record;
@@ -17,6 +18,7 @@ use App\Policies\Api\PatientRecord\AllergyPolicy;
 use App\Policies\Api\PatientRecord\DiseasePolicy;
 use App\Policies\Api\PatientRecord\MedicalAttachmentPolicy;
 use App\Policies\Api\PatientRecord\MedicalFilePolicy;
+use App\Policies\Api\PatientRecord\MedicationAlarmPolicy;
 use App\Policies\Api\PatientRecord\MedicationPolicy;
 use App\Policies\Api\PatientRecord\OperationPolicy;
 use App\Policies\DiseasesPolicy;
@@ -48,6 +50,7 @@ class AuthServiceProvider extends ServiceProvider
         Disease::class => DiseasePolicy::class,
         Medication::class => MedicationPolicy::class,
         Operation::class => OperationPolicy::class,
+        MedicationAlarm::class => MedicationAlarmPolicy::class,
 
     ];
 
@@ -72,6 +75,7 @@ class AuthServiceProvider extends ServiceProvider
         Gate::policy(Disease::class, DiseasePolicy::class);
         Gate::policy(Medication::class, MedicationPolicy::class);
         Gate::policy(Operation::class, OperationPolicy::class);
+        Gate::policy(MedicationAlarm::class, MedicationAlarmPolicy::class);
 
     }
 
