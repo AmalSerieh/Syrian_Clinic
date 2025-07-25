@@ -125,7 +125,20 @@ return [
     ],
 
     'Image' => 'Intervention\Image\Facades\ImageManagerStatic',
-
+    'provider'=>'Kreait\Laravel\Firebase\ServiceProvider',
+    
+    /* 'firebase' => [
+        'projectId' => env('FIREBASE_PROJECT_ID'),
+        'databaseUrl' => env('FIREBASE_DATABASE_URL'),
+        'credentials' => [
+            'keyFile' => env('FIREBASE_KEY_FILE'),
+        ],
+    ], */
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT'),
+    ],
 
 
 ];

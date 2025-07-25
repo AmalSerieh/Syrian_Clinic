@@ -1,4 +1,6 @@
 <x-app-layout>
+    <x-auth-session-status class="mb-4" :status="session('status')" />
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('لوحة التحكم') }}
@@ -12,7 +14,7 @@
                 <div class="p-6 text-gray-900">
                     {{ __('أهلاً بك، تم تسجيل الدخول بنجاح!') }}
                 </div>
-                  
+
             </div>
         </div>
     </div>

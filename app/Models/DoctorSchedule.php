@@ -13,6 +13,7 @@ class DoctorSchedule extends Model
         'end_time',
         'patients_per_hour',
         'appointment_duration',
+        'max_patients',
     ];
      public function doctor()
     {

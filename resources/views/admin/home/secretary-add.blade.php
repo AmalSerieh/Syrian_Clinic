@@ -60,11 +60,11 @@
                             <button type="button" onclick="togglePassword('password')"
                                     class="absolute right-2 top-8 text-white">
                                     <!-- Eye Icon -->
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                              {{--   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
                                     class="text-blue-500" stroke="currentColor" stroke-width="2">
                                     <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
                                     <circle cx="12" cy="12" r="3" />
-                                </svg>
+                                </svg> --}}
                                 👁️
                             </button>
                         </div>

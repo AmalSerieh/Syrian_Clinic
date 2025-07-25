@@ -24,20 +24,24 @@ class LoginAdminController extends Controller
             return redirect()->route('login')->with('status', 'Invalid email or password.');
 
         }
-        if (!Auth::attempt(['email' => $loginRequest->email, 'password' => $loginRequest->password])) {
+         if (!Auth::attempt(['email' => $loginRequest->email, 'password' => $loginRequest->password])) {
             return redirect()->back()->withInput()->with(['status' => 'Login failed, try again.']);
         }
-        $user = Auth::user();
+        Auth::login($user);
 
         // منع المرضى من الدخول
         if ($user->role === 'patient') {
             Auth::logout(); // تسجيل الخروج
             return redirect()->route('login')->with('status', 'You are not authorized to enter.');
         }
+        // توجيه الطبيب لتغيير بياناته إذا لم يقم بذلك بعد
+        if ($user->role === 'doctor' && !$user->has_changed_credentials) {
+            return redirect()->route('doctor.first-login');
+        }
 
 
         return match ($user->role) {
-            'admin'=>redirect()->route('admin.index'),
+            'admin' => redirect()->route('admin.index'),
             'doctor' => redirect()->route('doctor.dashboard'),
             'secretary' => redirect()->route('secretary.dashboard'),
             default => abort(403),

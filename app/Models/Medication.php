@@ -36,12 +36,20 @@ class Medication extends Model
     }
     public function getIsActiveAttribute()
     {
-        return $this->med_start_date && $this->med_end_date && $this->med_frequency_value > 0;
+         if ($this->med_type !== 'current') {
+        return true; // الأدوية المزمنة نشطة دائمًا
+    }
+
+    if (!$this->med_start_date || !$this->med_end_date) {
+        return false;
+    }
+
+    return Carbon::now()->lte(Carbon::parse($this->med_end_date));
+       // return $this->med_start_date && $this->med_end_date && $this->med_frequency_value > 0;
     }
     protected $appends = ['is_active', 'total_quantity'];
 
-
-    /*  public function getTotalQuantityAttribute()
+    public function getTotalQuantityAttribute()
     {
         $start = Carbon::parse($this->med_start_date);
         $end = ($this->med_type === 'current' && $this->med_end_date)
@@ -51,7 +59,7 @@ class Medication extends Model
         $days = $start->diffInDays($end) + 1;
         return ceil($days * $this->med_frequency_value);
     }
- */
+
     // ✅ الحقول التي تحتاج تشفير
     protected $encryptable = [
         'med_name',

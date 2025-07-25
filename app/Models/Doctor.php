@@ -15,7 +15,7 @@ class Doctor extends Model
     {
         return $this->belongsTo(User::class);
     }
-     public function room()
+    public function room()
     {
         return $this->belongsTo(Room::class);
     }
@@ -29,12 +29,17 @@ class Doctor extends Model
         return $this->hasMany(DoctorSchedule::class, 'doctor_id');
 
     }
-public function hasFinishedOrConfirmedAppointmentWith($patientId): bool
-{
-    return $this->appointments()
-        ->where('patient_id', $patientId)
-        ->whereIn('status', ['confirmed', 'completed'])
-        ->exists();
-}
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
+    public function hasFinishedOrConfirmedAppointmentWith($patientId): bool
+    {
+        return $this->appointments()
+            ->where('patient_id', $patientId)
+            ->whereIn('status', ['confirmed', 'completed'])
+            ->exists();
+    }
 
 }

@@ -14,14 +14,16 @@ class DoctorResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-
+        // نحاول قراءة اللغة من الهيدر مباشرةً
+        $lang = $request->getPreferredLanguage(['ar', 'en']) ?? 'ar';
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'specialist' => $this->specialist,
-            'exp_years' => $this->exp_years,
-            'photo' => $this->photo ? asset('storage/' . $this->photo) : null,
-            'biography' => $this->biography,
+            'name' => $this->user->name,
+            'photo' => asset('storage/' . $this->photo),
+            'specialization' => $this->doctorProfile?->{"specialist_$lang"} ?? 'غير محدد',
+            'biography' => $this->doctorProfile?->biography ?? '',
+            'experience_years' => $this->doctorProfile?->exp_years ?? 0,
+            'rating' => $this->doctorProfile->rating ?? 0,
         ];
     }
 

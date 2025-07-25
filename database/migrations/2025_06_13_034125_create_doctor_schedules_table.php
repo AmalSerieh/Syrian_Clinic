@@ -18,6 +18,8 @@ return new class extends Migration {
             $table->time('end_time');
             $table->integer('patients_per_hour')->default(0);
             $table->integer('appointment_duration')->comment('in minutes');
+            $table->integer('max_patients')->default(0);
+            
             $table->timestamps();
         });
     }

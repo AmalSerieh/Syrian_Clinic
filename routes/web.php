@@ -14,20 +14,24 @@ use App\Http\Controllers\Web\Auth_Otp\RegisterWithOtpController;
 use App\Http\Controllers\Web\Doctor\DoctorDashboardController;
 use App\Http\Controllers\Web\Doctor\DoctorProfileController;
 use App\Http\Controllers\Web\Doctor\Schedule\DoctorScheduleController;
+use App\Http\Controllers\Web\Secertary\SecertaryPatientController;
+use App\Http\Controllers\Web\Secertary\SecretaryAppointmentController;
 use App\Http\Controllers\Web\Secertary\SecretaryController;
+use App\Http\Controllers\Web\Secertary\SecretaryDoctorController;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 
 Route::get('/', function () {
     if (auth()->check()) {
-        $user = auth()->user();
-        if ($user->hasRole('admin')) {
+        $user = Auth::user();
+        if ($user->role == 'admin') {
             return redirect()->route('admin.index');
-        } elseif ($user->hasRole('doctor')) {
+        } elseif ($user->role == 'doctor') {
             return redirect()->route('doctor.dashboard');
-        } elseif ($user->hasRole('secretary')) {
+        } elseif ($user->role == 'secretary') {
             return redirect()->route('secretary.dashboard');
         } else {
             abort(403, 'Unauthorized.');
@@ -75,17 +79,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 
-/* Route::get('/admin/doctor/add', function() {
-    return 'doctor add page test';
-})->name('admin.doctor.add'); */
-
-
-
-
-
-
-
-
 Route::middleware('guest')->group(function () {
     // Route::get('register', [RegisterAdminController::class, 'create'])->name('admin.register');
     //Route::post('register', [RegisterAdminController::class, 'store'])->name('admin.register');
@@ -110,18 +103,21 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password-otp', [ForgetPasswordController::class, 'resetPassword'])->name('password.otp.reset');
 
 });
-Route::middleware(['auth', 'role:doctor', 'verified'])->group(function () {
+Route::middleware(['auth', 'role:doctor'])->group(function () {
+    //force-change for first login
+    Route::get('/doctor/first-login', [DoctorDashboardController::class, 'showForceChangeForm'])->name('doctor.first-login');
+    Route::post('/doctor/first-login/update', [DoctorDashboardController::class, 'updateCredentials'])->name('doctor.first-login.update');
+
     Route::get('/doctor/dashboard', [DoctorDashboardController::class, 'index'])->name('doctor.dashboard');
+    // مسارات الطبيب العادية هنا
+
     Route::put('/doctor/profile/photo', [DoctorDashboardController::class, 'updateProfilePhoto'])->name('doctor.profile.photo.update');
     Route::get('/doctor/password/edit', [ForgetPasswordController::class, 'edit'])->name('doctor.password.edit');
     Route::put('/doctor/password/update', [ForgetPasswordController::class, 'update'])->name('doctor.password.update');
-    //patient_profile
-    Route::put('patient-profile', [PatientProfileController::class, 'update']); // PUT
-    Route::put('diseases/{disease}', [DiseasesController::class, 'update']);
-    Route::delete('diseases/{disease}', [DiseasesController::class, 'destroy']);
+
     //Doctor Profile
     Route::get('/doctor/profile/create', [DoctorProfileController::class, 'createProfile'])->name('doctor-profile.create');
-    Route::post('/doctor/profile', [DoctorProfileController::class, 'storeProfile'])->name('doctor-profile.store');
+    Route::post('/doctor/profile/store', [DoctorProfileController::class, 'storeProfile'])->name('doctor-profile.store');
     Route::get('/doctor/profile/show', [DoctorProfileController::class, 'showProfile'])->name('doctor-profile.show');
     Route::get('/doctor-profile/{id}/edit', [DoctorProfileController::class, 'edit'])->name('doctor-profile.edit');
     Route::put('/doctor-profile/{id}/update', [DoctorProfileController::class, 'updateProfile'])->name('doctor-profile.update');
@@ -145,17 +141,46 @@ Route::middleware(['auth', 'role:doctor', 'verified'])->group(function () {
 
 
 Route::middleware('guest')->group(function () {
+    //patient_profile
+    Route::put('patient-profile', [PatientProfileController::class, 'update']); // PUT
+    Route::put('diseases/{disease}', [DiseasesController::class, 'update']);
+    Route::delete('diseases/{disease}', [DiseasesController::class, 'destroy']);
     // Route::get('login', [LoginSecretaryController::class, 'create'])->name('secretary.login');
     // Route::post('login', [LoginSecretaryController::class, 'store'])->name('secretary.login');
     // Route::get('login', [LoginSecretaryController::class, 'create'])->name('login');
 
 });
-Route::middleware(['auth', 'role:secretary', 'verified'])->group(function () {
-    Route::get('/secretary/dashboard', [SecretaryController::class, 'index'])->name('secretary.dashboard');
-    Route::get('/secretary/patient/add', [SecretaryController::class, 'patient_add'])->name('secretary.patient.add');
-    Route::post('/secretary/patient/store', [SecretaryController::class, 'patient_store'])->name('secretary.patient.store');
-    //Route::get('/secretary/password/edit', [ForgetPasswordController::class, 'edit'])->name('secretary.password.edit');
-    //Route::put('/secretary/password/update', [ForgetPasswordController::class, 'update'])->name('secretary.password.update');
+Route::middleware(['web','auth', 'role:secretary'])->prefix('secretary')->group(function () {
+    Route::get('/dashboard', [SecretaryController::class, 'index'])->name('secretary.dashboard');
+    Route::get('/patient/add', [SecretaryController::class, 'patient_add'])->name('secretary.patient.add');
+    Route::post('/patient/store', [SecretaryController::class, 'patient_store'])->name('secretary.patient.store');
+    //Route::get('/password/edit', [ForgetPasswordController::class, 'edit'])->name('secretary.password.edit');
+    //Route::put('/password/update', [ForgetPasswordController::class, 'update'])->name('secretary.password.update');
+    //Appointement
+
+    // عرض قائمة المواعيد التي تحتاج تأكيد
+    Route::get('/appointments/pending/{doctorId}', [SecretaryAppointmentController::class, 'pendingByDoctor'])->name('secretary.appointments.pending');
+    Route::post('/appointments/{appointment}/confirm', [SecretaryAppointmentController::class, 'confirm1'])->name('secretary.appointment.confirm');
+    Route::post('/appointments/{appointment}/cancel', [SecretaryAppointmentController::class, 'cancel1'])->name('secretary.appointment.cancel');
+    // Route::post('sendNotification', [SecretaryAppointmentController::class, 'sendNotification'])->name('secretary.send.notification');
+    //عرض كل المواعيد التي : تخص اليوم الحالي
+
+    Route::get('/appointments/today', [SecretaryAppointmentController::class, 'todayAppointments'])->name('secretary.appointments.today');
+    //عرض الأطباء
+    Route::get('/doctors', [SecretaryDoctorController::class, 'doctors'])->name('secretary.doctors');
+    //عرض جدول مواعيد الأطباء الأسبوعي
+    Route::get('/doctors/{id}/schedule', [SecretaryDoctorController::class, 'doctorSchedule'])->name('secretary.doctor.schedule');
+    Route::get('/doctors/{id}/Appointment', [SecretaryDoctorController::class, 'doctorAppointmentsDetails'])->name('secretary.doctor.appointment');
+
+
+    //عرض المرضى
+    Route::get('/patients', [SecertaryPatientController::class, 'patients'])->name('secretary.patients');
+
+    //عرض المواعيد
+    Route::get('/appointments', [SecretaryAppointmentController::class, 'index'])->name('secretary.appointments');
+    //عرض
+    Route::get('/appointments/{appointment}', [SecretaryAppointmentController::class, 'show'])->name('secretary.appointments.show');
+
 });
 
 

@@ -21,7 +21,7 @@ return new class extends Migration {
             $table->date('cer_date')->nullable();//تاريخ الحصول على الشهادة
             $table->string('exp_place')->nullable();//مكان الخبرة
             $table->string('exp_years')->nullable();//سنوات الخبرة
-            $table->string('biography')->nullable();//سيرة ذاتية
+            $table->text('biography')->nullable();//سيرة ذاتية
             $table->enum('gender', ['male', 'female'])->default('male');
             $table->date('date_birth')->nullable();
             //بحيث يتم حساب العمر من تاريخ الميلاد و يتم االتحديث التقائي أي كل ما بيكبير سننة بيتحدث ل حالو

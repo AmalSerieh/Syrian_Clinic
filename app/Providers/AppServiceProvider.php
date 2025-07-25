@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\Admin\DashboardRepositoryInterface;
+use App\Repositories\Api\Doctor\DoctorRepositoryInterface;
+use App\Repositories\Api\Doctor\DoctorScheduleRepositoryInterface;
 use App\Repositories\Api\PateintRecord\AllergyRepositoryInterface;
 use App\Repositories\Api\PateintRecord\DiseaseRepositoryInterface;
 use App\Repositories\Api\PateintRecord\MedicalAttachmentRepositoryInterface;
@@ -12,6 +15,9 @@ use App\Repositories\Api\PateintRecord\OperationRepositoryInterface;
 use App\Repositories\Api\PateintRecord\PatientProfileRepositoryInterface;
 use App\Repositories\Auth\AuthRepositoryInterface;
 use App\Repositories\Auth\OtpRepositoryInterface;
+use App\Repositories\Eloquent\Admin\DashboardRepository;
+use App\Repositories\Eloquent\Api\Doctor\DoctorRepository;
+use App\Repositories\Eloquent\Api\Doctor\DoctorScheduleRepository;
 use App\Repositories\Eloquent\Api\PateintRecord\AllergyRepository;
 use App\Repositories\Eloquent\Api\PateintRecord\DiseaseRepository;
 use App\Repositories\Eloquent\Api\PateintRecord\MedicalAttachmentRepository;
@@ -24,11 +30,13 @@ use App\Repositories\Eloquent\OtpRepository;
 use App\Repositories\Eloquent\Profile\FileStorage;
 use App\Repositories\Eloquent\Profile\FileStorageRepository;
 use App\Repositories\Eloquent\Profile\PatientRepository;
+use App\Repositories\Eloquent\Secertary\AppointmentRepository;
 use App\Repositories\Eloquent\UserRepository;
 use App\Repositories\Eloquent\AuthRepository;
 use App\Repositories\Auth\UserRepositoryInterface;
 use App\Repositories\Profile\FileStorageInterface;
 use App\Repositories\Profile\PatientRepositoryInterface;
+use App\Repositories\Secertary\AppointmentRepositoryInterface;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Symfony\Component\HttpKernel\Profiler\ProfilerStorageInterface;
@@ -53,7 +61,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MedicationRepositoryInterface::class, MedicationRepository::class);
         $this->app->bind(OperationRepositoryInterface::class, OperationRepository::class);
         $this->app->bind(MedicationAlarmInterface::class, MedicationAlarmRepository::class);
+        //Doctor
+        $this->app->bind(DoctorRepositoryInterface::class, DoctorRepository::class);
+        $this->app->bind(DoctorScheduleRepositoryInterface::class, DoctorScheduleRepository::class);
 
+
+        //web
+        $this->app->bind(DashboardRepositoryInterface::class, DashboardRepository::class);
+        $this->app->bind(AppointmentRepositoryInterface::class, AppointmentRepository::class);
 
 
     }

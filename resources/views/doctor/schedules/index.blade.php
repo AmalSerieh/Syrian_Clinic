@@ -22,23 +22,7 @@
             </thead>
             <tbody>
                 @foreach ($schedules as $schedule)
-                 @php
-    // تأكد من أن patients_per_hour >= 1
-    $patients_per_hour = max(1, $schedule->patients_per_hour);
-
-    $appointment_duration = 60 / $patients_per_hour;
-    $start = \Carbon\Carbon::parse($schedule->start_time);
-    $end = \Carbon\Carbon::parse($schedule->end_time);
-
-    // تأكد من أن وقت النهاية > وقت البداية
-    if ($end->gt($start)) {
-        $total_minutes = $end->diffInMinutes($start);
-        $total_hours = $total_minutes / 60;
-        $max_patients = round($total_hours * $patients_per_hour);
-    } else {
-        $max_patients = 0; // أو عرض رسالة خطأ
-    }
-@endphp
+                    
                     <tr class="border-b hover:bg-gray-50">
                         <td class="border px-4 py-2">{{ __($schedule->day) }}</td>
                         <td class="border px-4 py-2">{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}
@@ -47,7 +31,7 @@
                         </td>
                         <td class="border px-4 py-2">{{ $schedule->patients_per_hour }}</td>
                         <td class="border px-4 py-2">{{ $schedule->appointment_duration }}</td>
-                        <td class="border px-4 py-2">{{ $max_patients }}</td>
+                        <td class="border px-4 py-2">{{ $schedule->max_patients }}</td>
                         <td class="border px-4 py-2 space-x-2">
                             <a href="{{ route('doctor-schedule.edit', $schedule->id) }}"
                                 class="text-blue-600 hover:underline">تعديل</a>

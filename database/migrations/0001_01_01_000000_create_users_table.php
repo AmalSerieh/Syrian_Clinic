@@ -23,7 +23,8 @@ return new class extends Migration {
             // معلومات من أنشأ الحساب
             $table->enum('created_by', ['admin', 'secretary'])->nullable();
             $table->foreignId('created_by_user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('fcm_token')->nullable();
+            $table->boolean('has_changed_credentials')->default(0);
+            $table->text('fcm_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

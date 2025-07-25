@@ -5,7 +5,8 @@
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 bg-white p-6 rounded shadow">
-            <form action="{{ route('doctor-profile.update', $doctorProfile->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('doctor-profile.update', $doctorProfile->id) }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -13,28 +14,15 @@
                 <div class="mb-4">
                     <label class="block font-medium">الاسم</label>
                     <input type="text" value="{{ Auth::user()->name }}" disabled
-                           class="w-full border-gray-300 rounded-lg shadow-sm mt-1" />
-                </div>
-
-                <!-- التخصص -->
-                <div class="mb-4">
-                    <label class="block font-medium">التخصص</label>
-                    <input name="specialist" value="{{ $doctorProfile->specialist }}" class="w-full border-gray-300 rounded-lg mt-1" />
-                </div>
-
-                <!-- الجنس -->
-                <div class="mb-4">
-                    <label class="block font-medium">الجنس</label>
-                    <select name="gender" class="w-full border-gray-300 rounded-lg mt-1">
-                        <option value="male" {{ $doctorProfile->gender == 'male' ? 'selected' : '' }}>ذكر</option>
-                        <option value="female" {{ $doctorProfile->gender == 'female' ? 'selected' : '' }}>أنثى</option>
-                    </select>
+                        class="w-full border-gray-300 rounded-lg shadow-sm mt-1" />
                 </div>
 
                 <!-- تاريخ الميلاد -->
                 <div class="mb-4">
-                    <label class="block font-medium">تاريخ الميلاد</label>
-                    <input type="date" name="date_birth" value="{{ $doctorProfile->date_birth }}" class="w-full border-gray-300 rounded-lg mt-1" />
+                    <label for="date_birth" class="block font-medium">تاريخ الميلاد</label>
+                    <x-text-input id="date_birth" name="date_birth" type="date" :value="old('date_birth', $doctorProfile->date_birth)" />
+                    <x-input-error :messages="$errors->get('date_birth')" class="mt-2" />
+
                 </div>
 
                 <!-- السيرة الذاتية -->
@@ -46,13 +34,17 @@
                 <!-- معلومات الشهادة -->
                 <div class="mb-4 border-t pt-4">
                     <h4 class="text-md font-semibold mb-2">بيانات الشهادة:</h4>
-                    <input type="text" name="cer_name" placeholder="اسم الشهادة" value="{{ $doctorProfile->cer_name }}" class="w-full border-gray-300 rounded-lg mt-1 mb-2" />
-                    <input type="text" name="cer_place" placeholder="مكان الحصول عليها" value="{{ $doctorProfile->cer_place }}" class="w-full border-gray-300 rounded-lg mt-1 mb-2" />
-                    <input type="date" name="cer_date" value="{{ $doctorProfile->cer_date }}" class="w-full border-gray-300 rounded-lg mt-1 mb-2" />
+                    <input type="text" name="cer_name" placeholder="اسم الشهادة"
+                        value="{{ $doctorProfile->cer_name }}" class="w-full border-gray-300 rounded-lg mt-1 mb-2" />
+                    <input type="text" name="cer_place" placeholder="مكان الحصول عليها"
+                        value="{{ $doctorProfile->cer_place }}" class="w-full border-gray-300 rounded-lg mt-1 mb-2" />
+                    <input type="date" name="cer_date" value="{{ $doctorProfile->cer_date }}"
+                        class="w-full border-gray-300 rounded-lg mt-1 mb-2" />
 
                     @if ($doctorProfile->cer_images)
                         <div class="mb-2">
-                            <img src="{{ asset('storage/' . $doctorProfile->cer_images) }}" class="w-24 h-20 rounded-full object-cover" />
+                            <img src="{{ asset('storage/' . $doctorProfile->cer_images) }}"
+                                class="w-24 h-20 rounded-full object-cover" />
                         </div>
                     @endif
                     <input type="file" name="cer_images" class="w-full border-gray-300 rounded-lg mt-1" />
@@ -61,14 +53,15 @@
                 <!-- الخبرات -->
                 <div class="mb-4 border-t pt-4">
                     <h4 class="text-md font-semibold mb-2">الخبرات:</h4>
-                    <input type="text" name="exp_place" placeholder="مكان العمل" value="{{ $doctorProfile->exp_place }}" class="w-full border-gray-300 rounded-lg mt-1 mb-2" />
-                    <input type="number" name="exp_years" placeholder="عدد سنوات الخبرة" value="{{ $doctorProfile->exp_years }}" class="w-full border-gray-300 rounded-lg mt-1" />
+                    <input type="text" name="exp_place" placeholder="مكان العمل"
+                        value="{{ $doctorProfile->exp_place }}" class="w-full border-gray-300 rounded-lg mt-1 mb-2" />
+                    <input type="number" name="exp_years" placeholder="عدد سنوات الخبرة"
+                        value="{{ $doctorProfile->exp_years }}" class="w-full border-gray-300 rounded-lg mt-1" />
                 </div>
 
                 <!-- زر الحفظ -->
                 <div class="mt-6">
-                    <button type="submit"
-                            class="btn-pramiry">
+                    <button type="submit" class="btn-pramiry">
                         حفظ التعديلات
                     </button>
                 </div>

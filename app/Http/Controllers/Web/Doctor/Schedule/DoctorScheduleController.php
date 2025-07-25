@@ -66,15 +66,86 @@ class DoctorScheduleController extends Controller
 
     public function create()
     {
+        $doctor = auth()->user()->doctor;
+        $profile = $doctor->doctorProfile;
+
+        // نتحقق أن كل الحقول موجودة
+        if (
+            empty($profile->cer_place) ||
+            empty($profile->cer_name) ||
+            empty($profile->cer_images) ||
+            empty($profile->cer_date) ||
+            empty($profile->exp_place) ||
+            empty($profile->exp_years) ||
+            empty($profile->biography) ||
+            empty($profile->date_birth)
+        ) {
+            return redirect()->route('doctor-profile.edit', ['id' => $profile->id]) // أو أي صفحة تعديل الملف المهني
+                ->with('status', 'يرجى إكمال جميع بيانات الملف المهني قبل إضافة جدول المواعيد.');
+        }
+
         return view('doctor.schedules.create');
     }
 
     public function store(Request $request)
     {
-        $doctorId = Auth::user()->doctor->id;
+        $doctor = Auth::user()->doctor;
 
-        $start = Carbon::parse($request->start_time);
-        $end = Carbon::parse($request->end_time);
+        // ✅ تأكد أن ملفه المهني مكتمل
+        $profile = $doctor->doctorProfile;
+        $requiredFields = [
+            'cer_place',
+            'cer_name',
+            'cer_images',
+            'cer_date',
+            'exp_place',
+            'exp_years',
+            'biography',
+            'date_birth'
+        ];
+        foreach ($requiredFields as $field) {
+            if (empty($profile->$field)) {
+                return back()->withErrors([
+                    'profile' => 'يرجى إكمال جميع بيانات الملف المهني قبل إضافة جدول المواعيد.'
+                ])->withInput();
+            }
+        }
+        // ✅ تحقق من صحة البيانات
+        $validated = $request->validate([
+            'day' => 'required|in:Saturday,Sunday,Monday,Tuesday,Wednesday,Thursday,Friday',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'patients_per_hour' => 'required|integer|min:1',
+        ]);
+
+
+        $start = Carbon::parse($validated['start_time']);
+        $end = Carbon::parse($validated['end_time']);
+        // حساب الفرق بالدقائق
+        $durationInMinutes = $start->diffInMinutes($end);
+
+        $doctorId = Auth::user()->doctor->id;
+        $workstart = Carbon::parse('08:00');
+        $workend = Carbon::parse('20:00');
+        // ✅ التحقق من ساعات العمل (8 صباحاً - 8 مساءً)
+        if ($start->lt($workstart) || $end->gt($workend)) {
+            return back()->withErrors([
+                'schedule' => 'المواعيد يجب أن تكون بين الساعة 8 صباحاً و 8 مساءً. الوقت المحدد: ' .
+                    $start->format('H:i') . ' - ' . $end->format('H:i')
+            ])->withInput();
+        }
+
+
+        // عدد المرضى في الساعة
+        $patientsPerHour = $request->patients_per_hour;
+
+        // حساب المدة لكل موعد
+        $appointmentDuration = floor(60 / $patientsPerHour); // بالدقائق
+
+        // حساب إجمالي المرضى = عدد الساعات × المرضى بالساعة
+        $maxPatients = floor(($durationInMinutes / 60) * $patientsPerHour);
+        // حساب عدد المواعيد
+        $numberOfAppointments = ceil($durationInMinutes / $appointmentDuration);
 
         // تحقق من التداخل
         $hasConflict = DoctorSchedule::where('day', $request->day)
@@ -90,23 +161,12 @@ class DoctorScheduleController extends Controller
             ])->withInput();
         }
 
-        // حساب الفرق بالدقائق
-        $durationInMinutes = $start->diffInMinutes($end);
-
-        // عدد المرضى في الساعة
-        $patientsPerHour = $request->patients_per_hour;
-
-        // حساب المدة لكل موعد
-        $appointmentDuration = floor(60 / $patientsPerHour); // بالدقائق
-
-        // حساب إجمالي المرضى = عدد الساعات × المرضى بالساعة
-        $maxPatients = floor(($durationInMinutes / 60) * $patientsPerHour);
-
         DoctorSchedule::create([
             'doctor_id' => $doctorId,
             'day' => $request->day,
             'start_time' => $start->format('H:i'),
             'end_time' => $end->format('H:i'),
+            'patients_per_hour' => $validated['patients_per_hour'],
             'max_patients' => $maxPatients,
             'appointment_duration' => $appointmentDuration,
         ]);
@@ -130,24 +190,44 @@ class DoctorScheduleController extends Controller
 
     public function update(Request $request, DoctorSchedule $schedule)
     {
-        $request->validate([
+        $validated = $request->validate([
             'day' => 'required|in:Saturday,Sunday,Monday,Tuesday,Wednesday,Thursday,Friday',
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
             'patients_per_hour' => 'required|integer|min:1|max:60',
         ]);
 
-        $start = Carbon::parse($request->start_time);
-        $end = Carbon::parse($request->end_time);
-        $totalMinutes = $end->diffInMinutes($start);
+        $start = Carbon::parse($validated['start_time']);
+        $end = Carbon::parse($validated['end_time']);
+        // حساب الفرق بالدقائق
+        $durationInMinutes = $start->diffInMinutes($end);
 
-        $appointment_duration = intval(60 / $request->patients_per_hour);
-        $max_patients = intval($totalMinutes / $appointment_duration);
+        $doctorId = Auth::user()->doctor->id;
 
-        // التأكد من عدم تعارض المواعيد
-        $hasConflict = DoctorSchedule::where('doctor_id', auth()->id())
-            ->where('day', $request->day)
-            //   ->where('id', '!=', $schedule->id)
+        $workstart = Carbon::parse('08:00');
+        $workend = Carbon::parse('20:00');
+        // ✅ التحقق من ساعات العمل (8 صباحاً - 8 مساءً)
+        if ($start->lt($workstart) || $end->gt($workend)) {
+            return back()->withErrors([
+                'schedule' => 'المواعيد يجب أن تكون بين الساعة 8 صباحاً و 8 مساءً. الوقت المحدد: ' .
+                    $start->format('H:i') . ' - ' . $end->format('H:i')
+            ])->withInput();
+        }
+
+
+        // عدد المرضى في الساعة
+        $patientsPerHour = $request->patients_per_hour;
+        // حساب المدة لكل موعد
+        $appointmentDuration = intval(60 / $patientsPerHour); // بالدقائق
+
+        // حساب إجمالي المرضى = عدد الساعات × المرضى بالساعة
+        $maxPatients = intval($durationInMinutes / $appointmentDuration);
+        // حساب عدد المواعيد
+        $numberOfAppointments = ceil($durationInMinutes / $appointmentDuration);
+        //  dd($numberOfAppointments,$appointmentDuration,$maxPatients,$durationInMinutes,$numberOfAppointments,$start,$end);
+
+        // تحقق من التداخل
+        $hasConflict = DoctorSchedule::where('day', $request->day)
             ->where(function ($query) use ($request) {
                 $query->where('start_time', '<', $request->end_time)
                     ->where('end_time', '>', $request->start_time);
@@ -155,18 +235,20 @@ class DoctorScheduleController extends Controller
             ->exists();
 
         if ($hasConflict) {
-            return back()->withErrors(['يوجد تعارض مع موعد آخر']);
+            return back()->withErrors([
+                'duplicate' => 'يوجد تداخل مع موعد آخر في نفس اليوم. يرجى اختيار وقت مختلف.',
+            ])->withInput();
         }
-
         $schedule->update([
             'day' => $request->day,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
-            'appointment_duration' => $appointment_duration,
-            'max_patients' => $max_patients,
+            'appointment_duration' => $appointmentDuration,
+            'max_patients' => $maxPatients,
         ]);
 
         return redirect()->route('doctor-schedule.index')->with('info', 'تم تحديث جدول الدوام بنجاح');
+
     }
 
 

@@ -37,7 +37,7 @@ class MedicationAlarmRepository implements MedicationAlarmInterface
     }
     public function getUserAlarms($userId)
     {
-        return MedicationAlarm::whereHas('medication', fn($q) => $q->where('user_id', $userId))
+        return MedicationAlarm::whereHas('medication', fn($q) => $q->where('patient_record_id', $userId))
             ->with('medication')
             ->get();
     }

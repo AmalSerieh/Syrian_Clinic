@@ -25,13 +25,13 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">اليوم:</label>
                 <select name="day" required
                     class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="Monday">الاثنين</option>
-                    <option value="Tuesday">الثلاثاء</option>
-                    <option value="Wednesday">الأربعاء</option>
-                    <option value="Thursday">الخميس</option>
-                    <option value="Friday">الجمعة</option>
-                    <option value="Saturday">السبت</option>
-                    <option value="Sunday">الأحد</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
                 </select>
             </div>
 
@@ -49,7 +49,7 @@
             <!-- عدد المرضى في الساعة -->
             <div class="mb-3">
                 <label for="patients_per_hour" class="form-label">عدد المرضى في الساعة</label>
-                <input type="number" name="patients_per_hour" id="patients_per_hour"
+                <input type="number" min=1 name="patients_per_hour" id="patients_per_hour"
                     class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
 
                 @error('patients_per_hour')

@@ -190,7 +190,7 @@ class AuthService
         if ($user->role === 'patient') {
             $patient = Patient::create([
                 'user_id' => $user->id,
-                'photo' => 'avatars/default.png',
+                'photo' => 'avatars/defaults.jpg',
             ]);
 
             $patient_record = Patient_record::create([

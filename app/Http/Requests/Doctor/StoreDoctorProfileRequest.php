@@ -22,16 +22,22 @@ class StoreDoctorProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'specialist' => 'required|string|max:255',
-            'cer_place' => 'nullable|string',
-            'cer_name' => 'nullable|string',
-            'cer_images' => 'nullable|image',
-            'cer_date' => 'nullable|date',
-            'exp_place' => 'nullable|string',
+            'cer_place' => 'required|string',
+            'cer_name' => 'required|string',
+            'cer_images' => 'required|image',
+            'cer_date' => 'required|date',
+            'exp_place' => 'required|string',
             'exp_years' => 'required|numeric',
-            'biography' => 'nullable|string',
-            'gender' => 'required|in:male,female',
+            'biography' => 'required|string',
             'date_birth' => 'required|date',
         ];
+        // الصورة مطلوبة فقط عند الإنشاء
+        if ($this->isMethod('post')) {
+            $rules['cer_images'] = 'required|image|mimes:jpeg,png,jpg|max:2048';
+        } else {
+            $rules['cer_images'] = 'nullable|image|mimes:jpeg,png,jpg|max:2048';
+        }
+
+        return $rules;
     }
 }

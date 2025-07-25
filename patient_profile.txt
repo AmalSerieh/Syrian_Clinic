@@ -7,7 +7,7 @@
 'med_type' => chronic,current,
 'med_frequency' => once_daily,twice_daily,three_times_daily,daily,weekly,monthly,yearly,
 'med_dosage_form' => tablet,capsule,pills,syrup,liquid,drops,sprays,patches,injections,
-'med_timing' => before_food,after_food,morinng,
+'med_timing' => before_food,after_food,morning,morning_evening,evening
 
         'tablet' => ['0.5', '1', '1.5', '2', '2.5'],
         'capsule' => ['0.5', '1', '1.5', '2', '2.5'],
@@ -42,8 +42,11 @@
 
 
  php artisan schedule:work
+ php artisan schedule:run
  php artisan medications:update-progress
  php artisan medications:update-medication-status
+ php artisan appointments:remind
+ php artisan appointments-get-ready-to-arrive:notify-appointment-status-arrived
 
 ✅ السيناريو كامل للدواء المزمن (chronic):
 الدواء مزمن يعني ماله تاريخ انتهاء.

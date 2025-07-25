@@ -1,4 +1,13 @@
 <x-app-layout>
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
     <div class="max-w-4xl mx-auto py-10">
         <h2 class="text-2xl font-semibold mb-6 text-gray-800">إدخال الملف المهني للطبيب</h2>
 
@@ -9,12 +18,6 @@
         <form action="{{ route('doctor-profile.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
-            <!-- التخصص -->
-            <div>
-                <x-input-label for="specialist" :value="'التخصص'" />
-                <x-text-input id="specialist" name="specialist" type="text" class="mt-1 block w-full" :value="old('specialist')" required autofocus />
-                <x-input-error :messages="$errors->get('specialist')" class="mt-2" />
-            </div>
 
             <!-- السيرة الذاتية -->
             <div>
@@ -22,18 +25,6 @@
                 <textarea id="biography" name="biography" rows="4"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('biography') }}</textarea>
                 <x-input-error :messages="$errors->get('biography')" class="mt-2" />
-            </div>
-
-            <!-- الجنس -->
-            <div>
-                <x-input-label for="gender" :value="'الجنس'" />
-                <select id="gender" name="gender"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="">اختر</option>
-                    <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>ذكر</option>
-                    <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>أنثى</option>
-                </select>
-                <x-input-error :messages="$errors->get('gender')" class="mt-2" />
             </div>
 
             <!-- تاريخ الميلاد -->
@@ -90,13 +81,17 @@
             <!-- عدد سنوات الخبرة -->
             <div>
                 <x-input-label for="exp_years" :value="'عدد سنوات الخبرة'" />
-                <x-text-input id="exp_years" name="exp_years" type="number" class="mt-1 block w-full" :value="old('exp_years')" />
+                <x-text-input id="exp_years" name="exp_years" type="number" min=0 class="mt-1 block w-full" :value="old('exp_years')" />
                 <x-input-error :messages="$errors->get('exp_years')" class="mt-2" />
             </div>
 
             <!-- زر الحفظ -->
             <div class="flex justify-end">
-                <x-primary-button>{{ __('حفظ الملف') }}</x-primary-button>
+                <button type="submit"
+                            class="mt-4 bg-blue-600 hover:bg-blue-700 text-black border-b-blue-900 font-bold py-2 px-4 rounded-2xl w-full flex items-center justify-center gap-2">
+                        ➕ حفظ الملف المهني
+                    </button>
+                {{-- <x-primary-button>{{ __('حفظ الملف') }}</x-primary-button> --}}
             </div>
         </form>
     </div>

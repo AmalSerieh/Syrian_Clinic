@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\API\Appointement\AppointmentController;
+use App\Http\Controllers\API\Appointement\NotoficationController;
+use App\Http\Controllers\API\Doctor\DoctorScheduleController;
 use \App\Http\Controllers\API\PatientRecord\AllergyController;
 use App\Http\Controllers\API\Auth\Profile\ProfileController;
 use App\Http\Controllers\API\Doctor\DoctorController;
@@ -18,7 +21,8 @@ use App\Http\Controllers\Auth_Otp\RegisterWithOtpController;
 use App\Http\Controllers\Socialite\GoogleController;
 use App\Http\Controllers\API\PatientRecord\PatientProfileController;
 use App\Http\Middleware\SetLocale;
-use App\Models\Disease;
+use App\Models\Appointment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -30,13 +34,7 @@ Route::prefix('auth')->middleware([SetLocale::class])->group(function () {
     Route::post('google', [GoogleController::class, 'googleAuth'])->name('google.auth');
     Route::any('google/callback', [GoogleController::class, 'handleGoogleLogin'])->name('google.callback');
 });
-Route::prefix('doctor')->group(function () {
-    // عرض تفاصيل الطبيب + الجدول الزمني + الفترات الزمنية
-    Route::get('{doctor}/details', [DoctorController::class, 'show']);
 
-    // حجز موعد مع طبيب
-//    Route::post('{doctor}/appointments', [AppointmentController::class, 'book']);
-});
 Route::middleware([SetLocale::class])->group(function () {
     Route::prefix('auth')->group(function () {
         Route::middleware('api')->post('register_app', [RegisterWithOtpController::class, 'register']);
@@ -47,17 +45,19 @@ Route::middleware([SetLocale::class])->group(function () {
         Route::post('verify/otp/reset', [ForgetPasswordWithOtpController::class, 'verifyOtp']);
         Route::post('set-new-Password', [ForgetPasswordWithOtpController::class, 'setNewPassword']);
 
+
         //Route::middleware('api')->post('login_app_otp', [LoginWithOtpController::class, 'login']);
         // Route::post('verify/otp/login/store', [LoginWithOtpController::class, 'verifyOtpStore']);
 
     });
 });
-Route::middleware([SetLocale::class,'auth:sanctum'])->group(function () {
+Route::middleware([SetLocale::class, 'auth:sanctum'])->group(function () {
+    Route::post('user/device-token', [RegisterWithOtpController::class, 'updateDeviceToken']);
     Route::post('profile', [ProfileController::class, 'update'])->name('patient.profile.edit');
     Route::get('get_profile', [ProfileController::class, 'show']);
 
 });
-Route::middleware([SetLocale::class,'auth:sanctum'])->group(function () {
+Route::middleware([SetLocale::class, 'auth:sanctum'])->group(function () {
     Route::post('change-password', [ResetPasswordController::class, 'changePassword']);
     //السجل الطبي
 /*     Route::get('/patient-records/{id}', [PatientRecordController::class, 'show']);
@@ -96,50 +96,50 @@ Route::middleware([SetLocale::class,'auth:sanctum'])->group(function () {
     //Route::apiResource('medication-alarms', MedicationAlarmController::class)->only(['index', 'store', 'destroy']);
     Route::post('medication-alarms', [MedicationAlarmController::class, 'store']);
     Route::get('medication-alarms', [MedicationAlarmController::class, 'index']);
-    Route::delete('medication-alarms', [MedicationAlarmController::class, 'destroy']);
+    Route::delete('medication-alarms/{id}', [MedicationAlarmController::class, 'destroy']);
+    //book-appointment
+    Route::post('doctor/{doctor}/book-appointment', [AppointmentController::class, 'book']);
+    Route::post('/appointments/{appointmentId}/setArrivvedTime', [AppointmentController::class, 'setArrivvedTime']);
+    Route::delete('/appointments/{appointment}/cancel', [AppointmentController::class, 'cancelByPatient']);
+    Route::get('/patient/appointments', [AppointmentController::class, 'getPatientAppointmentsGroupedByStatus']);
+    Route::get('/appointments/confirmed/nearestAll', [AppointmentController::class, 'getConfirmedAppointmentsGroupedByDay']);
+    Route::get('/appointments/confirmed/nearest', [AppointmentController::class, 'getNearestConfirmedAppointmentForCurrentUser']);
 
 
 
-    /*
-        Route::get('patient-profile', [PatientProfileController::class, 'show']);   // GET
-        Route::post('patient-profile', [PatientProfileController::class, 'store1']); // POST
-        //Diseases
-        Route::get('/diseases', [DiseasesController::class, 'index']);
-        Route::get('diseases/{disease}', [DiseasesController::class, 'show']);
-        Route::post('diseases/store', [DiseasesController::class, 'store']);
-        Route::post('diseases/submit', [DiseasesController::class, 'submit']);
-        //Medication
-        Route::get('/medication', [MedicationController::class, 'index']);
-        Route::get('medication/{medication}', [MedicationController::class, 'show']);
-        Route::post('medication/store', [MedicationController::class, 'store']);
-        Route::post('medication/submit', [MedicationController::class, 'submit']);
-        //Operation
-        Route::get('/operation', [OperationController::class, 'index']);
-        Route::get('operation/{operation}', [OperationController::class, 'show']);
-        Route::post('operation/store', [OperationController::class, 'store']);
-        Route::post('operation/submit', [OperationController::class, 'submit']);
-        //Test
-        Route::get('/test', [TestController::class, 'index']);
-        Route::get('test/{test}', [TestController::class, 'show']);
-        Route::post('test/store', [TestController::class, 'store']);
-        Route::post('test/submit', [TestController::class, 'submit']);
-        //Allergy
-        Route::get('/allergy', [AllergyController::class, 'index']);
-        Route::get('allergy/{allergy}', [AllergyController::class, 'show']);
-        Route::post('allergy/store', [AllergyController::class, 'store']);
-        Route::post('allergy/submit', [AllergyController::class, 'submit']);
-        //FamilyHistory
-        Route::get('/familyHistory', [FamilyHistoryController::class, 'index']);
-        Route::get('familyHistory/{familyHistory}', [FamilyHistoryController::class, 'show']);
-        Route::post('familyHistory/store', [FamilyHistoryController::class, 'store']);
-        Route::post('familyHistory/submit', [FamilyHistoryController::class, 'submit']);
-        //MedicalFile
-        Route::get('/medicalFile', [MedicalFileController::class, 'index']);
-        Route::get('medicalFile/{medicalFile}', [MedicalFileController::class, 'show']);
-        Route::post('medicalFile/store', [MedicalFileController::class, 'store']);
-        Route::post('medicalFile/submit', [MedicalFileController::class, 'submit']);
-     */
+});
+//notifiaction
+Route::middleware([SetLocale::class], 'auth:sanctum')->prefix('notifications')->group(function () {
+    Route::get('/', [NotoficationController::class, 'all']);
+    Route::get('/unread', [NotoficationController::class, 'unread']);
+    Route::post('/{id}/read', [NotoficationController::class, 'markAsRead']);
+    Route::post('/read-all', [NotoficationController::class, 'markAllAsRead']);
 });
 
+Route::middleware([SetLocale::class])->group(function () {
+    Route::get('/doctors', [DoctorController::class, 'index']);
+    Route::get('/doctor/details/{id}', [DoctorController::class, 'show2']);
+    Route::get('doctor/{doctorId}/slots', [DoctorController::class, 'getDaySlots']);
+
+    // عرض تفاصيل الطبيب + الجدول الزمني + الفترات الزمنية
+    Route::get('doctor/{doctor}/details', [DoctorController::class, 'show']);
+    Route::get('doctor/{doctor}/month-days', [DoctorScheduleController::class, 'monthDays']);
+    Route::get('doctor/{doctor}/day-slots', [DoctorScheduleController::class, 'daySlots']);
+
+
+    // حجز موعد مع طبيب
+//    Route::post('{doctor}/appointments', [AppointmentController::class, 'book']);
+
+
+
+});
+
+Route::get('/nbmb/{date}', function ($date) {
+    return \App\Models\Appointment::with(['doctor', 'patient'])
+        ->whereDate('date', $date)
+        ->where('status', 'confirmed')
+        ->orderBy('start_time')
+        ->get();
+});
 
 

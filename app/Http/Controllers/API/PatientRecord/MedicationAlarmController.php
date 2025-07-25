@@ -10,6 +10,7 @@ use App\Models\MedicationAlarm;
 use App\Services\Api\PateintRecord\MedicationAlarmService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class MedicationAlarmController extends Controller
 {
@@ -19,6 +20,7 @@ class MedicationAlarmController extends Controller
     public function index()
     {
         $alarms = $this->service->getUserAlarms();
+        // dd($alarms);
         return MedicationAlarmResource::collection($alarms);
     }
     // app/Http/Controllers/MedicationAlarmController.php
@@ -55,19 +57,28 @@ class MedicationAlarmController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
         // التحقق من عدد الأوقات
-     /*    $expectedCount = (int) $medication->med_frequency_value;
-        $actualCount = count($request->alarm_times);
+        /*    $expectedCount = (int) $medication->med_frequency_value;
+           $actualCount = count($request->alarm_times);
 
-        if ($expectedCount !== $actualCount) {
-            return response()->json([
-                'message' => 'عدد أوقات التنبيه لا يتطابق مع تكرار الدواء',
-                'errors' => ['alarm_times' => "يجب إدخال {$expectedCount} أوقات تنبيه لهذا الدواء"]
-            ], 422);
-        } */
+           if ($expectedCount !== $actualCount) {
+               return response()->json([
+                   'message' => 'عدد أوقات التنبيه لا يتطابق مع تكرار الدواء',
+                   'errors' => ['alarm_times' => "يجب إدخال {$expectedCount} أوقات تنبيه لهذا الدواء"]
+               ], 422);
+           } */
 
         // إنشاء المنبهات
         $alarms = $this->service->createAlarms($medication, $request->alarm_times);
 
         return MedicationAlarmResource::collection($alarms);
+    }
+    public function destroy($id)
+    {
+        $alarm = MedicationAlarm::where('patient_record_id', Auth::user()->patient->patient_record->id)->findOrFail($id);
+        $alarm->delete();
+        //$medicationAlarm->delete();
+        return response()->json([
+            'message' => 'تم حذف المنبه بنجاح',
+        ]);
     }
 }

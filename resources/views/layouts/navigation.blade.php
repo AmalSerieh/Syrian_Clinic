@@ -12,7 +12,7 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.index')">
+                    <x-nav-link :href="route('doctor-profile.create')" :active="request()->routeIs('admin.index')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>

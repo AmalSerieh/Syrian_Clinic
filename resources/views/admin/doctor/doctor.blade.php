@@ -17,13 +17,12 @@
                                     <div
                                         class="absolute w-[140px] h-[140px] -top-[10px] -left-[10px] rounded-full border-[6px] border-blue-700 border-r-transparent border-b-transparent rotate-[-30deg] z-0">
                                     </div>
-                                    <img src="{{ asset('storage/' . $doctor->photo) }}"
-                                        alt="Doctor"
+                                    <img src="{{ asset('storage/' . $doctor->photo) }}" alt="Doctor"
                                         class="w-[100px] h-[100px] object-cover object-center rounded-full border-4 border-black bg-white z-[2] relative">
                                 </div>
                                 <div class="text-center">
                                     <h3 class="text-white font-semibold">{{ $doctor->user->name }}</h3>
-                                    <p class="text-gray-400 text-sm">{{ $doctor->doctorProfile->specialist_ar ?? 'Specialty' }}</p>
+                                    {{ app()->getLocale() == 'ar' ? $doctor->doctorProfile->specialist_ar ?? 'specialist' : $doctor->doctorProfile->specialist_en ?? 'specialist' }}
                                 </div>
                             </div>
                             <div class="flex flex-col gap-2 w-full justify-end mt-4">
@@ -32,37 +31,59 @@
                                         '{{ $doctor->user->name }}',
                                         '{{ $doctor->user->email }}',
                                         '{{ asset('storage/' . $doctor->photo) }}',
-                                        '{{ $doctor->doctorProfile->specialist_ar ?? 'Specialty' }}'
+                                        '{{ app()->getLocale() == 'ar' ? $doctor->doctorProfile->specialist_ar ?? 'specialist' : $doctor->doctorProfile->specialist_en ?? 'specialist' }}'
                                     )"
                                     class="bg-black bg-opacity-60 text-white py-3 rounded-full text-sm">
                                     View Details
                                 </button>
-                                <button class="bg-red-900 bg-opacity-60 text-white py-3 rounded-full text-sm">Delete</button>
+                                <button
+                                    class="bg-red-900 bg-opacity-60 text-white py-3 rounded-full text-sm">Delete</button>
                             </div>
                         </div>
                     @endforeach
 
-                    <!-- إضافة طبيب -->
-                    <a href="{{ route('admin.doctor.add') }}" class="block">
+                    @if ($roomsAreFull)
                         <div
-                            class="p-4 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-blue-500/10 transition h-[350px] border-2 border-dashed border-blue-500 bg-transparent">
-                            <div class="text-blue-500 text-6xl mb-2 font-bold select-none">+</div>
-                            <div class="w-full block text-center text-xl text-blue-500 py-2 px-4 rounded-md font-semibold">
-                                Add Doctor
+                            class="p-4 rounded-3xl flex flex-col items-center justify-center cursor-pointer h-[350px] border-2 border-dashed border-red-500 bg-transparent">
+                            <div class="text-red-500 text-6xl mb-2 font-bold select-none">!</div>
+                            <div class="w-full block text-center text-xl text-red-500 py-2 px-4 rounded-md font-semibold">
+                                غرف العيادة ممتلئة
+                            </div>
+                            <div class="text-white text-sm mt-2">
+                                يرجى حذف طبيب لإضافة طبيب جديد
                             </div>
                         </div>
-                    </a>
-                @else
-                    <div class="col-span-3 flex items-center justify-center">
-                        <a href="{{ route('admin.doctor.add') }}">
+                    @else
+                        <!-- إضافة طبيب -->
+                        <a href="{{ route('admin.doctor.add') }}" class="block">
                             <div
-                                class="p-10 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-blue-500/10 transition border-2 border-dashed border-blue-500 bg-transparent">
-                                <div class="text-blue-500 text-8xl mb-4 font-bold select-none">+</div>
-                                <div class="text-2xl text-blue-500 py-2 px-4 rounded-md font-semibold">
-                                    Add First Doctor
+                                class="p-4 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-blue-500/10 transition h-[350px] border-2 border-dashed border-blue-500 bg-transparent">
+                                <div class="text-blue-500 text-6xl mb-2 font-bold select-none">+</div>
+                                <div
+                                    class="w-full block text-center text-xl text-blue-500 py-2 px-4 rounded-md font-semibold">
+                                    Add Doctor
                                 </div>
                             </div>
                         </a>
+                    @endif
+                @else
+                    <div class="col-span-3 flex items-center justify-center">
+                        @if ($roomsAreFull)
+                            <div class="mt-4 bg-red-600 text-white font-bold py-2 px-4 rounded-2xl w-full text-center">
+                                غرف العيادة ممتلئة! يرجى حذف طبيب لإضافة طبيب جديد.
+                            </div>
+                        @else
+                            <div class="col-span-3 flex items-center justify-center">
+                                <a href="{{ route('admin.doctor.add') }}">
+                                    <div
+                                        class="p-10 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-blue-500/10 transition border-2 border-dashed border-blue-500 bg-transparent">
+                                        <div class="text-blue-500 text-8xl mb-4 font-bold select-none">+</div>
+                                        <div class="text-2xl text-blue-500 py-2 px-4 rounded-md font-semibold">
+                                            Add First Doctor
+                                        </div>
+                                    </div>
+                                </a>
+                        @endif
                     </div>
                 @endif
 
@@ -71,17 +92,19 @@
 
         <!-- Right Side (Info Panel) -->
         <div class="w-1/4 flex flex-col">
-            <div class="flex-grow bg-[#0e1625] p-6 rounded-3xl flex flex-col items-center justify-start text-center relative">
+            <div
+                class="flex-grow bg-[#0e1625] p-6 rounded-3xl flex flex-col items-center justify-start text-center relative">
 
                 <template x-if="selectedDoctor">
                     <div class="mt-8 flex flex-col items-center w-full space-y-4">
                         <div class="w-40 h-40 rounded-full overflow-hidden border-4 border-black">
-                            <img :src="selectedDoctor.image" alt="Doctor" class="w-full h-full object-cover rounded-full" />
+                            <img :src="selectedDoctor.image" alt="Doctor"
+                                class="w-full h-full object-cover rounded-full" />
                         </div>
                         <h3 class="text-white font-semibold text-xl" x-text="selectedDoctor.name"></h3>
                         <p class="text-gray-400 text-sm" x-text="selectedDoctor.role"></p>
                         <p class="text-gray-400 text-sm" x-text="selectedDoctor.email"></p>
-                         <div class="w-full flex flex-col gap-4 pt-20">
+                        <div class="w-full flex flex-col gap-4 pt-20">
                             <!-- Red Card -->
                             <div
                                 class="bg-red-900/30 border border-red-700 p-4 rounded-lg shadow flex items-center justify-between gap-3 w-full">
@@ -121,7 +144,7 @@
                             </div>
                         </div>
                     </div>
-                      
+
                 </template>
 
                 <template x-if="!selectedDoctor">
@@ -139,7 +162,12 @@
             return {
                 selectedDoctor: null,
                 viewDoctor(name, email, image, role) {
-                    this.selectedDoctor = { name, email, image, role };
+                    this.selectedDoctor = {
+                        name,
+                        email,
+                        image,
+                        role
+                    };
                 }
             }
         }

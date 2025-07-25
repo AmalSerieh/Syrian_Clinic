@@ -28,6 +28,7 @@ class User extends Authenticatable
         'phone',
         'created_by',
         'created_by_user_id',
+        'has_changed_credentials',
         'fcm_token'
     ];
 
@@ -51,6 +52,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'has_changed_credentials' => 'boolean',
+
         ];
     }
     public function isPatient()
@@ -76,7 +79,7 @@ class User extends Authenticatable
         return $this->hasOne(Doctor::class, 'user_id');
 
     }
-      public function secretary()
+    public function secretary()
     {
         return $this->hasOne(Secretary::class, 'user_id');
 
@@ -97,5 +100,13 @@ class User extends Authenticatable
     public function wasCreatedByAnother()
     {
         return !is_null($this->created_by);
+    }
+     public function routeNotificationForFcm()
+    {
+        return $this->fcm_token;
+    }
+    public function routeNotificationForMail()
+    {
+        return $this->email;
     }
 }

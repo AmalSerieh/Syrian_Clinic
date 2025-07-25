@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth_Otp;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\updateDeviceTokenRequest;
 use App\Http\Requests\Auth\VerifyOtpRequest;
 use App\Http\Resources\Auth\UserResource;
 use App\Http\Resources\PatientResource;
@@ -191,5 +192,15 @@ class RegisterWithOtpController extends Controller
 
         return in_array($lang, ['ar', 'en']) ? $lang : config('app.fallback_locale', 'en');
     }
+    //to set tokenfor notification
+    public function updateDeviceToken(updateDeviceTokenRequest $request)
+    {
+        $user = auth()->user();
+        $user->fcm_token = $request->token;
+        $user->save();
+
+        return response()->json(['message' => 'Device token updated successfully']);
+    }
+
 
 }

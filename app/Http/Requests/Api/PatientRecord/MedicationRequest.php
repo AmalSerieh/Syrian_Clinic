@@ -29,7 +29,7 @@ class MedicationRequest extends FormRequest
             'med_frequency' => 'required|in:once_daily,twice_daily,three_times_daily,daily,weekly,monthly,yearly',
             'med_dosage_form' => 'required|in:tablet,capsule,pills,syrup,liquid,drops,sprays,patches,injections','powder',
             'med_dose' => 'required|numeric|min:0.1|max:1000',
-            'med_timing' => 'nullable|in:before_food,after_food,morinng',
+            'med_timing' => 'nullable|in:before_food,after_food,morning,evening,morning_evening',
             'med_prescribed_by_doctor' => 'nullable|string|max:255',
         ];
     }

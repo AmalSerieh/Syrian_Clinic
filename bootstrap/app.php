@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckDoctorCredentials;
 use App\Http\Middleware\ForceProfileUpdate;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\SetLocale;
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     $middleware->alias([
         'role' => RoleMiddleware::class,
         'forceProfileUpdate' => ForceProfileUpdate::class,
+        'doctor.credentials' => CheckDoctorCredentials::class,
     ]);
 
     $middleware->api(prepend: [
@@ -29,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
     $middleware->use([
         SetLocale::class,
+
     ]);
 
     $middleware->web(append: [

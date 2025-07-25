@@ -38,16 +38,24 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-     //   'redirect' => env('GOOGLE_REDIRECT_URI'),
+        //   'redirect' => env('GOOGLE_REDIRECT_URI'),
         'redirect' => 'http://localhost:8000/api/auth/google/callback',
     ],
 
     'facebook' => [
         'client_id' => env('FACEBOOK_CLIENT_ID'),
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
-     //   'redirect' => env('GOOGLE_REDIRECT_URI'),
+        //   'redirect' => env('GOOGLE_REDIRECT_URI'),
         'redirect' => 'http://localhost:8000/api/auth/google/callback',
     ],
+    'fcm' => [
+        'key' => env('FCM_SERVER_KEY'),
+    ],
+    'firebase' => [
+        'credentials_file' => storage_path('app/firebase/syrianclinic-de742-firebase-adminsdk-fbsvc-6faf9f4ff8.json'),
+    ],
+
+
 
 
 ];

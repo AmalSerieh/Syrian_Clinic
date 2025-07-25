@@ -52,44 +52,41 @@ class DoctorProfileController extends Controller
     public function createProfile()
     {
         $doctor = auth()->user()->doctor;
-
-        if ($doctor->doctorProfile) {
-            return redirect()->route('doctor.dashboard')->with('status', 'تم إدخال الملف المهني مسبقًا.');
-        }
+        /*  if ($doctor->doctorProfile) {
+             return redirect()->route('doctor.dashboard')->with('status', 'تم إدخال الملف المهني مسبقًا.');
+         } */
         return view('doctor.create');
 
     }
     public function storeProfile(StoreDoctorProfileRequest $request)
     {
         $doctor = auth()->user()->doctor;
-
-        if ($doctor->doctorProfile) {
-            return redirect()->route('doctor.dashboard')->with('info', 'تم إدخال الملف المهني مسبقًا.');
-        }
-
+        $profileData = $request->validated();
         // رفع صورة الشهادة إن وجدت
-        $certImagePath = null;
+        // معالجة صورة الشهادة
         if ($request->hasFile('cer_images')) {
-            $certImagePath = $request->file('cer_images')->store('certificates', 'public');
+            // حذف الصورة القديمة إن وجدت
+            if ($doctor->doctorProfile && $doctor->doctorProfile->cer_images) {
+                Storage::disk('public')->delete($doctor->doctorProfile->cer_images);
+            }
+
+            // رفع الصورة الجديدة
+            $profileData['cer_images'] = $request->file('cer_images')->store('certificates', 'public');
+        } else {
+            // الحفاظ على الصورة القديمة إن وجدت
+            if ($doctor->doctorProfile) {
+                $profileData['cer_images'] = $doctor->doctorProfile->cer_images;
+            }
         }
 
-        // إنشاء الملف المهني للطبيب
-        DoctorProfile::create([
-            'doctor_id' => $doctor->id,
-            'specialist_ar' => $request->specialist_ar,
-            'specialist_en' => $request->specialist_en,
-            'biography' => $request->biography,
-            'gender' => $request->gender,
-            'date_birth' => $request->date_birth,
-            'cer_place' => $request->cer_place,
-            'cer_name' => $request->cer_name,
-            'cer_images' => $certImagePath,
-            'cer_date' => $request->cer_date,
-            'exp_place' => $request->exp_place,
-            'exp_yesrs' => $request->exp_yesrs,
-        ]);
-
-        return redirect()->route('doctor.dashboard')->with('success', 'تم حفظ الملف المهني بنجاح.');
+        // تحقق: إذا كان يوجد ملف مهني للطبيب → نحدثه، إذا لا → ننشئه
+        // تحقق: إذا كان يوجد ملف مهني للطبيب → نحدثه، إذا لا → ننشئه
+        if ($doctor->doctorProfile) {
+            $doctor->doctorProfile->update($profileData);
+        } else {
+            $doctor->doctorProfile()->create($profileData);
+        }
+        return redirect()->route('doctor.dashboard')->with('status', 'تم حفظ الملف المهني بنجاح.');
     }
     public function showProfile()
     {
@@ -103,24 +100,36 @@ class DoctorProfileController extends Controller
     }
     public function updateProfile(Request $request, $id)
     {
-        $profile = DoctorProfile::findOrFail($id);
 
+        $profile = DoctorProfile::findOrFail($id);
+        //dd($request->cer_images);
         $data = $request->validate([
-            'specialist' => 'required|string|max:255',
-            'gender' => 'required|in:male,female',
             'date_birth' => 'required|date',
             'biography' => 'nullable|string',
             'cer_name' => 'nullable|string|max:255',
             'cer_place' => 'nullable|string|max:255',
             'cer_date' => 'nullable|date',
-            'cer_images' => 'nullable|image|max:2048',
+            'cer_images' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
             'exp_place' => 'nullable|string|max:255',
             'exp_years' => 'nullable|numeric',
         ]);
 
-        if ($request->hasFile('cer_images')) {
-            $data['cer_images'] = $request->file('cer_images')->store('certifications', 'public');
+        // 2. معالجة الصورة
+    if ($request->hasFile('cer_images')) {
+        // 2.1 حذف الصورة القديمة
+        if ($profile->cer_images) {
+            Storage::disk('public')->delete($profile->cer_images);
         }
+
+        // 2.2 رفع الصورة الجديدة
+        $data['cer_images'] = $request->file('cer_images')->store(
+            'certifications',
+            'public'
+        );
+    } else {
+        // 2.3 الاحتفاظ بالصورة الحالية
+        $data['cer_images'] = $profile->cer_images;
+    }
 
         $profile->update($data);
 

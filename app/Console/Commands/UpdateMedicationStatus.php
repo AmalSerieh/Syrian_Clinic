@@ -31,10 +31,11 @@ class UpdateMedicationStatus extends Command
 
         // فقط الأدوية المؤقتة current
         $count = Medication::where('med_type', 'current')
-            ->whereNotNull('med_end_date')
-            ->where('med_end_date', '<', $now)
-            ->where('is_active', true)
-            ->update(['is_active' => false]);
+            ->where(function ($query) {
+                $query->whereNull('med_end_date')
+                    ->orWhere('med_end_date', '>=', Carbon::now());
+            })
+            ->get();
 
         $this->info("✅ تم تحديث حالة $count دواء إلى غير نشط.");
         return Command::SUCCESS;

@@ -31,7 +31,7 @@
                             <strong>Name:</strong> {{ Auth::user()->name }}
                         </div>
                         <div>
-                            <strong>specialist:</strong> {{ $doctor->doctorProfile->specialist }}
+                            <strong>specialist:</strong> {{ $doctor->doctorProfile->specialist_en }}
                         </div>
                         <div>
                             <strong>gender:</strong> {{ $doctor->doctorProfile->gender == 'male' ? 'ذكر' : 'أنثى' }}

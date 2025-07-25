@@ -12,8 +12,34 @@ class DoctorDashboardController extends Controller
 {
     public function index()
     {
+        if (!auth()->user()->has_changed_credentials) {
+            return redirect()->route('doctor.first-login');
+        }
         return view('dashboard');
+      // return redirect()->route('doctor-profile.create');
     }
+    public function showForceChangeForm()
+    {
+        return view('doctor.editauth.first-login'); // view فيها فورم تغيير الإيميل والباسورد
+    }
+
+    public function updateCredentials(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|unique:users,email,' . auth()->id(),
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = auth()->user();
+        $user->update([
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'has_changed_credentials' => true,
+        ]);
+
+        return redirect()->route('doctor.dashboard')->with('status', 'Credentials updated successfully!');
+    }
+
     public function updateProfilePhoto(Request $request)
     {
         $request->validate([

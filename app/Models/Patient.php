@@ -20,6 +20,11 @@ class Patient extends Model
         return $this->hasOne(Patient_record::class, 'patient_id');
 
     }
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
     // app/Models/Patient.php
     public function getPhotoUrlAttribute1()
     {
