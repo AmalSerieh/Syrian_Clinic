@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Models\Doctor;
 use App\Models\Room;
 use App\Models\Secretary;
 use App\Repositories\Admin\DashboardRepositoryInterface;
@@ -20,14 +21,19 @@ class DashboardService
     {
         // ممكن لاحقًا نضيف بيانات أخرى للداشبورد هنا
         $secretary = $this->repo->getLatestSecretary();
-        return compact('secretary');
+        $totalRooms = Room::count();
+        $usedRooms = Doctor::whereNotNull('room_id')->count();
+
+        $roomsFull = $usedRooms >= $totalRooms;
+
+        return compact('secretary','roomsFull');
     }
 
-      public function shouldRedirectToList(): bool
+    public function shouldRedirectToList(): bool
     {
         return $this->repo->secretaryExists();
     }
-     public function storeSecretary(array $validated): void
+    public function storeSecretary(array $validated): void
     {
         DB::beginTransaction();
 
@@ -49,11 +55,11 @@ class DashboardService
             throw $e; // سنعالج الاستثناء في Controller
         }
     }
-        public function getSecretaryById(int $id)
+    public function getSecretaryById(int $id)
     {
         return $this->repo->findSecretaryById($id);
     }
-     public function updateSecretary(array $data)
+    public function updateSecretary(array $data)
     {
         DB::beginTransaction();
         try {
@@ -85,12 +91,12 @@ class DashboardService
             throw $e; // نرمي الاستثناء للكنترولر ليعالج الرد
         }
     }
-     public function getAvailableRooms()
+    public function getAvailableRooms()
     {
         $language = app()->getLocale(); // 'ar' أو 'en'
         return $this->repo->getAvailableRooms($language);
     }
-     public function storeDoctor(array $data)
+    public function storeDoctor(array $data)
     {
         DB::beginTransaction();
 
@@ -113,24 +119,24 @@ class DashboardService
             throw $e;
         }
     }
-     public function getAllDoctors()
+    public function getAllDoctors()
     {
         return $this->repo->getAllDoctors();
     }
     public function checkIfRoomsAreFull()
-{
-    // احصل على جميع الغرف مع عدد الأطباء في كل غرفة
-    $rooms = Room::withCount('doctors')->get();
+    {
+        // احصل على جميع الغرف مع عدد الأطباء في كل غرفة
+        $rooms = Room::withCount('doctors')->get();
 
-    // إذا لم يكن هناك غرف أساساً
-    if ($rooms->isEmpty()) {
-        return true;
+        // إذا لم يكن هناك غرف أساساً
+        if ($rooms->isEmpty()) {
+            return true;
+        }
+
+        // تحقق إذا كانت جميع الغرف ممتلئة (عدد الأطباء >= السعة القصوى)
+        return $rooms->every(function ($room) {
+            return $room->doctors_count >= ($room->room_capacity ?? 1); // استخدم 1 كقيمة افتراضية إذا لم تكن السعة محددة
+        });
     }
-
-    // تحقق إذا كانت جميع الغرف ممتلئة (عدد الأطباء >= السعة القصوى)
-    return $rooms->every(function($room) {
-        return $room->doctors_count >= ($room->room_capacity ?? 1); // استخدم 1 كقيمة افتراضية إذا لم تكن السعة محددة
-    });
-}
 
 }

@@ -40,9 +40,9 @@ class MedicalAttachmentController extends Controller
         if (!$recordId) {
             return response()->json(['message' => trans('message.no_record')], 404);
         }
-         if ($user->patient->patient_record->medicalAttachments_submitted) {
+        /*  if ($user->patient->patient_record->medicalAttachments_submitted) {
             return response()->json(['message' => trans('message.submitted_already')], 403);
-        }
+        } */
         $this->authorize('viewAny', MedicalAttachment::class);
 
         $attachments = $this->service->getByPatientRecord($recordId);

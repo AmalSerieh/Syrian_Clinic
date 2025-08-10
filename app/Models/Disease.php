@@ -20,6 +20,12 @@ class Disease extends Model
     {
         return $this->belongsTo(Patient_record::class);
     }
+    public function visit()
+    {
+        return $this->belongsTo(Visit::class);
+    }
+
+
     // ✅ الحقول التي تحتاج تشفير
     protected $encryptable = [
         'd_name',

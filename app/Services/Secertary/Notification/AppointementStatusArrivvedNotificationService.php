@@ -44,14 +44,13 @@ class AppointementStatusArrivvedNotificationService
                 // ⏱ تحقق من وقت الإرسال + التكرار
                 if ($now->format('Y-m-d H:i') === $sendTime->format('Y-m-d H:i') && !Cache::has($cacheKey)) {
 
-
                     //إرسال إشعار للمريض
                     $appointment->patient->user->notify(new AppointementStatusArrivvedNotification($appointment));
                     // إرسال إشعار Firebase إذا كان هناك token
                     if ($appointment->patient->user->fcm_token) {
                         $success = $this->sendFirebaseNotification(
                             $appointment->patient->user->fcm_token,
-                            'تذكير بالموعد - تهيئة للوصول',
+                            'تذكير بالموعد - تهيئة للوصول 🚶‍♂️',
                             '🔔 لديك موعد اليوم الساعة ' . $startTime->format('g:i A') . '، الرجاء التوجه للعيادة في الوقت المناسب.'
                         );
                         if ($success) {
@@ -95,6 +94,107 @@ class AppointementStatusArrivvedNotificationService
 
 
     }
+    public function patientsInClinicCountToday($doctorId)
+    {
+        return Appointment::where('doctor_id', $doctorId)
+            ->where('location_type', 'in_Clinic')
+            ->whereDate('date', Carbon::today())
+            ->count();
+    }
+
+/* public function sendReminders()
+{
+    $now = Carbon::now();
+    $appointments = Appointment::where('status', 'confirmed')
+        ->whereDate('date', $now->toDateString())
+        ->whereIn('location_type', ['in_Home'])
+        ->whereNotNull('arrivved_time')
+        ->with('patient.user')
+        ->orderBy('start_time') // ترتيب نظري
+        ->get()
+        ->groupBy('doctor_id');
+
+    foreach ($appointments as $doctorId => $doctorAppointments) {
+        $patientsInClinic = $this->patientsInClinicCountToday($doctorId);
+
+        // إرسال الإشعارات فقط إذا أقل من 3 في العيادة
+        if ($patientsInClinic >= 3) {
+            continue;
+        }
+
+        $remainingSlots = 3 - $patientsInClinic;
+
+        // حدد المرضى الذين لم يُرسل لهم إشعار بعد
+        $candidates = $doctorAppointments->filter(function ($a) {
+            return $a->location_type === 'in_Home';
+        });
+
+        // أرسل إشعار لعدد المرضى الذي يحتاجه الطبيب ليكمل الثلاثة
+        foreach ($candidates->take($remainingSlots) as $appointment) {
+            $startTime = Carbon::parse($appointment->date . ' ' . $appointment->start_time);
+            $arrivalDuration = Carbon::parse($appointment->arrivved_time);
+            $arrivalMinutes = $arrivalDuration->hour * 60 + $arrivalDuration->minute;
+            $sendTime = $startTime->copy()->subMinutes($arrivalMinutes);
+            $cacheKey = 'reminder_sent_appointment_' . $appointment->id;
+
+            if ($now->format('Y-m-d H:i') === $sendTime->format('Y-m-d H:i') && !Cache::has($cacheKey)) {
+                // إشعار المريض
+                $appointment->patient->user->notify(new AppointementStatusArrivvedNotification($appointment));
+
+                if ($appointment->patient->user->fcm_token) {
+                    $this->sendFirebaseNotification(
+                        $appointment->patient->user->fcm_token,
+                        '🚶‍♂️ تذكير بالموعد',
+                        'حان وقت التوجه للعيادة.'
+                    );
+                }
+
+                $appointment->update(['location_type' => 'on_Street']);
+                Cache::put($cacheKey, true, now()->addMinutes(90));
+            }
+        }
+    }
+}
+
+
+// 🔁 بعد خروجه، نتحقق إن العدد < 3
+public function enterConsultation(Appointment $appointment)
+{
+    if ($appointment->location_type !== 'in_Clinic') {
+        return back()->with('error', 'المريض غير متواجد في العيادة.');
+    }
+
+    $firstInLine = Appointment::where('doctor_id', $appointment->doctor_id)
+        ->whereDate('date', Carbon::today())
+        ->where('location_type', 'in_Clinic')
+        ->where('status', 'confirmed')
+        ->orderBy('start_time')
+        ->first();
+
+    if (!$firstInLine || $firstInLine->id !== $appointment->id) {
+        return back()->with('error', 'ليس هذا دور هذا المريض بعد.');
+    }
+
+    $waitingEntry = WaitingList::where('appointment_id', $appointment->id)->first();
+
+    if ($waitingEntry) {
+        $waitingEntry->update([
+            'status' => 'in_progress',
+            'start_time' => now()
+        ]);
+    }
+
+    $appointment->update([
+        'location_type' => 'at_Doctor'
+    ]);
+
+    // 🔔 نادِ على المريض التالي (الرابع)
+   app(\App\Services\ReminderService::class)->sendReminders();
+ // 👈 استدعاء تابع التذكير
+
+    return back()->with('success', 'تم إدخال المريض إلى غرفة المعاينة.');
+}
+ */
 
 }
 

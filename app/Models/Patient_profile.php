@@ -8,6 +8,7 @@ class Patient_profile extends Model
 {
     protected $fillable = [
         'patient_record_id',
+        'visit_id',
         'gender',
         'date_birth',
         'height',
@@ -22,6 +23,12 @@ class Patient_profile extends Model
     {
         return $this->belongsTo(Patient_record::class);
     }
+
+    public function visit()
+    {
+        return $this->belongsTo(Visit::class);
+    }
+
     public function getAcceptedBloodTypes(): array
     {
         $map = [
@@ -46,12 +53,12 @@ class Patient_profile extends Model
     }
     // ✅ الحقول التي تحتاج تشفير
     protected $encryptable = [
-       // 'gender',
-       // 'date_birth',
+        // 'gender',
+        // 'date_birth',
         'height',
         'weight',
-       // 'blood_type',
-       // 'smoker',
+        // 'blood_type',
+        // 'smoker',
         //'alcohol',
         //'drug',
         //'matital_status'

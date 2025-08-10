@@ -144,7 +144,7 @@ class AppointmentController extends Controller
         ]);
     }
 
-    public function getPatientAppointmentsGroupedByStatus()
+    public function getPatientAppointmentsGroupedByStatus7()
     {
         $today = Carbon::today()->toDateString();
 
@@ -172,6 +172,86 @@ class AppointmentController extends Controller
                 'processing' => $processing,
             ]
         ]);
+    }
+
+    public function getPatientAppointmentsGroupedByStatus()
+    {
+        $today = Carbon::today()->toDateString();
+
+        // تحميل علاقة الطبيب مع كل استعلام
+        $pending = Appointment::with(['doctor.user'])
+            ->where('status', 'pending')
+            ->whereDate('date', '>=', $today)
+            ->orderBy('date')
+            ->get();
+
+        $confirmed = Appointment::with(['doctor.user'])
+            ->where('status', 'confirmed')
+            ->whereDate('date', '>=', $today)
+            ->orderBy('date')
+            ->get();
+
+        $canceledByPatient = Appointment::with(['doctor.user'])
+            ->where('status', 'canceled_by_patient')
+            ->orderBy('date')
+            ->get();
+
+        $completed = Appointment::with(['doctor.user'])
+            ->where('status', 'completed')
+            ->orderBy('date')
+            ->get();
+
+        $canceledByDoctor = Appointment::with(['doctor.user'])
+            ->where('status', 'canceled_by_doctor')
+            ->orderBy('date')
+            ->get();
+
+        $canceledBySecretary = Appointment::with(['doctor.user'])
+            ->where('status', 'canceled_by_secretary')
+            ->orderBy('date')
+            ->get();
+
+        $processing = Appointment::with(['doctor.user'])
+            ->where('status', 'processing')
+            ->orderBy('date')
+            ->get();
+
+        return response()->json([
+            'appointments' => [
+                'pending' => $this->formatAppointments($pending),
+                'confirmed' => $this->formatAppointments($confirmed),
+                'canceled_by_patient' => $this->formatAppointments($canceledByPatient),
+                'completed' => $this->formatAppointments($completed),
+                'canceled_by_doctor' => $this->formatAppointments($canceledByDoctor),
+                'canceled_by_secretary' => $this->formatAppointments($canceledBySecretary),
+                'processing' => $this->formatAppointments($processing),
+            ]
+        ]);
+    }
+
+    // دالة مساعدة لتنسيق بيانات الموعد
+    protected function formatAppointments($appointments)
+    {
+        return $appointments->map(function ($appointment) {
+            return [
+                'id' => $appointment->id,
+                'doctor_id' => $appointment->doctor_id,
+                'doctor_name' => $appointment->doctor->user->name ?? 'غير معروف',
+                'doctor_photo' =>asset('storage/' . $appointment->doctor->photo) ?? null,
+                'patient_id' => $appointment->patient_id,
+                'date' => $appointment->date,
+                'day' => $appointment->day,
+                'start_time' => $appointment->start_time,
+                'end_time' => $appointment->end_time,
+                'status' => $appointment->status,
+                'location_type' => $appointment->location_type,
+                'arrivved_time' => $appointment->arrivved_time,
+                'created_by' => $appointment->created_by,
+                'type_visit' => $appointment->type_visit,
+                'created_at' => $appointment->created_at,
+                'updated_at' => $appointment->updated_at
+            ];
+        });
     }
 
 

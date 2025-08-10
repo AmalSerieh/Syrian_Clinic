@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Repositories\Admin\DashboardRepositoryInterface;
 use App\Services\Admin\DashboardService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\DB;
@@ -73,16 +74,32 @@ class AdminController extends Controller
         $secretary = $this->dashboardService->getSecretaryById($id);
         return view('admin.home.secretary-edit', compact('secretary'));
     }
+
     public function secretary_update(UpdateSecretaryRequest $request)
     {
         try {
             $this->dashboardService->updateSecretary($request->validated());
-            return redirect()->route('admin.secretary')->with('message', 'تم استبدال السكرتيرة بنجاح');
-        } catch (\Exception $e) {
-            return back()->withErrors(['error' => $e->getMessage()])->withInput();
-        }
 
+            return redirect()
+                ->route('admin.secretary')
+                ->with('status', '✅ تم استبدال السكرتيرة بنجاح');
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == 23000 && str_contains($e->getMessage(), 'users_email_unique')) {
+                return back()
+                    ->withErrors(['email' => '⚠️ البريد الإلكتروني مستخدم مسبقًا.'])
+                    ->withInput();
+            }
+
+            return back()
+                ->withErrors(['error' => 'حدث خطأ غير متوقع أثناء تحديث السكرتيرة.'])
+                ->withInput();
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => 'حدث خطأ: ' . $e->getMessage()])
+                ->withInput();
+        }
     }
+
     public function doctor_add()
     {
 
@@ -90,10 +107,9 @@ class AdminController extends Controller
         // إذا لم يكن هناك أي غرف متاحة → رجوع برسالة خطأ
 
         if ($availableRooms->isEmpty()) {
-            return redirect()->back()->withErrors([
-                'status' => 'لا توجد غرف متاحة حالياً. تم الوصول إلى الحد الأقصى لعدد الأطباء في جميع الغرف.'
-            ]);
-        };
+            return redirect()->back()->with('status', 'لا توجد غرف متاحة حالياً. تم الوصول إلى الحد الأقصى لعدد الأطباء في جميع الغرف.');
+        }
+
 
         return view('admin.doctor.doctor-add', ['rooms' => $availableRooms]);
     }
@@ -111,10 +127,10 @@ class AdminController extends Controller
     public function doctor()
     {
         $doctors = $this->dashboardService->getAllDoctors();
-            $roomsAreFull = $this->dashboardService->checkIfRoomsAreFull();
+        $roomsAreFull = $this->dashboardService->checkIfRoomsAreFull();
 
 
-        return view('admin.doctor.doctor', compact('doctors','roomsAreFull'));
+        return view('admin.doctor.doctor', compact('doctors', 'roomsAreFull'));
     }
     public function doctor_details($id)
     {
@@ -161,7 +177,35 @@ class AdminController extends Controller
         return redirect()->route('admin.doctor')->with('message', 'تم حذف الطبيب بنجاح!');
     }
 
+    public function reports()
+    {
+        return view('admin.home.reports');
 
+    }
+    public function logout(Request $request)
+    {
+        Auth::guard('web')->logout(); // إذا كان يستخدم نفس الحارس العام
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('admin.login'); // أو أي Route مخصص لصفحة دخول الأدمن
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        $doctors = Doctor::with('user')
+            ->whereHas('user', function ($q) use ($query) {
+                $q->where('name', 'LIKE', '%' . $query . '%');
+            })
+            ->get();
+
+        $roomsAreFull = $this->dashboardService->checkIfRoomsAreFull();
+
+        return view('admin.doctor.doctor', compact('doctors', 'roomsAreFull', 'query'));
+    }
 
 
 

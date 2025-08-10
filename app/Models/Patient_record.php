@@ -8,6 +8,7 @@ class Patient_record extends Model
 {
     protected $fillable = [
         'patient_id',
+        'visit_id',
         'profile_submitted',
         'diseases_submitted',
         'operations_submitted',
@@ -69,6 +70,11 @@ class Patient_record extends Model
         return $this->hasMany(MedicalFile::class);
 
     }
+    public function visit()
+{
+    return $this->belongsTo(Visit::class);
+}
+
 
     // ✅ تهيئة تلقائية بعد إنشاء السجل لأول مرة
     /*   protected static function booted()

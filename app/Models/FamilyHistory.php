@@ -12,7 +12,13 @@ class FamilyHistory extends Model
     {
         return $this->belongsTo(Patient_record::class);
     }
-         // ✅ الحقول التي تحتاج تشفير
+
+    public function visit()
+    {
+        return $this->belongsTo(Visit::class);
+    }
+
+    // ✅ الحقول التي تحتاج تشفير
     protected $encryptable = [
         'family_name',
     ];

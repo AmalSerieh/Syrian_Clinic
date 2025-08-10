@@ -34,18 +34,24 @@ class Medication extends Model
     {
         return $this->hasMany(MedicationAlarm::class);
     }
+
+    public function visit()
+    {
+        return $this->belongsTo(Visit::class);
+    }
+
     public function getIsActiveAttribute()
     {
-         if ($this->med_type !== 'current') {
-        return true; // الأدوية المزمنة نشطة دائمًا
-    }
+        if ($this->med_type !== 'current') {
+            return true; // الأدوية المزمنة نشطة دائمًا
+        }
 
-    if (!$this->med_start_date || !$this->med_end_date) {
-        return false;
-    }
+        if (!$this->med_start_date || !$this->med_end_date) {
+            return false;
+        }
 
-    return Carbon::now()->lte(Carbon::parse($this->med_end_date));
-       // return $this->med_start_date && $this->med_end_date && $this->med_frequency_value > 0;
+        return Carbon::now()->lte(Carbon::parse($this->med_end_date));
+        // return $this->med_start_date && $this->med_end_date && $this->med_frequency_value > 0;
     }
     protected $appends = ['is_active', 'total_quantity'];
 

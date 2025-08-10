@@ -81,7 +81,7 @@ class DiseasePolicy
      */
     public function delete(User $user, Disease $disease): bool
     {
-        return false;
+        return $user->isDoctor();
     }
 
     /**

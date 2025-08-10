@@ -48,6 +48,7 @@ class AppointmentRepository implements AppointmentRepositoryInterface
             ->where('status', 'confirmed')
             ->orderBy('date') // ليس ضروريًا بما أنه اليوم فقط، لكن لا بأس
             ->orderBy('start_time')
-            ->get();
+            ->get()
+             ->groupBy('doctor_id'); // تجميع حسب الطبيب;
     }
 }

@@ -10,16 +10,27 @@ class NotoficationController extends Controller
 {
 
 
- public function all(Request $request)
+    public function all(Request $request)
     {
         $notifications = $request->user()->notifications()->latest()->paginate(20);
-
+        if ($notifications->isEmpty()) {
+            return response()->json([
+                'message' => 'لا توجد إشعارات لعرضها',
+                'data' => []
+            ], 200);
+        }
         return NotificationResource::collection($notifications);
     }
 
     public function unread(Request $request)
     {
         $notifications = $request->user()->unreadNotifications()->latest()->get();
+         if ($notifications->isEmpty()) {
+            return response()->json([
+                'message' => 'لا توجد إشعارات غير مقروءة',
+                'data' => []
+            ], 200);
+        }
         return NotificationResource::collection($notifications);
     }
 
@@ -32,7 +43,14 @@ class NotoficationController extends Controller
     }
 
     public function markAllAsRead(Request $request)
-    {
+    { $unreadCount = $request->user()->unreadNotifications->count();
+
+        if ($unreadCount === 0) {
+            return response()->json([
+                'message' => 'لا توجد إشعارات غير مقروءة لتعليمها',
+                'data' => []
+            ], 200);
+        }
         $request->user()->unreadNotifications->markAsRead();
         return response()->json(['message' => 'تم تعليم كل الإشعارات كمقروءة']);
     }

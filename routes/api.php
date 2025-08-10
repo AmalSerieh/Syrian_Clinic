@@ -141,5 +141,21 @@ Route::get('/nbmb/{date}', function ($date) {
         ->orderBy('start_time')
         ->get();
 });
+Route::get('/nbmb/{recordId}', function ($recordId) {
+    return \App\Models\Visit::whereHas('diseases', function ($q) use ($recordId) {
+        $q->where('patient_record_id', $recordId);
+    })
+    ->orWhereHas('medications', function ($q) use ($recordId) {
+        $q->where('patient_record_id', $recordId);
+    })
+    ->orWhereHas('operations', function ($q) use ($recordId) {
+        $q->where('patient_record_id', $recordId);
+    })
+    // كرر حسب باقي الفروع
+    ->with('doctor') // لجلب بيانات الطبيب
+    ->get();
+
+});
+
 
 

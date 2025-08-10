@@ -9,11 +9,33 @@
     <div class="h-screen flex items-center justify-end"
         style="background-image: url('{{ asset('images/admin/secretary/secretary.png') }}'); background-size: cover; background-position: center;">
 
+
+        {{--  @if ($errors->any())
+            <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                <ul class="list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                        <li>⚠️ {{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif --}}
+
         <form method="POST" action="{{ route('admin.secretary.update') }}" enctype="multipart/form-data"
             onsubmit="return confirmSecretaryReplacement()"
-            class="bg-gray-700 bg-opacity-70 shadow-lg text-white p-6 m-8 w-full md:w-1/2 lg:w-1/3 rounded-[50px] ml-16" autocomplete="off">
+            class="bg-gray-700 bg-opacity-70 shadow-lg text-white p-6 m-8 w-full md:w-1/2 lg:w-1/3 rounded-[50px] ml-16"
+            autocomplete="off">
             @csrf
             @method('PUT')
+          
+            @if ($errors->any())
+                <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                    <ul class="list-disc list-inside">
+                        @foreach ($errors->all() as $error)
+                            <li>⚠️ {{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <input type="hidden" name="id" value="{{ $secretary->id }}" />
 

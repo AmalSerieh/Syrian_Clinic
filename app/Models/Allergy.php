@@ -21,11 +21,16 @@ class Allergy extends Model
     {
         return $this->belongsTo(Patient_record::class);
     }
-     // ✅ الحقول التي تحتاج تشفير
+    public function visit()
+    {
+        return $this->belongsTo(Visit::class);
+    }
+
+    // ✅ الحقول التي تحتاج تشفير
     protected $encryptable = [
         //'aller_power',
         'aller_name',
-       // 'aller_type',
+        // 'aller_type',
         'aller_cause',//المسبب
         'aller_treatment',//العلاج
         'aller_pervention',//المنوعات

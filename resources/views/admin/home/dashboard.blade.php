@@ -1,6 +1,8 @@
 @extends('layouts.admin.header')
 
 @section('content')
+    <x-auth-session-status class="mb-8" :status="session('status')" />
+
     <div class="p-6 space-y-6">
 
         <!-- Top Stats Cards -->
@@ -169,53 +171,77 @@
         <div class="grid grid-cols-12 gap-6 items-start w-full">
 
             <div class="col-span-2 flex flex-col items-start gap-6">
-                <a href="{{route('admin.doctor.add')}}" class="block">
+                @if ($roomsFull)
                     <div
-                        class="border-2 border-dashed border-orange-400 text-white-300 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md bg-[#12192b] hover:scale-105 transition-transform duration-300">
+                        class="border-2 border-dashed border-orange-400 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md bg-[#12192b] hover:scale-105 transition-transform duration-300">
+
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-user-round-plus-icon text-orange-300">
+                            class="w-6 h-6 text-orange-500">
                             <path d="M2 21a8 8 0 0 1 13.292-6" />
                             <circle cx="10" cy="8" r="5" />
                             <path d="M19 16v6" />
                             <path d="M22 19h-6" />
                         </svg>
-                        <div class="text-base font-semibold">+ Add Doctor</div>
-                    </div>
-                </a>
-                @if ($secretary)
 
-
-                <a href="{{ route('admin.secretary.replace', [$secretary->id]) }}">
-                    <div
-                        class="border-2 border-dashed border-red-500 text-white-300 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md bg-[#12192b] hover:scale-105 transition-transform duration-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-repeat-icon text-red-300">
-                            <path d="m17 2 4 4-4 4" />
-                            <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
-                            <path d="m7 22-4-4 4-4" />
-                            <path d="M21 13v1a4 4 0 0 1-4 4H3" />
-                        </svg>
-                        <div class="text-base font-semibold">Replacing Secretary</div>
+                        <div class="text-base font-semibold">
+                            يرجى حذف طبيب لإضافة طبيب جديد.
+                        </div>
                     </div>
-                </a>
+
+                    {{--
+                    <div class="bg-red-600 text-white px-4 py-3 rounded-md shadow-md">
+                        غرف العيادة ممتلئة
+                    </div>
+                    <div class="text-white text-sm mt-2">
+                        يرجى حذف طبيب لإضافة طبيب جديد
+                    </div> --}}
                 @else
-                <a href="{{ route('admin.secretary.add') }}" class="block">
-                    <div
-                        class="border-2 border-dashed border-red-500 text-white-300 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md bg-[#12192b] hover:scale-105 transition-transform duration-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-user-round-plus-icon text-orange-300">
-                            <path d="M2 21a8 8 0 0 1 13.292-6" />
-                            <circle cx="10" cy="8" r="5" />
-                            <path d="M19 16v6" />
-                            <path d="M22 19h-6" />
-                        </svg>
-                        <div class="text-base font-semibold">+ Add Secretary</div>
-                    </div>
-                </a>
-                
+                    <a href="{{ route('admin.doctor.add') }}" class="block">
+                        <div
+                            class="border-2 border-dashed border-orange-400 text-white-300 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md bg-[#12192b] hover:scale-105 transition-transform duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-user-round-plus-icon text-orange-300">
+                                <path d="M2 21a8 8 0 0 1 13.292-6" />
+                                <circle cx="10" cy="8" r="5" />
+                                <path d="M19 16v6" />
+                                <path d="M22 19h-6" />
+                            </svg>
+                            <div class="text-base font-semibold">+ Add Doctor</div>
+                        </div>
+                    </a>
+                @endif
+                @if ($secretary)
+                    <a href="{{ route('admin.secretary.replace', [$secretary->id]) }}">
+                        <div
+                            class="border-2 border-dashed border-red-500 text-white-300 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md bg-[#12192b] hover:scale-105 transition-transform duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-repeat-icon text-red-300">
+                                <path d="m17 2 4 4-4 4" />
+                                <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
+                                <path d="m7 22-4-4 4-4" />
+                                <path d="M21 13v1a4 4 0 0 1-4 4H3" />
+                            </svg>
+                            <div class="text-base font-semibold">Replacing Secretary</div>
+                        </div>
+                    </a>
+                @else
+                    <a href="{{ route('admin.secretary.add') }}" class="block">
+                        <div
+                            class="border-2 border-dashed border-red-500 text-white-300 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md bg-[#12192b] hover:scale-105 transition-transform duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-user-round-plus-icon text-orange-300">
+                                <path d="M2 21a8 8 0 0 1 13.292-6" />
+                                <circle cx="10" cy="8" r="5" />
+                                <path d="M19 16v6" />
+                                <path d="M22 19h-6" />
+                            </svg>
+                            <div class="text-base font-semibold">+ Add Secretary</div>
+                        </div>
+                    </a>
                 @endif
             </div>
 
@@ -354,4 +380,4 @@
                 },
             });
         </script>
-@endsection
+    @endsection

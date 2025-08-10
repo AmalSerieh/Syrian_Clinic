@@ -59,7 +59,7 @@ class AppointementStatusArrivvedNotification extends Notification
             ),
             data: [
                 'appointment_id' => (string) $this->appointment->id,
-                'action' => ' You must be on_Street' . $this->appointment->patient->user->name,
+                'action' => 'المطلوب منك التوجه للعيادة الآن - ' . $this->appointment->patient->user->name,
 
             ],
             custom: [

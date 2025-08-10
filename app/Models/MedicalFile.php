@@ -22,6 +22,12 @@ class MedicalFile extends Model
     {
         return $this->belongsTo(Patient_record::class);
     }
+
+    public function visit()
+    {
+        return $this->belongsTo(Visit::class);
+    }
+
     public function getExtensionType(): string
     {
         $extension = strtolower(pathinfo($this->test_image_pdf, PATHINFO_EXTENSION));

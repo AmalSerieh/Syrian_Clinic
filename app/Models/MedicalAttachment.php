@@ -18,7 +18,13 @@ class MedicalAttachment extends Model
     {
         return $this->belongsTo(Patient_record::class);
     }
-         // ✅ الحقول التي تحتاج تشفير
+
+    public function visit()
+    {
+        return $this->belongsTo(Visit::class);
+    }
+
+    // ✅ الحقول التي تحتاج تشفير
     protected $encryptable = [
         'ray_name',
         'ray_laboratory',
