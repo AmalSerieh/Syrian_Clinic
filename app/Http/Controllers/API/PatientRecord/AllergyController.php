@@ -74,8 +74,13 @@ class AllergyController extends Controller
         if (!$record) {
             return response()->json(['message' => trans('message.no_record')], 404);
         }
+        if ($record->allergies_submitted) {
+            return response()->json(['message' => trans('message.submitted_already')], 403);
+        }
 
         $this->authorize('create', [Allergy::class, $record]);
+        $allergyData = $request->validated()['allergies'];
+
 
         $data = $request->validated() + ['patient_record_id' => $record->id];
 
@@ -112,6 +117,7 @@ class AllergyController extends Controller
         //  $this->authorize('viewAny', $allergies);
 
         $grouped = $this->service->getGroupedByPower($record->id);
+        //dd($grouped);
         $groupedResources = [];
 
         foreach (['strong', 'medium', 'weak'] as $level) {

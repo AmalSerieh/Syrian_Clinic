@@ -8,8 +8,10 @@ use App\Http\Resources\Api\PateintRecord\PatientProfileResource;
 use App\Models\Patient;
 use App\Models\Patient_profile;
 use App\Services\Api\PateintRecord\PatientProfileService;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
@@ -72,19 +74,33 @@ class PatientProfileController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->isPatient() || !$user->patient || !$user->patient->patient_record) {
+        if (!$user->isPatient()) {
             return response()->json(['message' => trans('message.no_record')], 404);
         }
 
-        $profile = $user->patient->patient_record->patient_profile;
+        $profile = $user->patient?->patient_record?->patient_profile;
 
         if (!$profile) {
             return response()->json(['message' => trans('message.no_data')], 404);
         }
 
-        $this->authorize('view', $profile);
+        // $this->authorize('view', $profile);
+        $canView = Gate::allows('view', $profile);
 
-        //return new PatientProfileResource($profile);
+        // فك تشفير الحقول المشفرة إذا لزم الأمر
+        // فك تشفير الحقول إذا لزم الأمر
+        if (isset($profile->encryptable)) {
+            foreach ($profile->encryptable as $field) {
+                if (!empty($profile->$field)) {
+                    try {
+                        $profile->$field = Crypt::decrypt($profile->$field);
+                    } catch (DecryptException $e) {
+                        // التعامل مع خطأ فك التشفير
+                    }
+                }
+            }
+        }
+
         return (new PatientProfileResource($profile))->additional([
             'message' => __('message.profile_submitted_success'),
         ]);
@@ -113,37 +129,39 @@ class PatientProfileController extends Controller
     }
 
     //✅ تأكيد الإرسال
-   public function saveRecord()
-{
-    $user = auth()->user();
-    $record = $user->patient->patient_record;
+    public function saveRecord()
+    {
+        $user = auth()->user();
+        $record = $user->patient->patient_record;
 
-    if (!$record) {
-        return response()->json(['message' => trans('message.no_record')], 404);
+        if (!$record) {
+            return response()->json(['message' => trans('message.no_record')], 404);
+        }
+
+        // تحقق إذا كان السجل محفوظ سابقًا (مثلاً نعتبر أنه محفوظ إذا profile_submitted = 1)
+        if (
+            $record->profile_submitted && $record->diseases_submitted && $record->operations_submitted &&
+            $record->medicalAttachments_submitted && $record->allergies_submitted && $record->family_history_submitted &&
+            $record->medications_submitted && $record->medicalfiles_submitted
+        ) {
+
+            return response()->json(['message' => trans('message.already_saved')], 200);
+        }
+
+        // إذا لم يكن محفوظًا بعد، قم بالحفظ لأول مرة
+        $record->update([
+            'profile_submitted' => 1,
+            'diseases_submitted' => 1,
+            'operations_submitted' => 1,
+            'medicalAttachments_submitted' => 1,
+            'allergies_submitted' => 1,
+            'family_history_submitted' => 1,
+            'medications_submitted' => 1,
+            'medicalfiles_submitted' => 1
+        ]);
+
+        return response()->json(['message' => trans('message.patient_record_saved')], 200);
     }
-
-    // تحقق إذا كان السجل محفوظ سابقًا (مثلاً نعتبر أنه محفوظ إذا profile_submitted = 1)
-    if ($record->profile_submitted && $record->diseases_submitted && $record->operations_submitted &&
-        $record->medicalAttachments_submitted && $record->allergies_submitted && $record->family_history_submitted &&
-        $record->medications_submitted && $record->medicalfiles_submitted) {
-
-        return response()->json(['message' => trans('message.already_saved')], 200);
-    }
-
-    // إذا لم يكن محفوظًا بعد، قم بالحفظ لأول مرة
-    $record->update([
-        'profile_submitted' => 1,
-        'diseases_submitted' => 1,
-        'operations_submitted' => 1,
-        'medicalAttachments_submitted' => 1,
-        'allergies_submitted' => 1,
-        'family_history_submitted' => 1,
-        'medications_submitted' => 1,
-        'medicalfiles_submitted' => 1
-    ]);
-
-    return response()->json(['message' => trans('message.patient_record_saved')], 200);
-}
 
 
 

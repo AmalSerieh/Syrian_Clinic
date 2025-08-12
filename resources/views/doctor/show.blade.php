@@ -8,7 +8,7 @@
         <img src="{{ asset('storage/' . $doctor->photo) }}" alt="صورة الطبيب" class="w-24 h-24 rounded-full border object-cover">
         <div>
             <h2 class="text-2xl font-bold">{{ $doctor->user->name }}</h2>
-            <p class="text-gray-600">الاختصاص: {{ $profile->specialist }}</p>
+            <p class="text-gray-600">الاختصاص: {{ $profile->specialist_ar }}</p>
             <p class="text-gray-500">سنوات الخبرة: {{ $profile->exp_years }} سنة</p>
             <p class="text-gray-500">السيرة الذاتية: {{ $profile->biography }}</p>
         </div>

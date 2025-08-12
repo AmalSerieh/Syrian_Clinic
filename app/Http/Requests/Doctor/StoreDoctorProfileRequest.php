@@ -27,7 +27,7 @@ class StoreDoctorProfileRequest extends FormRequest
             'cer_images' => 'required|image',
             'cer_date' => 'required|date',
             'exp_place' => 'required|string',
-            'exp_years' => 'required|numeric',
+            'exp_years' => 'required|numeric|min:0',
             'biography' => 'required|string',
             'date_birth' => 'required|date',
         ];

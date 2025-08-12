@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\Crypt;
 class Patient_profile extends Model
 {
     protected $fillable = [
@@ -84,6 +84,12 @@ class Patient_profile extends Model
             }
         }
         return $value;
+    }
+    public function decryptFields()
+    {
+        $this->height = Crypt::decrypt($this->height);
+        $this->weight = Crypt::decrypt($this->weight);
+        return $this;
     }
 
 }

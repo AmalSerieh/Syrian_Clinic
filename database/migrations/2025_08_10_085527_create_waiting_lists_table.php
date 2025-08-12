@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('waiting_lists', function (Blueprint $table) {
             $table->id();
             $table->foreignId('appointment_id')->constrained('appointments')->onDelete('cascade');
-            $table->enum('status', ['waiting', 'in_progress', 'done'])->default('waiting');
-            $table->timestamp('check_in_time')->nullable(); // وقت دخول المريض للانتظار
-            $table->timestamp('start_time')->nullable(); // وقت بدء المعاينة
-            $table->timestamp('end_time')->nullable(); // وقت انتهاء المعاينة
+            $table->enum('w_status', ['waiting', 'in_progress', 'done'])->default('waiting');
+            $table->timestamp('w_check_in_time')->nullable(); // وقت دخول المريض للانتظار
+            $table->timestamp('w_start_time')->nullable(); // وقت بدء المعاينة
+            $table->timestamp('w_end_time')->nullable(); // وقت انتهاء المعاينة
             $table->timestamps();
         });
     }

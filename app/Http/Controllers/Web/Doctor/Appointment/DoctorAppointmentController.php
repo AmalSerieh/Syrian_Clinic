@@ -29,13 +29,14 @@ class DoctorAppointmentController extends Controller
     //المرضى يلي في العيادة
     public function patientsInClinic()
     {
+        //dd('yes');
         $doctor = Auth::user()->doctor;
         $doctorId = $doctor->id;
         $today = Carbon::today();
 
-        if (!$this->isDoctorAvailableNow($doctor->id)) {
+       /*  if (!$this->isDoctorAvailableNow($doctor->id)) {
             abort(403, 'الطبيب ليس في وقت دوامه حالياً.');
-        }
+        } */
         $appointments = Appointment::with('patient.user')
             ->where('doctor_id', Auth::user()->doctor->id)
             ->whereDate('date', Carbon::today())
@@ -52,7 +53,7 @@ class DoctorAppointmentController extends Controller
             ->orderBy('w_check_in_time') // ترتيب حسب وقت الدخول الحقيقي
             ->get();
 
-        return view('doctor.appointments.clinic-patients', compact('waitingPatients', 'appointments'));
+        return view('doctor.appointments.clinic_patients', compact('waitingPatients', 'appointments'));
     }
 
     public function enterConsultation(Appointment $appointment)

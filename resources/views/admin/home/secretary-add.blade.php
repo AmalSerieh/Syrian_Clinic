@@ -57,26 +57,28 @@
                             <label for="password" class="flex items-center mb-1 text-sm font-medium">Password</label>
                             <input id="password" type="password" name="password" required autocomplete="new-password"
                                    class="w-full text-sm py-1.5 px-2 pr-10 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-50 text-blue-500">
-                            <button type="button" onclick="togglePassword('password')"
-                                    class="absolute right-2 top-8 text-white">
-                                    <!-- Eye Icon -->
-                              {{--   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                                    class="text-blue-500" stroke="currentColor" stroke-width="2">
-                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
-                                    <circle cx="12" cy="12" r="3" />
-                                </svg> --}}
-                                👁️
-                            </button>
+                              <button type="button" onclick="togglePassword('password')"
+                            class="absolute right-2 top-8 text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
                         </div>
 
                         <div class="w-1/2 relative">
                             <label for="password_confirmation" class="flex items-center mb-1 text-sm font-medium">Confirm</label>
                             <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
                                    class="w-full text-sm py-1.5 px-2 pr-10 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-50 text-blue-500">
-                            <button type="button" onclick="togglePassword('password_confirmation')"
-                                    class="absolute right-2 top-8 text-white">
-                                👁️
-                            </button>
+                             <button type="button" onclick="togglePassword('password')"
+                            class="absolute right-2 top-8 text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
                         </div>
                     </div>
                     <p id="passwordError" class="text-red-400 mt-2 text-sm"></p>

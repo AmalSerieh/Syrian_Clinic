@@ -17,9 +17,10 @@
         <!-- Session Status -->
         <x-auth-session-status class="mb-4" :status="session('status')" />
         @if (!$existingAdmin)
-            <form method="POST" action="{{ route('admin.register') }}
-            class="bg-gray-700 bg-opacity-70
+            <form method="POST" action="{{ route('admin.register') }}"
+            class="bg-blue-400 bg-opacity-40
                 shadow-lg text-white p-6 m-8 w-full md:w-1/2 lg:w-1/3 rounded-[50px] ml-16">
+                @method('POST')
 
                 @csrf
                 <!-- أيقونة -->
@@ -39,7 +40,7 @@
 
                     <!-- Full Name -->
                     <div>
-                        <label class="flex items-center mb-1 text-sm font-medium">
+                        <label class="flex items-center mb-1 text-sm font-medium text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400 mr-2" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -59,7 +60,7 @@
 
                     <!-- Email -->
                     <div>
-                        <label class="flex items-center mb-1 text-sm font-medium">
+                        <label class="flex items-center mb-1 text-sm font-medium text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400 mr-2" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -76,7 +77,7 @@
 
                     <!-- Phone Number -->
                     <div>
-                        <label class="flex items-center mb-1 text-sm font-medium">
+                        <label class="flex items-center mb-1 text-sm font-medium text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400 mr-2" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -144,7 +145,7 @@
                     </div>
 
                     <h5>you already have an account <a href="{{ route('admin.login') }}"
-                            class="text-blue-500 underline">Login</a> </h5>
+                            class="text-blue-500 underline ">Login</a> </h5>
 
 
                     <!-- زر الإرسال -->

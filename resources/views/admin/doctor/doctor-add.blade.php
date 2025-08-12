@@ -80,7 +80,7 @@
                     <x-input-error :messages="$errors->get('phone')" class="mt-2" />
 
                 </div>
-                <br>
+               {{--  <br> --}}
 
                 <!-- Password and Confirm Password (Side by Side with Show/Hide) -->
                 <div class="flex gap-4">
@@ -178,7 +178,7 @@
 
 
                 </div>
-                <br>
+               {{--  <br> --}}
 
                 <!-- Date of Appointment -->
                 <div>

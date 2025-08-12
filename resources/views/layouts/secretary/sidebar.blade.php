@@ -37,7 +37,7 @@
             Appointment
         </a>
 
-        <a href="/SecDoctors" class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
+        <a href="{{route('secretary.doctors')}}" class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
             <!-- Doctor icon -->
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -48,7 +48,7 @@
             Doctors
         </a>
 
-        <a href="/SecPatients" class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
+        <a href="{{route('secretary.patients')}}" class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
             <!-- Patients icon -->
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

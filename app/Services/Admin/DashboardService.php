@@ -24,9 +24,14 @@ class DashboardService
         $totalRooms = Room::count();
         $usedRooms = Doctor::whereNotNull('room_id')->count();
 
-        $roomsFull = $usedRooms >= $totalRooms;
 
-        return compact('secretary','roomsFull');
+        $roomsFull = Room::all()->every(function ($room) {
+            return $room->doctors()->count() >= $room->room_capacity;
+        });
+
+        $roomsFull1 = $usedRooms >= $totalRooms;
+
+        return compact('secretary', 'roomsFull');
     }
 
     public function shouldRedirectToList(): bool

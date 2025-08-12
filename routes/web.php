@@ -135,6 +135,9 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::put('/doctor-profile/{id}/update', [DoctorProfileController::class, 'updateProfile'])->name('doctor-profile.update');
     //schedules
     Route::get('/doctor/schedules', [DoctorScheduleController::class, 'index'])->name('doctor-schedule.index');
+    //عرض المرضى يلي في العيادة
+    Route::get('/doctor/clinic', [DoctorAppointmentController::class, 'patientsInClinic'])->name('doctor.appointments.in_clinic');
+
     //indexAnother
     Route::get('/doctor/schedules/indexAnother', [DoctorScheduleController::class, 'indexAnother'])->name('doctor-schedule.indexAnother');
     Route::get('/doctor/schedules/create', [DoctorScheduleController::class, 'create'])->name('doctor-schedule.create');
@@ -143,9 +146,8 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::put('/doctor/schedules/{schedule}', [DoctorScheduleController::class, 'update'])->name('doctor-schedule.update');
     Route::delete('/doctor/schedule/{schedule}', [DoctorScheduleController::class, 'destroy'])->name('doctor-schedule.destroy');
     Route::get('/doctor/{doctor}', [DoctorDashboardController::class, 'show'])->name('doctors.show');
-    //عرض المرضى يلي في العيادة
-    Route::get('/doctor/clinic-patients', [DoctorAppointmentController::class, 'patientsInClinic'])
-        ->name('doctor.appointments.in_clinic');
+
+
     //أدخل المريض
     Route::post('/doctor/appointments/{appointment}/start', [DoctorAppointmentController::class, 'enterConsultation'])
         ->name('doctor.appointments.enterConsultation');
@@ -277,6 +279,8 @@ Route::middleware(['web', 'auth', 'role:secretary'])->group(function () {
 
     //عرض المرضى
     Route::get('/secretary/patients', [SecertaryPatientController::class, 'patients'])->name('secretary.patients');
+    Route::get('/secretary/patients/{id}/show', [SecertaryPatientController::class, 'patient_show'])->name('secretary.patient.show');
+    Route::delete('/secretary/patients/{id}/delete', [SecertaryPatientController::class, 'patient_delete'])->name('secretary.patient.delete');
 
     //عرض المواعيد
     Route::get('/secretary/appointments', [SecretaryAppointmentController::class, 'index'])->name('secretary.appointments');

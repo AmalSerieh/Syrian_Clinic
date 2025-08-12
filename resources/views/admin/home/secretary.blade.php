@@ -23,21 +23,21 @@
             <!-- تفاصيل الموعد -->
             <div class="bg-[#19222f] rounded-2xl p-6 text-left space-y-6">
                 <div>
-                    <label class="text-gray-400 text-sm block mb-1">Phone Number</label>
+                    <label class="text-blue-400 text-sm block mb-1">Phone Number</label>
                     <p class="w-full border-b border-gray-600 text-white text-lg pb-1">
                         {{ $secretary->phone }}
                     </p>
                 </div>
 
                 <div>
-                    <label class="text-gray-400 text-sm block mb-1">Date of Appointment</label>
+                    <label class="text-blue-400 text-sm block mb-1">Date of Appointment</label>
                     <p class="w-full border-b border-gray-600 text-white text-lg pb-1">
                         {{ $secretary->secretary->date_of_appointment }}
                     </p>
                 </div>
 
                 <div>
-                    <label class="text-gray-400 text-sm block mb-1">Gender</label>
+                    <label class="text-blue-400 text-sm block mb-1">Gender</label>
                     <p class="w-full border-b border-gray-600 text-white text-lg pb-1 capitalize">
                         {{ $secretary->secretary->gender }}
                     </p>

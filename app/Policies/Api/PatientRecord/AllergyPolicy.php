@@ -32,7 +32,7 @@ class AllergyPolicy
             return $user->patient &&
                 $user->patient->patient_record &&
                 $user->patient->patient_record->id === $allergy->patient_record_id
-                && !$user->patient->patient_record->allergies_submitted;
+                && $user->patient->patient_record->allergies_submitted;
         }
 
         // للطبيب

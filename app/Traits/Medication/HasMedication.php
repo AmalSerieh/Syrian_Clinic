@@ -50,13 +50,13 @@ trait HasMedication
 
         return intval(round($days * $perDay * $quantityPerDose, 2));
     }
-     public function calculateProgressDetailed()
+    public function calculateProgressDetailed()
     {
         if ($this->med_type !== 'current' || !$this->med_end_date || !$this->med_start_date) {
             return [
                 'dose_progress_by 100%' => null,
                 'taken_till_now' => 0,
-                'unit' =>  $this->resolveUnit(),
+                'unit' => $this->resolveUnit(),
             ];
         }
 
@@ -91,7 +91,13 @@ trait HasMedication
         $quantityTaken = $takenTillNow * $doseQuantity;
 
 
-        $progress = min(100, ($quantityTaken / floatval($this->med_total_quantity)) * 100);
+        $totalQuantity = floatval($this->med_total_quantity);
+
+        if ($totalQuantity == 0) {
+            $progress = 0;
+        } else {
+            $progress = min(100, ($quantityTaken / $totalQuantity) * 100);
+        }
 
         // ⚡ هنا نتحقق من النوع:
         $solidForms = ['tablet', 'capsule', 'pills'];

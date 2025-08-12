@@ -237,7 +237,7 @@ class AppointmentController extends Controller
                 'id' => $appointment->id,
                 'doctor_id' => $appointment->doctor_id,
                 'doctor_name' => $appointment->doctor->user->name ?? 'غير معروف',
-                'doctor_photo' =>asset('storage/' . $appointment->doctor->photo) ?? null,
+                'doctor_photo' => asset('storage/' . $appointment->doctor->photo) ?? null,
                 'patient_id' => $appointment->patient_id,
                 'date' => $appointment->date,
                 'day' => $appointment->day,
@@ -259,13 +259,28 @@ class AppointmentController extends Controller
     {
         $today = Carbon::today();
         $endOfMonth = $today->copy()->endOfMonth();
-
-        // جلب جميع المواعيد المؤكدة لهذا الشهر
-        $appointments = Appointment::where('status', 'confirmed')
+        $lang = app()->getLocale(); // أو تحدد 'ar' أو 'en'
+        // جلب جميع المواعيد المؤكدة لهذا الشهر مع بيانات الطبيب
+        $appointments = Appointment::with(['doctor', 'doctor.doctorProfile', 'doctor.user'])
+            ->where('status', 'confirmed')
             ->whereBetween('date', [$today->toDateString(), $endOfMonth->toDateString()])
             ->orderBy('date')
             ->orderBy('start_time')
             ->get()
+            ->map(function ($appointment) use ($lang) {
+                $doctor = $appointment->doctor;
+                $data = $appointment->toArray();
+
+                // إزالة بيانات العلاقة doctor
+                unset($data['doctor']);
+
+                // إضافة الحقول الإضافية
+                $data['doctor_name'] = $doctor->user->name ?? 'غير محدد';
+                $data['specialization'] = $doctor->doctorProfile?->{"specialist_$lang"} ?? 'غير محدد';
+                $data['doctor_photo'] = $doctor->photo ? asset('storage/' . $doctor->photo) : null;
+
+                return $data;
+            })
             ->groupBy('date');
 
         // إنشاء جميع تواريخ الشهر من اليوم وحتى نهاية الشهر
@@ -274,6 +289,7 @@ class AppointmentController extends Controller
             $dateStr = $date->toDateString();
             // إذا وجدنا مواعيد لهذا اليوم نضيفها، وإلا نضيف مصفوفة فارغة
             $dates[$dateStr] = $appointments->get($dateStr, []);
+
         }
 
         return response()->json([
@@ -289,6 +305,7 @@ class AppointmentController extends Controller
         $user = Auth::user();
         // نفترض أن لديك علاقة: $user->patient->appointments()
         // أو عندك patient_id في appointments
+        $lang = app()->getLocale(); // أو تحدد 'ar' أو 'en'
 
         $today = Carbon::today()->toDateString();
 
@@ -298,6 +315,23 @@ class AppointmentController extends Controller
             ->orderBy('date')
             ->orderBy('start_time')
             ->first();
+        if ($appointment) {
+            $doctor = $appointment->doctor;
+
+
+            // دمج بيانات الموعد الأصلية مع الإضافات
+            $data = $appointment->toArray();
+            // حذف بيانات العلاقة "doctor"
+            unset($data['doctor']);
+
+            $data['doctor_name'] = $doctor->user->name ?? 'غير محدد';
+            $data['specialization'] = $doctor->doctorProfile?->{"specialist_$lang"} ?? 'غير محدد';
+            $data['doctor_photo'] = $doctor->photo ? asset('storage/' . $doctor->photo) : null;
+
+            return response()->json([
+                'appointment' => $data
+            ]);
+        }
 
         return response()->json([
             'appointment' => $appointment

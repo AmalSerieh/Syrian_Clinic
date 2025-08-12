@@ -1,6 +1,8 @@
 <!-- resources/views/doctor/appointments/clinic-patients.blade.php -->
 
-<x-app-layout>
+@extends('layouts.doctor.header')
+
+@section('content')
     <h2 class="text-xl font-bold mb-4">🏥 المرضى المنتظرون في العيادة</h2>
 
     @if ($waitingPatients->isEmpty())
@@ -54,4 +56,4 @@
             </tbody>
         </table>
     @endif
-</x-app-layout>
+@endsection

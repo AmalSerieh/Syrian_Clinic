@@ -70,5 +70,13 @@ class Visit extends Model
     {
         return $this->belongsTo(Appointment::class);
     }
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
+    }
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
 
 }

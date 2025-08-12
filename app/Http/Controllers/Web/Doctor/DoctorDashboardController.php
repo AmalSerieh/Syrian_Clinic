@@ -15,8 +15,8 @@ class DoctorDashboardController extends Controller
         if (!auth()->user()->has_changed_credentials) {
             return redirect()->route('doctor.first-login');
         }
-        return view('dashboard');
-      // return redirect()->route('doctor-profile.create');
+        return view('doctor.home.dashboard');
+        // return redirect()->route('doctor-profile.create');
     }
     public function showForceChangeForm()
     {
@@ -76,7 +76,7 @@ class DoctorDashboardController extends Controller
 
         // تقسيم المواعيد
         $timeRanges = [];
-        foreach ($schedules as $schedule) {
+        /* foreach ($schedules as $schedule) {
             $start = Carbon::parse($schedule->start_time);
             $end = Carbon::parse($schedule->end_time);
             while ($start->lt($end)) {
@@ -93,7 +93,31 @@ class DoctorDashboardController extends Controller
 
                 $start = $next;
             }
+            $schedules = DoctorSchedule::all(); // أو جدول الطبيب الحالي
+ */
+        $timeRanges = [];
+
+        foreach ($schedules as $schedule) {
+            $start = Carbon::createFromTimeString($schedule->start_time);
+            $end = Carbon::createFromTimeString($schedule->end_time);
+
+            while ($start->lt($end)) {
+                $next = $start->copy()->addHour();
+                if ($next->gt($end)) {
+                    $next = $end->copy();
+                }
+
+                $timeRanges[] = [
+                    'day' => $schedule->day,
+                    'from' => $start->format('H:i'),
+                    'to' => $next->format('H:i'),
+                ];
+
+                $start = $next;
+            }
         }
+
+
 
         return view('doctor.show', compact('doctor', 'profile', 'schedules', 'timeRanges'));
     }

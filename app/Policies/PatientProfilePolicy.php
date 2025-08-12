@@ -21,11 +21,12 @@ class PatientProfilePolicy
      */
     public function view(User $user, Patient_profile $patientProfile): bool
     {
-        // السماح للمريض برؤية ملفه
+        // السماح للمريض فقط برؤية ملفه
         if (
             $user->patient &&
             $user->patient->patient_record &&
-            $user->patient->patient_record->patient_profile
+            $user->patient->patient_record->patient_profile &&
+            $user->patient->patient_record->patient_profile->id === $patientProfile->id
         ) {
             return true;
         }
@@ -53,19 +54,19 @@ class PatientProfilePolicy
      */
     public function update(User $user, Patient_profile $patientProfile): bool
     {
-         // تحقق من أن المستخدم طبيب
-    if (!$user->doctor) {
-        return false;
-    }
+        // تحقق من أن المستخدم طبيب
+        if (!$user->doctor) {
+            return false;
+        }
 
-    // جلب المريض من الملف الطبي
-    $patient = $patientProfile->patient_record->patient;
+        // جلب المريض من الملف الطبي
+        $patient = $patientProfile->patient_record->patient;
 
-    // تحقق من وجود موعد سابق أو مؤكد بين الطبيب وهذا المريض
-    return $user->doctor->appointments()
-        ->where('patient_id', $patient->id)
-        ->whereIn('status', ['confirmed', 'done']) // عدل الحالات حسب نظامك
-        ->exists();
+        // تحقق من وجود موعد سابق أو مؤكد بين الطبيب وهذا المريض
+        return $user->doctor->appointments()
+            ->where('patient_id', $patient->id)
+            ->whereIn('status', ['confirmed', 'done']) // عدل الحالات حسب نظامك
+            ->exists();
     }
 
     /**
