@@ -80,7 +80,7 @@
                     <x-input-error :messages="$errors->get('phone')" class="mt-2" />
 
                 </div>
-               {{--  <br> --}}
+                {{--  <br> --}}
 
                 <!-- Password and Confirm Password (Side by Side with Show/Hide) -->
                 <div class="flex gap-4">
@@ -177,9 +177,56 @@
                     </div>
 
 
-                </div>
-               {{--  <br> --}}
 
+                </div>
+
+
+               {{--  <div class="flex gap-4">
+
+
+                    <!-- type_wage Number (enum) -->
+                    <div class="w-1/2 relative">
+                        <div class="mt-4">
+                            <label for="type_wage" class="flex block mb-1 text-sm font-medium text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400  mr-2"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M3 7v10a2 2 0 002 2h3m10-12h3a2 2 0 012 2v10a2 2 0 01-2 2h-3m0 0V5a2 2 0 00-2-2H9a2 2 0 00-2 2v14m10 0H7" />
+                                </svg>
+                                type_wage</label>
+                            <select id="type_wage" name="type_wage"
+                                class="w-full text-sm py-1.5 px-2 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-10 text-blue-500">
+                                <option value="" disabled selected>Select Room</option>
+                                <option value="number" {{ old('gender') == 'number' ? 'selected' : '' }}>number</option>
+                                <option value="percentage" {{ old('gender') == 'percentage' ? 'selected' : '' }}>percentage
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="w-1/2 relative">
+                        <div class="mt-4">
+                            <!-- wage Enum -->
+
+                            <label for="wage" class="flex block mb-1 text-sm font-medium">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400 mr-2" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="7" r="4" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.5 21h13a2 2 0 00-13 0z" />
+                                </svg>
+                                wage</label>
+
+                            <input id="wage" type="text" name="wage" :value="old('wage')" required autofocus
+                                class="w-full text-sm py-1.5 px-2 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-10 text-blue-500">
+                            <x-input-error :messages="$errors->get('wage')" class="mt-2" />
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+ --}}
                 <!-- Date of Appointment -->
                 <div>
                     <label for="date_of_appointment" class=" flex block mb-1 text-sm font-medium">

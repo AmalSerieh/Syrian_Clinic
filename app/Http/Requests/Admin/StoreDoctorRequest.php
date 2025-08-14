@@ -30,6 +30,8 @@ class StoreDoctorRequest extends FormRequest
             'date_of_appointment' => ['required', 'date'],
             'room_id' => 'required|exists:rooms,id',
             'gender' => ['required', 'in:male,female'],
+            'type_wage' => ['required', 'in:number,percentage'],
+            'wage' => ['required', 'number', 'max:255'],
         ];
     }
 }

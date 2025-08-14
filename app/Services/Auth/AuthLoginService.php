@@ -39,11 +39,8 @@ class AuthLoginService
                     'data' => null
                 ];
             }
-            $isCreatedBySecretary = false;
-
-            if ($user->role === 'patient' && $user->created_by === 'secretary') {
-                $isCreatedBySecretary = true;
-            }
+            $isCreatedBySecretary = $user->role === 'patient' && $user->created_by === 'secretary';
+            $requiresPasswordChange = $isCreatedBySecretary && !$user->has_changed_credentials;
 
             $this->updateUserLanguage($user, $language);
             Auth::login($user);
@@ -58,7 +55,9 @@ class AuthLoginService
                     'user' => $user,
                     'token' => $user->createToken('auth_token')->plainTextToken,
                     'created_by_secretary' => $isCreatedBySecretary,
-                    'redirect_route' => $isCreatedBySecretary ? route('patient.profile.edit') : null, // 👈
+                    'requires_password_change' => $requiresPasswordChange, // 👈
+                    'redirect_route' => $requiresPasswordChange ? route('patient.force-password-change') : null,
+
 
                 ],
                 'patient' => $user->role === 'patient' ? $user->patient : null

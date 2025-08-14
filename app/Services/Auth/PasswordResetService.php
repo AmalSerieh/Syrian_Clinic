@@ -48,7 +48,7 @@ class PasswordResetService
         // حفظ البريد في الجلسة
         $request->session()->put('reset_password_email', $email);
 
-      //  Mail::to($email)->send(new ResetPasswordOtpMail($otp));
+        Mail::to($email)->send(new ResetPasswordOtpMail($otp));
 
         return [
             'success' => true,

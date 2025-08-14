@@ -48,7 +48,7 @@ class MedicalAttachmentController extends Controller
             return response()->json(['message' => trans('message.submitted_already')], 403);
         } */
         $this->authorize('viewAny', MedicalAttachment::class);
-
+/*  */
         $attachments = $this->service->getByPatientRecord($recordId);
 
         return MedicalAttachmentResource::collection($attachments);

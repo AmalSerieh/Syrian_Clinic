@@ -129,7 +129,7 @@ class AuthService
             ['otp' => $otp, 'expired_at' => Carbon::now()->addMinutes(10)]
         );
 
-      //  Mail::to($data['email'])->send(new EmailOtpMail($otp));
+        Mail::to($data['email'])->send(new EmailOtpMail($otp));
 
         // Store session data
         Session::put('register_email', $data['email']);
@@ -252,7 +252,7 @@ class AuthService
             ['otp' => $otp, 'expired_at' => now()->addMinutes(10)]
         );
 
-        //Mail::to($email)->send(new EmailOtpMail($otp));
+        Mail::to($email)->send(new EmailOtpMail($otp));
 
         return [
             'status' => true,

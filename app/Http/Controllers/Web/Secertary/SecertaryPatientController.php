@@ -70,6 +70,29 @@ class SecertaryPatientController extends Controller
             ->orderBy('date')
             ->get();
 
+        // ✅ عدد الزيارات المكتملة (لإظهار العدد)
+        $completedVisitsCount = $completedVisits->count();
+
+        // ❌ عدد المواعيد الملغاة (لإظهار العدد)
+        $cancelledAppointmentsCount = $cancelledAppointments->count();
+
+        // ✨ تحقق هل للمريض موعد اليوم
+        $today = now()->toDateString();
+        $todayAppointment = Appointment::where('patient_id', $patient->id)
+            ->whereDate('date', $today)
+            ->whereNotIn('status', ['canceled_by_patient', 'canceled_by_doctor', 'canceled_by_secretary'])
+            ->first();
+
+        // ✨ أقرب موعد مستقبلي إذا ما عنده موعد اليوم
+        $nextAppointment = null;
+        if (!$todayAppointment) {
+            $nextAppointment = Appointment::where('patient_id', $patient->id)
+                ->whereDate('date', '>', $today)
+                ->whereNotIn('status', ['canceled_by_patient', 'canceled_by_doctor', 'canceled_by_secretary'])
+                ->orderBy('date')
+                ->first();
+        }
+
         $medicalRecord = $patient->patient_record
             ? collect([
                 $patient->patient_record->profile_submitted,
@@ -82,17 +105,21 @@ class SecertaryPatientController extends Controller
                 $patient->patient_record->medicalfiles_submitted,
             ])->every(fn($val) => $val === 1)
             : false;
-        // assuming relation exists
 
         return view('secretary.patient.patient-show', compact(
             'patient',
             'lastVisit',
             'completedVisits',
+            'completedVisitsCount',
             'cancelledAppointments',
+            'cancelledAppointmentsCount',
             'pendingAppointments',
-            'medicalRecord'
+            'medicalRecord',
+            'todayAppointment',
+            'nextAppointment'
         ));
     }
+
 
     public function patient_delete($id)
     {

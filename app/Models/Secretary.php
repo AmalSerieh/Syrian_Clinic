@@ -10,7 +10,9 @@ class Secretary extends Model
         'user_id',
         'photo',
         'date_of_appointment',
-        'gender'
+        'gender',
+        's_type_wage',
+        's_wage'
     ];
     public function user()
     {

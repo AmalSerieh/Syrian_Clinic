@@ -178,7 +178,7 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
         Route::get('/{patientId}/medications/create', [PatientMedicalRecordController::class, 'medications_Create'])->name('doctor.medical-record.medications.create');
         Route::post('/{patientId}/medications/store', [PatientMedicalRecordController::class, 'medications_Store'])->name('doctor.medical-record.medications.store');
         Route::delete('/{medicationId}/medications/delete', [PatientMedicalRecordController::class, 'medications_Delete'])->name('doctor.medical-record.medications.delete');
-        Route::get('/{medicationId}/medications/showone', [PatientMedicalRecordController::class, 'medications_show'])->name('doctor.medical-record.medications.update');
+        Route::get('/{medicationId}/medications/showone', [PatientMedicalRecordController::class, 'medications_show'])->name('doctor.medical-record.medications.showone');
         Route::get('/{patientRecordId}/medications/deleteAll', [PatientMedicalRecordController::class, 'medications_DeleteAll'])->name('doctor.medical-record.medicationsAll');
 
 
@@ -263,6 +263,8 @@ Route::middleware(['web', 'auth', 'role:secretary'])->group(function () {
     Route::get('/secretary/appointments/pending/{doctorId}', [SecretaryAppointmentController::class, 'pendingByDoctor'])->name('secretary.appointments.pending');
     Route::post('/secretary/appointments/{appointment}/confirm', [SecretaryAppointmentController::class, 'confirm1'])->name('secretary.appointment.confirm');
     Route::post('/secretary/appointments/{appointment}/cancel', [SecretaryAppointmentController::class, 'cancel1'])->name('secretary.appointment.cancel');
+    Route::post('/secretary/appointments/{doctor}/cancel-all', [SecretaryAppointmentController::class, 'cancelAllUpcoming'])->name('secretary.appointments.cancelAll');
+
     // Route::post('sendNotification', [SecretaryAppointmentController::class, 'sendNotification'])->name('send.notification');
     //عرض كل المواعيد التي : تخص اليوم الحالي
 
@@ -284,6 +286,13 @@ Route::middleware(['web', 'auth', 'role:secretary'])->group(function () {
 
     //عرض المواعيد
     Route::get('/secretary/appointments', [SecretaryAppointmentController::class, 'index'])->name('secretary.appointments');
+    Route::get('/secretary/appointments/{id}/getNearestAvailableSlot', [SecretaryAppointmentController::class, 'getNearestAvailableRangeSlot'])->name('secretary.appointments.getNextAvailableSlot');
+    Route::get(
+        '/secretary/appointments/{doctor_id}/{date}/{time}/book',
+        [SecretaryAppointmentController::class, 'book']
+    )->name('secretary.appointments.book');
+    Route::post('/secretary/appointments/bookstore', [SecretaryAppointmentController::class, 'bookstore'])->name('secretary.appointments.bookstore');
+
     //عرض
     Route::get('/secretary/appointments/{appointment}', [SecretaryAppointmentController::class, 'show'])->name('secretary.appointments.show');
     //supplier
@@ -308,6 +317,7 @@ Route::middleware(['web', 'auth', 'role:secretary'])->group(function () {
     Route::get('secretary/visits/pending-payments', [SecretaryVisitController::class, 'pendingPayments'])->name('secretary.visits.pendingPayments');
     Route::put('secretary/visits/{id}/confirm-payment', [SecretaryVisitController::class, 'confirmPayment'])->name('secretary.visits.confirmPayment');
 
+    Route::post('secretary/logout', [AdminController::class, 'logout'])->name('secretary.logout');
 
 });
 

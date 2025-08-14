@@ -25,7 +25,7 @@ class AppointmentController extends Controller
         try {
             $appointment = $this->bookingService->book(
                 $request->doctor_id,
-                Auth::user()->id,
+                Auth::user()->patient->id,
                 $request->date,
                 $request->time,
             );
@@ -177,41 +177,49 @@ class AppointmentController extends Controller
     public function getPatientAppointmentsGroupedByStatus()
     {
         $today = Carbon::today()->toDateString();
+        $patientId = Auth::user()->patient->id; // المريض الحالي
 
         // تحميل علاقة الطبيب مع كل استعلام
         $pending = Appointment::with(['doctor.user'])
+            ->where('patient_id',  $patientId)
             ->where('status', 'pending')
             ->whereDate('date', '>=', $today)
             ->orderBy('date')
             ->get();
 
         $confirmed = Appointment::with(['doctor.user'])
+            ->where('patient_id',  $patientId)
             ->where('status', 'confirmed')
             ->whereDate('date', '>=', $today)
             ->orderBy('date')
             ->get();
 
         $canceledByPatient = Appointment::with(['doctor.user'])
+            ->where('patient_id',  $patientId)
             ->where('status', 'canceled_by_patient')
             ->orderBy('date')
             ->get();
 
         $completed = Appointment::with(['doctor.user'])
+            ->where('patient_id',  $patientId)
             ->where('status', 'completed')
             ->orderBy('date')
             ->get();
 
         $canceledByDoctor = Appointment::with(['doctor.user'])
+            ->where('patient_id',  $patientId)
             ->where('status', 'canceled_by_doctor')
             ->orderBy('date')
             ->get();
 
         $canceledBySecretary = Appointment::with(['doctor.user'])
+            ->where('patient_id',  $patientId)
             ->where('status', 'canceled_by_secretary')
             ->orderBy('date')
             ->get();
 
         $processing = Appointment::with(['doctor.user'])
+            ->where('patient_id',  $patientId)
             ->where('status', 'processing')
             ->orderBy('date')
             ->get();

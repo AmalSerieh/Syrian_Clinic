@@ -95,6 +95,7 @@ class BookingService
 
     public function book($doctorId, $patientId, $date, $time, )
     {
+       // dd($patientId);
         $now = now();
         $dateObj = Carbon::parse($date);
         $dayName = $dateObj->format('l');
@@ -110,6 +111,7 @@ class BookingService
             throw new \Exception('لا يمكن الحجز في يوم ماضي');
         }
 
+       // dd($this->checkPatientMedicalRecord($patientId));
         // تحقق من السجل الطبي للمريض
         $this->checkPatientMedicalRecord($patientId);
 
@@ -169,7 +171,7 @@ class BookingService
     {
         // نفترض أن جدول patient_records فيه عمود patient_id يشير للمريض
         $record = Patient_record::where('patient_id', $patientId)->first();
-
+//dd($patientId);
         if (
             !$record ||
             !$record->profile_submitted ||

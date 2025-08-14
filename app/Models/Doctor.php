@@ -9,7 +9,9 @@ class Doctor extends Model
     protected $fillable = [
         'user_id',
         'photo',
-        'room_id'
+        'room_id',
+        'type_wage',
+        'wage'
     ];
     public function user()
     {

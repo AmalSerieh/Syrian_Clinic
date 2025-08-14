@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class PatientProfileController extends Controller
 {
@@ -69,6 +71,7 @@ class PatientProfileController extends Controller
             ], 500);
         }
     }
+
     // ✅ للمريض المسجل حاليًا
     public function showMyProfile()
     {
@@ -104,6 +107,7 @@ class PatientProfileController extends Controller
         return (new PatientProfileResource($profile))->additional([
             'message' => __('message.profile_submitted_success'),
         ]);
+
     }// ✅ للطبيب الذي يعرض ملف مريض معيّن
     // ✅ عرض سجل مريض معين بواسطة الطبيب
     public function showForDoctor($patientId)
@@ -164,13 +168,22 @@ class PatientProfileController extends Controller
     }
 
 
+    public function forcePasswordChange(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $request->user()->id],
+            'password' => ['required', 'confirmed', 'min:8', Password::defaults()],
+        ]);
 
-    /*  public function update(PatientProfileRequest $request, $id)
-     {
-         $profile = $this->service->repo->getByPatientId($id);
-         $this->authorize('update', $profile);
+        $user = $request->user();
+        $user->update([
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'has_changed_credentials' => true,
+        ]);
 
-         $updated = $this->service->update($request->validated(), $id);
-         return new PatientProfileResource($updated);
-     } */
+        return response()->json([
+            'message' => 'تم تحديث البيانات بنجاح',
+        ]);
+    }
 }

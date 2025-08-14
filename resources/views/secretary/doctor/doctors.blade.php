@@ -67,9 +67,9 @@
                         </button>
 
                         @if ($doctor->is_available_today)
-                            <button class="w-full bg-green-700 py-2 rounded-xl">Exist</button>
+                            <button class="w-full bg-green-900 py-2 rounded-xl">Exist</button>
                         @else
-                            <button class="w-full bg-red-700 py-2 rounded-xl">Not Exist</button>
+                            <button class="w-full bg-red-900 py-2 rounded-xl">Not Exist</button>
                         @endif
                     </div>
                 </div>

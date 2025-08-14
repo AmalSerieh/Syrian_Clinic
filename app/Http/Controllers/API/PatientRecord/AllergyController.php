@@ -79,7 +79,6 @@ class AllergyController extends Controller
         }
 
         $this->authorize('create', [Allergy::class, $record]);
-        $allergyData = $request->validated()['allergies'];
 
 
         $data = $request->validated() + ['patient_record_id' => $record->id];

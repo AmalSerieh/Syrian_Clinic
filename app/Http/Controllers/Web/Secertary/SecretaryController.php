@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\Secertary\Appointement\AppointementSerivce;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -85,7 +86,7 @@ class SecretaryController extends Controller
     }
     public function patient_add()
     {
-        return view('secretary.patient-add');
+        return view('secretary.home.patient_add');
     }
     public function patient_store(Request $request)
     {
@@ -105,7 +106,8 @@ class SecretaryController extends Controller
                 'phone' => $validated['phone'],
                 'role' => 'patient',
                 'created_by' => 'secretary',
-                'created_by_user_id' => auth()->id(),
+                'created_by_user_id' => Auth::user()->secretary->id,
+                'has_changed_credentials' => false,
             ]);
 
             $patient = Patient::create([
@@ -118,7 +120,7 @@ class SecretaryController extends Controller
 
             DB::commit();
 
-            return redirect()->route('secretary.patient')->with('message', 'تمت إضافة المريض بنجاح!');
+            return redirect()->route('secretary.patients')->with('status', 'تمت إضافة المريض بنجاح!');
         } catch (\Exception $e) {
             DB::rollback();
             return back()->withErrors(['error' => 'حدث خطأ أثناء إضافة المريض'])->withInput();

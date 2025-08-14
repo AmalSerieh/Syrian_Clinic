@@ -29,27 +29,52 @@ class AppointementSerivce
     public function confirmAppointment($appointmentId)
     {
         $appointment = $this->repo->updateStatus($appointmentId, 'confirmed');
+        $notificationSent = false;
+
         // إرسال الإشعار للمريض فقط (fcm_token موجود)
-        if ($appointment->patient && $appointment->patient->user->fcm_token) {
-            $appointment->patient->user->notify(new AppointmentConfirmedNotification($appointment));
+        if ($appointment->patient && $appointment->patient->user) {
+            $user = $appointment->patient->user;
+            $user->notify(new AppointmentConfirmedNotification($appointment));
+
+            // إرسال إشعار Firebase فقط إذا كان هناك token
+            if (!empty($user->fcm_token)) {
+                $success = $this->sendFirebaseNotification(
+                    $appointment->patient->user->fcm_token,
+                    'تم تأكيد الموعد',
+                    'تم تأكيد موعدك بتاريخ ' . $appointment->date
+                );
+                if ($success) {
+                    \Log::info("تم إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
+                } else {
+                    \Log::warning("فشل إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
+                }
+            } else {
+                \Log::info("لا يوجد FCM token للمستخدم ID={$user->id}، تم حفظ الإشعار في قاعدة البيانات فقط");
+            }
+        } else {
+            \Log::warning("لا يوجد مريض مرتبط بالموعد ID={$appointment->id}");
+
+
         }
         // إشعار للمريض عبر FCM + notification database
         // $appointment->patient->user->notify(new AppointmentConfirmedNotification($appointment));
         // إرسال إشعار Firebase
-        $success=$this->sendFirebaseNotification(
-            $appointment->patient->user->fcm_token,
-            'تم تأكيد الموعد',
-            'تم تأكيد موعدك بتاريخ ' . $appointment->date
-        );
-        if ($success) {
-            \Log::info("تم إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
-        } else {
-            \Log::warning("فشل إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
-        }
-        return $appointment;
+
+        return [
+            'appointment' => $appointment,
+            'notification_sent' => $notificationSent,
+            'has_token' => !empty($user->fcm_token ?? null)
+        ];
     }
+
+
     public function sendFirebaseNotification($token, $title, $body)
     {
+        if (empty($token)) {
+            \Log::warning("محاولة إرسال إشعار بدون FCM Token");
+            return false;
+        }
+
         try {
             $messaging = (new Factory)
                 ->withServiceAccount(config('services.firebase.credentials_file'))
@@ -63,32 +88,41 @@ class AppointementSerivce
             return true;
         } catch (\Exception $e) {
             \Log::error('Firebase Notification Error: ' . $e->getMessage());
+
             return false;
         }
-
-
     }
+
 
     public function cancelAppointment($appointmentId)
     {
         $appointment = $this->repo->updateStatus($appointmentId, 'canceled_by_secretary');
 
-        if ($appointment->patient && $appointment->patient->user->fcm_token) {
-            $appointment->patient->user->notify(new AppointmentCancelledNotification($appointment));
-        }
-        // إشعار للمريض
-
-        $success = $this->sendFirebaseNotification(
-            $appointment->patient->user->fcm_token,
-            'تم إلغاء الموعد',
-            'تم إلغاء موعدك بتاريخ ' . $appointment->date
-        );
-
-        if ($success) {
-            \Log::info("تم إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
+        if ($appointment->patient && $appointment->patient->user) {
+            $user = $appointment->patient->user;
+            $user->notify(new AppointmentCancelledNotification($appointment));
+            // إرسال إشعار Firebase فقط إذا كان هناك token
+            if (!empty($user->fcm_token)) {
+                $success = $this->sendFirebaseNotification(
+                    $appointment->patient->user->fcm_token,
+                    'تم إلغاء الموعد',
+                    'تم إلغاء موعدك بتاريخ ' . $appointment->date
+                );
+                if ($success) {
+                    \Log::info("تم إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
+                } else {
+                    \Log::warning("فشل إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
+                }
+            } else {
+                \Log::info("لا يوجد FCM token للمستخدم ID={$user->id}، تم حفظ الإشعار في قاعدة البيانات فقط");
+            }
         } else {
-            \Log::warning("فشل إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
+            \Log::warning("لا يوجد مريض مرتبط بالموعد ID={$appointment->id}");
+
+
         }
+
+
         return $appointment;
     }
 

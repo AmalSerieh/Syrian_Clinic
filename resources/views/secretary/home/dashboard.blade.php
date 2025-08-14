@@ -1,17 +1,8 @@
 @extends('layouts.secretary.header')
 
 @section('content')
- <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <a href="{{ route('secretary.doctors') }}" style="background-color: rgb(255, 0, 0);"class="btn btn-danger">Doctor</a>
-    <br> <br>
-    <hr> <br>
-    <a href="{{ route('secretary.patients') }}" style="background-color: rgb(255, 0, 0);"class="btn btn-danger">patients</a>
-    <br> <br>
-    <hr> <br>
-
-
- <div class="p-6 space-y-6">
+    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <div class="p-6 space-y-6">
         <div class="grid grid-cols-3 gap-6 -mt-8 ">
             {{-- قسم الثلثين --}}
             <div class="col-span-2 space-y-2 -ml-5">
@@ -193,7 +184,7 @@
                                 </svg>
                                 <p>Add Appointment</p>
                             </a>
-                            <a href="#"
+                            <a href="{{ route('secretary.patient.add') }}"
                                 class="border-2 border-dashed border-blue-600 p-6 rounded-3xl text-center text-white block">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mx-auto mb-2 text-blue-500"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"

@@ -59,6 +59,7 @@ Route::middleware([SetLocale::class, 'auth:sanctum'])->group(function () {
 });
 Route::middleware([SetLocale::class, 'auth:sanctum'])->group(function () {
     Route::post('change-password', [ResetPasswordController::class, 'changePassword']);
+    Route::post('force-password-change', [PatientProfileController::class, 'forcePasswordChange'])->name('patient.force-password-change');;
     //السجل الطبي
 /*     Route::get('/patient-records/{id}', [PatientRecordController::class, 'show']);
     Route::post('/patient-records', [PatientRecordController::class, 'store']);
