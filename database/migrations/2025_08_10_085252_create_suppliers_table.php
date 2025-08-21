@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->foreignId('secretary_id')->nullable()->constrained('secretaries')->cascadeOnDelete();
             $table->string('sup_name');//اسم المورد
             $table->string('sup_phone')->nullable();//رقم المورد
+            $table->string('sup_photo')->nullable();
             $table->timestamps();
         });
     }

@@ -315,9 +315,9 @@ class DoctorScheduleService
     // منع الحجز المزدوج + إضافة حجز
     public function book1($doctorId, $patientId, $date, $startTime)
     {
-        $doctor = Doctor::with('schedules')->findOrFail($doctorId);
+        $doctor = Doctor::with('doctorSchedule')->findOrFail($doctorId);
         $dayName = Carbon::parse($date)->format('l');
-        $schedule = $doctor->schedules->firstWhere('day', $dayName);
+        $schedule = $doctor->doctorSchedule->firstWhere('day', $dayName);
         if (!$schedule) {
             throw new \Exception('لا يوجد دوام بهذا اليوم');
         }

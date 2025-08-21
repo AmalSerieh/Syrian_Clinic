@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Appointment extends Model
-{  use SoftDeletes;
+{
+    use SoftDeletes;
     protected $fillable = [
         'doctor_id',
         'patient_id',
@@ -31,8 +32,12 @@ class Appointment extends Model
     {
         return $this->belongsTo(Patient::class);
     }
-     public function waitingList()
+    public function waitingList()
     {
         return $this->hasMany(WaitingList::class);
+    }
+    public function visit()
+    {
+        return $this->hasMany(Visit::class);
     }
 }

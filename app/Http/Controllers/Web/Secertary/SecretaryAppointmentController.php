@@ -8,6 +8,7 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\DoctorSchedule;
 use App\Models\Patient;
+use App\Models\User;
 use App\Models\WaitingList;
 use App\Notifications\AppointmentCancelledNotification;
 use App\Notifications\AppointmentConfirmedNotification;
@@ -15,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Services\Secertary\Appointement\AppointementSerivce;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
@@ -31,7 +33,7 @@ class SecretaryAppointmentController extends Controller
         $today = Carbon::today();
         $doctors = Doctor::with('doctorSchedule')->get();
         $appointments = Appointment::with(['doctor', 'patient'])
-             ->whereDate('date', '>=', $today)
+            ->whereDate('date', '>=', $today)
             ->get();
         $bookingRequests = Appointment::where('status', 'pending')
             ->whereDate('date', '>=', $today)
@@ -156,14 +158,13 @@ class SecretaryAppointmentController extends Controller
 
     public function confirm1(Request $request, $appointmentId)
     {
-
+        //dd($appointmentId);
         \Log::info('CSRF token from input: ' . $request->input('_token'));
         \Log::info('From header: ' . $request->header('X-CSRF-TOKEN'));
 
         try {
             $result = $this->service->confirmAppointment($appointmentId);
-            $appointment = $result['appointment'];
-
+            //  dd($result);
             $message = 'تم تأكيد الموعد بنجاح';
 
             if (!$result['has_token']) {
@@ -179,7 +180,6 @@ class SecretaryAppointmentController extends Controller
                     'notification_sent' => $result['notification_sent']
                 ]);
             }
-            //  $appointment = $this->service->cancelAppointment($appointmentId);
 
             return redirect()->back()->with([
                 'status' => 'تم تأكيد الموعد بنجاح',
@@ -560,6 +560,7 @@ class SecretaryAppointmentController extends Controller
             'end_time' => 'required',
             'type_visit' => 'required|in:appointment,review',
             'location_type' => 'required|in:in_Home,on_Street,in_Clinic,at_Doctor,in_Payment,finished',
+            'arrivved_time' => 'required|integer|min:1'
         ]);
 
 
@@ -580,6 +581,7 @@ class SecretaryAppointmentController extends Controller
             'location_type' => $validated['location_type'],
             'created_by' => 'secretary',
             'type_visit' => $validated['type_visit'],
+            'arrivved_time' => $validated['arrivved_time'],
         ]);
 
         // إذا الموعد اليوم -> إكمال السجل الطبي ومنع التعديل
@@ -668,6 +670,7 @@ class SecretaryAppointmentController extends Controller
 
             if ($appointment->patient && $appointment->patient->user) {
                 $user = $appointment->patient->user;
+                
 
                 // Send database notification
                 $user->notify(new AppointmentCancelledNotification($appointment));

@@ -22,6 +22,7 @@ use App\Http\Controllers\Socialite\GoogleController;
 use App\Http\Controllers\API\PatientRecord\PatientProfileController;
 use App\Http\Middleware\SetLocale;
 use App\Models\Appointment;
+use App\Models\Material;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -59,7 +60,8 @@ Route::middleware([SetLocale::class, 'auth:sanctum'])->group(function () {
 });
 Route::middleware([SetLocale::class, 'auth:sanctum'])->group(function () {
     Route::post('change-password', [ResetPasswordController::class, 'changePassword']);
-    Route::post('force-password-change', [PatientProfileController::class, 'forcePasswordChange'])->name('patient.force-password-change');;
+    Route::post('force-password-change', [PatientProfileController::class, 'forcePasswordChange'])->name('patient.force-password-change');
+    ;
     //السجل الطبي
 /*     Route::get('/patient-records/{id}', [PatientRecordController::class, 'show']);
     Route::post('/patient-records', [PatientRecordController::class, 'store']);
@@ -127,13 +129,8 @@ Route::middleware([SetLocale::class])->group(function () {
     Route::get('doctor/{doctor}/month-days', [DoctorScheduleController::class, 'monthDays']);
     Route::get('doctor/{doctor}/day-slots', [DoctorScheduleController::class, 'daySlots']);
 
-
-    // حجز موعد مع طبيب
-//    Route::post('{doctor}/appointments', [AppointmentController::class, 'book']);
-
-
-
 });
+
 
 Route::get('/nbmb/{date}', function ($date) {
     return \App\Models\Appointment::with(['doctor', 'patient'])
@@ -146,17 +143,19 @@ Route::get('/nbmb/{recordId}', function ($recordId) {
     return \App\Models\Visit::whereHas('diseases', function ($q) use ($recordId) {
         $q->where('patient_record_id', $recordId);
     })
-    ->orWhereHas('medications', function ($q) use ($recordId) {
-        $q->where('patient_record_id', $recordId);
-    })
-    ->orWhereHas('operations', function ($q) use ($recordId) {
-        $q->where('patient_record_id', $recordId);
-    })
-    // كرر حسب باقي الفروع
-    ->with('doctor') // لجلب بيانات الطبيب
-    ->get();
+        ->orWhereHas('medications', function ($q) use ($recordId) {
+            $q->where('patient_record_id', $recordId);
+        })
+        ->orWhereHas('operations', function ($q) use ($recordId) {
+            $q->where('patient_record_id', $recordId);
+        })
+        // كرر حسب باقي الفروع
+        ->with('doctor') // لجلب بيانات الطبيب
+        ->get();
+
 
 });
+
 
 
 

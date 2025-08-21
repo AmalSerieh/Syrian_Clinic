@@ -22,11 +22,11 @@
                     class="btn btn-outline-primary w-100">💊 الأدوية</a>
             </div>
             <div class="col-md-3">
-                <a href="{{ route('doctor.medical-record.medicalAttachment', $patient->patient_record->id) }}"
+                <a href="{{ route('doctor.medical-record.medicalAttachments', $patient->patient_record->id) }}"
                     class="btn btn-outline-primary w-100"> 🧪الفحوصات</a>
             </div>
             <div class="col-md-3">
-                <a href="{{ route('doctor.medical-record.allergies', $patient->patient_record->id) }}"
+                <a href="{{ route('doctor.medical-record.allergies.index', $patient->patient_record->id) }}"
                     class="btn btn-outline-primary w-100"> 🌿 الحساسيات</a>
             </div>
             <div class="col-md-3">

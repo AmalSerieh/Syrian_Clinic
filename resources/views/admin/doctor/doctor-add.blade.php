@@ -97,9 +97,8 @@
                             class="w-full text-sm py-1.5 px-2 pr-10 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-50 text-blue-500">
                         <button type="button" onclick="togglePassword('password')"
                             class="absolute right-2 top-8 text-white">
-                            <!-- Eye Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                                class="text-blue-500" stroke="currentColor" stroke-width="2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
                                 <circle cx="12" cy="12" r="3" />
                             </svg>
@@ -118,11 +117,10 @@
                         <input id="password_confirmation" type="password" name="password_confirmation" required
                             autocomplete="new-password" type="password"
                             class="w-full text-sm py-1.5 px-2 pr-10 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-50 text-blue-500">
-                        <button type="button" onclick="togglePassword('confirmPassword')"
+                        <button type="button" onclick="togglePassword('password_confirmation')"
                             class="absolute right-2 top-8 text-white">
-                            <!-- Eye Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                                class="text-blue-500" stroke="currentColor" stroke-width="2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
                                 <circle cx="12" cy="12" r="3" />
                             </svg>
@@ -181,7 +179,7 @@
                 </div>
 
 
-               {{--  <div class="flex gap-4">
+                <div class="flex gap-4">
 
 
                     <!-- type_wage Number (enum) -->
@@ -226,7 +224,7 @@
 
 
                 </div>
- --}}
+
                 <!-- Date of Appointment -->
                 <div>
                     <label for="date_of_appointment" class=" flex block mb-1 text-sm font-medium">
@@ -273,6 +271,21 @@
             input.type = input.type === "password" ? "text" : "password";
         }
 
+        function validatePasswords() {
+            const password = document.getElementById("password").value;
+            const confirm = document.getElementById("password_confirmation").value;
+            const errorText = document.getElementById("passwordError");
+            if (password !== confirm) {
+                errorText.textContent = "Passwords do not match!";
+                return false;
+            } else if (password.length < 6) {
+                errorText.textContent = "Password must be at least 6 characters.";
+                return false;
+            } else {
+                errorText.textContent = "";
+                return true;
+            }
+        }
         // التحقق من الباسوورد عند الإرسال
         document.getElementById('doctorForm').addEventListener('submit', function(e) {
             const password = document.getElementById("password").value;

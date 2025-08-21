@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class StoreDoctorRequest extends FormRequest
@@ -22,7 +23,7 @@ class StoreDoctorRequest extends FormRequest
      */
     public function rules(): array
     {
-         return [
+        return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', 'min:8', Password::defaults()],
@@ -30,8 +31,13 @@ class StoreDoctorRequest extends FormRequest
             'date_of_appointment' => ['required', 'date'],
             'room_id' => 'required|exists:rooms,id',
             'gender' => ['required', 'in:male,female'],
-            'type_wage' => ['required', 'in:number,percentage'],
-            'wage' => ['required', 'number', 'max:255'],
+            'type_wage' => ['required', Rule::in(['number', 'percentage'])],
+            'wage' => [
+                'required',
+                'numeric',
+                Rule::when(request('type_wage') === 'number', ['min:1', 'max:1000000']), // راتب
+                Rule::when(request('type_wage') === 'percentage', ['min:5', 'max:100']),  // نسبة مئوية
+            ],
         ];
     }
 }

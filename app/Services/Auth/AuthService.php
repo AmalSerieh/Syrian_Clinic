@@ -126,7 +126,7 @@ class AuthService
         $otp = rand(10000, 99999);
         EmailOtp::updateOrCreate(
             ['email' => $data['email']],
-            ['otp' => $otp, 'expired_at' => Carbon::now()->addMinutes(10)]
+            ['otp' => $otp, 'expired_at' => Carbon::now()->addMinutes(1)]
         );
 
         Mail::to($data['email'])->send(new EmailOtpMail($otp));
@@ -249,7 +249,7 @@ class AuthService
         $otp = rand(10000, 99999);
         EmailOtp::updateOrCreate(
             ['email' => $email],
-            ['otp' => $otp, 'expired_at' => now()->addMinutes(10)]
+            ['otp' => $otp, 'expired_at' => now()->addMinutes(1)]
         );
 
         Mail::to($email)->send(new EmailOtpMail($otp));

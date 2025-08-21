@@ -34,9 +34,9 @@ class DoctorAppointmentController extends Controller
         $doctorId = $doctor->id;
         $today = Carbon::today();
 
-       /*  if (!$this->isDoctorAvailableNow($doctor->id)) {
-            abort(403, 'الطبيب ليس في وقت دوامه حالياً.');
-        } */
+        /*  if (!$this->isDoctorAvailableNow($doctor->id)) {
+             abort(403, 'الطبيب ليس في وقت دوامه حالياً.');
+         } */
         $appointments = Appointment::with('patient.user')
             ->where('doctor_id', Auth::user()->doctor->id)
             ->whereDate('date', Carbon::today())
@@ -111,58 +111,59 @@ class DoctorAppointmentController extends Controller
 
     }
     public function finishVisit(Request $request, $id)
-{
-    $visit = Visit::with('appointment')->findOrFail($id);
+    {
 
-    $request->validate([
-        'v_notes'  => 'required|string',
-        'v_price'  => 'required|numeric|min:1',
-    ]);
+        $visit = Visit::with('appointment')->findOrFail($id);
 
-    // تحقق من وصفة الطبيب
-    $hasPrescription = Prescription::where('visit_id', $visit->id)->exists();
-    $isFollowUp = $visit->appointment->type === 'followup';
-
-    if (!$isFollowUp && !$hasPrescription) {
-        return back()->withErrors(['error' => 'يجب إدخال وصفة طبية لهذا الموعد.']);
-    }
-
-    // تحقق من وجود مواد مستخدمة
-    $usedMaterials = DoctorMaterial::where('visit_id', $visit->id)->exists();
-    if (!$usedMaterials) {
-        return back()->withErrors(['error' => 'لم يتم تسجيل أي مواد مستخدمة.']);
-    }
-
-    DB::beginTransaction();
-
-    try {
-        $visit->update([
-            'v_notes'     => $request->v_notes,
-            'v_price'     => $request->v_price,
-            'v_status'    => 'in_payment',
-            'v_ended_at'  => now(),
+        $request->validate([
+            'v_notes' => 'required|string',
+            'v_price' => 'required|numeric|min:1',
         ]);
 
-        // تحديث حالة الموعد
-        $visit->appointment->update([
-            'status' => 'completed',
-        ]);
+        // تحقق من وصفة الطبيب
+        $hasPrescription = Prescription::where('visit_id', $visit->id)->exists();
+        $isFollowUp = $visit->appointment->type === 'followup';
 
-        // تحديث قائمة الانتظار
-        WaitingList::where('appointment_id', $visit->appointment_id)
-            ->update([
-                'status'    => 'done',
-                'end_time'  => now(),
+        if (!$isFollowUp && !$hasPrescription) {
+            return back()->withErrors(['error' => 'يجب إدخال وصفة طبية لهذا الموعد.']);
+        }
+
+        // تحقق من وجود مواد مستخدمة
+        $usedMaterials = DoctorMaterial::where('visit_id', $visit->id)->exists();
+        if (!$usedMaterials) {
+            return back()->withErrors(['error' => 'لم يتم تسجيل أي مواد مستخدمة.']);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $visit->update([
+                'v_notes' => $request->v_notes,
+                'v_price' => $request->v_price,
+                'v_status' => 'in_payment',
+                'v_ended_at' => now(),
             ]);
 
-        DB::commit();
+            // تحديث حالة الموعد
+            $visit->appointment->update([
+                'status' => 'completed',
+            ]);
 
-        return redirect()->route('doctor.dashboard')->with('success', 'تم إنهاء الزيارة بنجاح، بانتظار الدفع.');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return back()->withErrors(['error' => 'حدث خطأ أثناء إنهاء الزيارة: ' . $e->getMessage()]);
+            // تحديث قائمة الانتظار
+            WaitingList::where('appointment_id', $visit->appointment_id)
+                ->update([
+                    'status' => 'done',
+                    'end_time' => now(),
+                ]);
+
+            DB::commit();
+
+            return redirect()->route('doctor.dashboard')->with('success', 'تم إنهاء الزيارة بنجاح، بانتظار الدفع.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'حدث خطأ أثناء إنهاء الزيارة: ' . $e->getMessage()]);
+        }
     }
-}
 
     //✅ 1. إدخال السعر (من الطبيب)
 
@@ -194,5 +195,20 @@ class DoctorAppointmentController extends Controller
             ->where('start_time', '<=', $currentTime)
             ->where('end_time', '>=', $currentTime)
             ->exists();
+    }
+
+    public function patientsall(){
+        $appointments = Appointment::with('patient.user')
+            ->where('doctor_id', Auth::user()->doctor->id)
+            ->whereDate('date', '>=', Carbon::today())
+            ->where('status', 'confirmed')
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->get();
+
+        // تفادي التكرار إذا المريض لديه أكثر من موعد اليوم
+        $patients = $appointments->pluck('patient')->unique('id');
+
+        return view('doctor.appointments.patientsall', compact('patients'));
     }
 }

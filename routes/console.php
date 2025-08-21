@@ -11,15 +11,8 @@ Schedule::command('medications:update-progress')->hourly();
 //تجديث حالة الدواء منهية الصلاحية فقط
 //Schedule::command('medications:update-medication-status')->hourly();
 //remaider
-Schedule::command('appointments:remind')->hourly();
+Schedule::command('appointments:remind')->everyMinute();
 //arrivved
 Schedule::command('appointments-get-ready-to-arrive:notify-appointment-status-arrived')->everyMinute();
-
-/* protected function schedule(Schedule $schedule)
-{
-    $schedule->call(function () {
-        \App\Models\MedicationAlarm::whereDate('med_end_date', '<', now())->delete();
-    })->daily();
-} */
 
 

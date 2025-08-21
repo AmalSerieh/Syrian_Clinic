@@ -25,6 +25,7 @@ use App\Http\Controllers\Web\Secertary\SecretaryDoctorController;
 use App\Http\Controllers\Web\Secertary\SecretaryMaterialController;
 use App\Http\Controllers\Web\Secertary\SecretarySupplierController;
 use App\Http\Controllers\Web\Secertary\SecretaryVisitController;
+use App\Models\Material;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -147,6 +148,8 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::delete('/doctor/schedule/{schedule}', [DoctorScheduleController::class, 'destroy'])->name('doctor-schedule.destroy');
     Route::get('/doctor/{doctor}', [DoctorDashboardController::class, 'show'])->name('doctors.show');
 
+ // صفحة جميع المرضى اليوم وما بعده
+    Route::get('/doctor/patients', [DoctorAppointmentController::class, 'patientsall'])->name('doctor.patients.index');
 
     //أدخل المريض
     Route::post('/doctor/appointments/{appointment}/start', [DoctorAppointmentController::class, 'enterConsultation'])
@@ -255,9 +258,14 @@ Route::middleware(['web', 'auth', 'role:secretary'])->group(function () {
     Route::get('/secretary/dashboard', [SecretaryController::class, 'index'])->name('secretary.dashboard');
     Route::get('/secretary/patient/add', [SecretaryController::class, 'patient_add'])->name('secretary.patient.add');
     Route::post('/secretary/patient/store', [SecretaryController::class, 'patient_store'])->name('secretary.patient.store');
-    //Route::get('/secretary/password/edit', [ForgetPasswordController::class, 'edit'])->name('password.edit');
-    //Route::put('/secretary/password/update', [ForgetPasswordController::class, 'update'])->name('password.update');
+    Route::get('/secretary/patient/book/add', [SecretaryController::class, 'book_add'])->name('secretary.patient.book.add')->middleware('web');
+    Route::post('/secretary/patient/book/store', [SecretaryController::class, 'book_store'])->name('secretary.patient.book.store')->middleware('web');
+    Route::get('/session/keepalive', function () {
+        return response()->json(['status' => 'session refreshed']);
+    })->middleware('auth')->name('session.keepalive');
     //Appointement
+    Route::post('/secretary/patient/moveToClinic/{appointment}', [SecretaryController::class, 'moveToClinic'])->name('secretary.patient.appointments.moveto.clinic');
+
 
     // عرض قائمة المواعيد التي تحتاج تأكيد
     Route::get('/secretary/appointments/pending/{doctorId}', [SecretaryAppointmentController::class, 'pendingByDoctor'])->name('secretary.appointments.pending');
@@ -300,9 +308,11 @@ Route::middleware(['web', 'auth', 'role:secretary'])->group(function () {
     Route::get('/secretary/supllier/create', [SecretarySupplierController::class, 'create'])->name('secretary.supplier.create');
     Route::post('/secretary/supllier/store', [SecretarySupplierController::class, 'store'])->name('secretary.supplier.store');
     Route::get('/secretary/supllier/{supplierId}/edit', [SecretarySupplierController::class, 'edit'])->name('secretary.supplier.edit');
-    Route::post('/secretary/supllier/{supplierId}/update', [SecretarySupplierController::class, 'update'])->name('secretary.supplier.update');
+    Route::put('/secretary/supplier/{supplier}/update', [SecretarySupplierController::class, 'update'])
+        ->name('secretary.supplier.update');
     Route::delete('/secretary/supllier/{supplierId}/delete', [SecretarySupplierController::class, 'delete'])->name('secretary.supplier.delete');
     Route::delete('/secretary/supllier/deleteAll', [SecretarySupplierController::class, 'deleteAll'])->name('secretary.supplier.deleteAll');
+
     //material
     Route::get('/secretary/material', [SecretaryMaterialController::class, 'index'])->name('secretary.material');
     Route::get('/secretary/material/create', [SecretaryMaterialController::class, 'create'])->name('secretary.material.create');
@@ -311,7 +321,7 @@ Route::middleware(['web', 'auth', 'role:secretary'])->group(function () {
     Route::post('/secretary/material/{materialId}/update', [SecretaryMaterialController::class, 'update'])->name('secretary.material.update');
     Route::delete('/secretary/material/{materialId}/delete', [SecretaryMaterialController::class, 'delete'])->name('secretary.material.delete');
     Route::delete('/secretary/material/deleteAll', [SecretaryMaterialController::class, 'deleteAll'])->name('secretary.material.deleteAll');
-    Route::delete('/secretary/material/{materialId}/recommended-suppliers', [SecretaryMaterialController::class, 'recommendedSuppliers'])->name('secretary.material.recommended_suppliers');
+    Route::get('/secretary/material/{materialId}/recommended-suppliers', [SecretaryMaterialController::class, 'recommendedSuppliers'])->name('secretary.material.recommendedSuppliers');
 
 
     Route::get('secretary/visits/pending-payments', [SecretaryVisitController::class, 'pendingPayments'])->name('secretary.visits.pendingPayments');
@@ -321,5 +331,21 @@ Route::middleware(['web', 'auth', 'role:secretary'])->group(function () {
 
 });
 
+Route::get('/materials/{material}/suppliers', function (Material $material) {
+    $suppliers = $material->supplierMaterials()->with('supplier')->get();
+
+    return $suppliers->map(function ($supplierMaterial) {
+        return [
+            'id' => $supplierMaterial->supplier->id,
+            'name' => $supplierMaterial->supplier->sup_name,
+            'quantity' => $supplierMaterial->sup_material_quantity,
+            'price' => $supplierMaterial->sup_material_price,
+            'delivered_at' => $supplierMaterial->sup_material_delivered_at
+                ? \Carbon\Carbon::parse($supplierMaterial->sup_material_delivered_at)->format('Y-m-d')
+                : 'غير محدد',
+            'quality' => $supplierMaterial->sup_material_is_damaged ? 'تالفة' : 'جيدة'
+        ];
+    });
+});
 
 require __DIR__ . '/auth.php';

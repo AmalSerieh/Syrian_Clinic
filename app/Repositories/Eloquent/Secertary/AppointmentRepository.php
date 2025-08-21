@@ -32,15 +32,19 @@ class AppointmentRepository implements AppointmentRepositoryInterface
             ->delete(); // يستخدم SoftDeletes
     }
 
-
     public function updateStatus($appointmentId, $status)
     {
-        $appointment = Appointment::findOrFail($appointmentId);
+        $appointment = Appointment::find($appointmentId);
+        if (!$appointment) {
+            \Log::error("الموعد {$appointmentId} غير موجود");
+            return null;
+        }
         $appointment->status = $status;
         $appointment->save();
-
+        \Log::info("تم تحديث حالة الموعد {$appointmentId} إلى {$status}");
         return $appointment;
     }
+
     public function fetchConfirmedAppointmentsToday()
     {
         return Appointment::with(['doctor', 'patient'])
@@ -49,6 +53,6 @@ class AppointmentRepository implements AppointmentRepositoryInterface
             ->orderBy('date') // ليس ضروريًا بما أنه اليوم فقط، لكن لا بأس
             ->orderBy('start_time')
             ->get()
-             ->groupBy('doctor_id'); // تجميع حسب الطبيب;
+            ->groupBy('doctor_id'); // تجميع حسب الطبيب;
     }
 }

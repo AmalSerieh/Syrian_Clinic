@@ -7,7 +7,7 @@
         ✏️ تعديل معلومات المورد
     </x-slot>
 
-    <div class="max-w-2xl mx-auto mt-6 bg-white p-6 rounded shadow">
+    <div class="max-w-2xl mx-auto mt-6  p-6 rounded shadow">
         <form method="POST" action="{{ route('secretary.supplier.update', $supplier->id) }}">
             @csrf
             @method('PUT')
@@ -22,6 +22,11 @@
                 <label for="sup_phone" class="block font-bold">رقم الهاتف</label>
                 <input type="text" name="sup_phone" id="sup_phone" class="form-input w-full"
                     value="{{ old('sup_phone', $supplier->sup_phone) }}">
+            </div>
+             <div class="mb-4">
+                <label for="sup_photo" class="block font-bold">image </label>
+                <input type="text" name="sup_photo" id="sup_photo" class="form-input w-full"
+                    value="{{ old('sup_photo', $supplier->sup_photo) }}">
             </div>
 
             <div class="text-right">

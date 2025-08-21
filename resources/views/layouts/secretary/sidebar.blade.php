@@ -9,8 +9,9 @@
 
 
     <!-- Navigation -->
-    <nav class="flex flex-col space-y-2 text-lg ">
-        <a href="{{route('secretary.dashboard')}}" class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
+    <nav class="flex flex-col space-y-2  text-base ">
+        <a href="{{ route('secretary.dashboard') }}"
+            class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
             <!-- Home icon -->
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -20,7 +21,8 @@
             Home
         </a>
 
-        <a href="{{route('secretary.appointments')}}" class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
+        <a href="{{ route('secretary.appointments') }}"
+            class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
             <!-- Appointment icon -->
             <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -37,7 +39,8 @@
             Appointment
         </a>
 
-        <a href="{{route('secretary.doctors')}}" class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
+        <a href="{{ route('secretary.doctors') }}"
+            class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
             <!-- Doctor icon -->
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -48,7 +51,8 @@
             Doctors
         </a>
 
-        <a href="{{route('secretary.patients')}}" class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
+        <a href="{{ route('secretary.patients') }}"
+            class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
             <!-- Patients icon -->
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -59,13 +63,49 @@
             </svg>
             Patients
         </a>
+
+        <a href="{{ route('secretary.patients') }}"
+            class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
+            <!-- Visits icon -->
+            <!-- Visits Icon - Modern Design -->
+            <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M2 12h20M12 2v20M5 5l14 14" />
+                <circle cx="12" cy="12" r="10" />
+            </svg>
+            Visits
+        </a>
+
+        <a href="{{ route('secretary.supplier') }}"
+            class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
+            <!-- Supplier  icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Supplier
+        </a>
+
+        <a href="{{ route('secretary.material') }}"
+            class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
+            <!-- Material  icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            Material
+        </a>
+
         <form action="{{ route('secretary.logout') }}" method="POST">
             @csrf
             <button type="submit" class="flex items-center gap-3 p-3 rounded hover:bg-[#0f2f41]/50 w-full text-left">
                 <!-- أيقونة تسجيل الخروج -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="lucide lucide-log-out">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="lucide lucide-log-out">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                     <polyline points="16 17 21 12 16 7" />
                     <line x1="21" x2="9" y1="12" y2="12" />

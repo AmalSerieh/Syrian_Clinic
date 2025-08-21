@@ -213,6 +213,7 @@
                     <div class="space-y-2">
                         @if (isset($doctorBookingRequests) && $doctorBookingRequests->count() > 0)
                             @foreach ($doctorBookingRequests as $request)
+
                                 <div class="flex items-center justify-between bg-[#0E2A3F] p-2 rounded-xl">
 
                                     <div class="flex items-center gap-2">
@@ -227,6 +228,7 @@
                                     </div>
 
                                     <div class="flex gap-1 textxs">
+                                        {{-- {{ dd($appointment) }} --}}
                                         <form method="POST"
                                             action="{{ route('secretary.appointment.confirm', $appointment->id) }}">
                                             @csrf
@@ -269,7 +271,7 @@
                             <!-- Book Button -->
 
                             <!-- Icon -->
-                            <a href="{{ route('secretary.appointments.book', [
+                           {{--  <a href="{{ route('secretary.appointments.book', [
                                 'doctor_id' => $doctor->id,
                                 'date' => $nearestSlots[$doctor->id]['date'],
                                 'time' => $nearestSlots[$doctor->id]['time'],
@@ -281,7 +283,7 @@
                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 <span class="text-xs font-semibold">Book</span>
-                            </a>
+                            </a> --}}
 
                         </div>
                         <div class="flex justify-between gap-2 mt-4">
@@ -322,4 +324,50 @@
             </div>
         @endforeach
     </div>
+@endsection
+
+@section('scripts')
+    <script>
+        function confirmAppointment(appointmentId) {
+            fetch(`/secretary/appointment/${appointmentId}/confirm1`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(resp => {
+                    const statusCell = document.querySelector(`#status-${appointmentId}`);
+                    const messageCell = document.querySelector(`#message-${appointmentId}`);
+
+                    if (resp.status) {
+                        // تحديث الحالة مباشرة
+                        if (statusCell) {
+                            statusCell.innerText = 'confirmed';
+                            statusCell.classList.remove('text-yellow-500');
+                            statusCell.classList.add('text-green-500');
+                        }
+
+                        // عرض التحذير إذا وجد
+                        if (messageCell) {
+                            messageCell.innerHTML = resp.message || '';
+                            messageCell.classList.add('text-sm');
+                            if (resp.message.includes('ملاحظة')) {
+                                messageCell.classList.add('text-yellow-500');
+                            }
+                        }
+                    } else {
+                        if (messageCell) {
+                            messageCell.innerHTML = resp.message || 'حدث خطأ أثناء تأكيد الموعد';
+                            messageCell.classList.add('text-sm', 'text-red-500');
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('خطأ في الاتصال بالسيرفر');
+                });
+        }
+    </script>
 @endsection

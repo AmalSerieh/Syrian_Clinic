@@ -1,5 +1,7 @@
-<x-app-layout>
-    @if (session('info'))
+@extends('layouts.doctor.header')
+
+@section('content')
+    @if (session(key: 'info'))
         <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
             {{ session('info') }}
         </div>
@@ -15,14 +17,14 @@
     @endif
 
 
-    <div class="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-6">
+    <div class="max-w-xl mx-auto mt-10  shadow-lg rounded-lg p-6">
         <h2 class="text-xl font-semibold mb-6 text-center text-blue-700">إضافة جدول دوام جديد</h2>
 
         <form action=" {{ route('doctor-schedule.store') }} " method="POST" class="space-y-4">
             @csrf
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">اليوم:</label>
+                <label class="block text-sm font-medium text-gray-500 mb-1">اليوم:</label>
                 <select name="day" required
                     class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     <option value="Monday">Monday</option>
@@ -36,13 +38,13 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">وقت البدء:</label>
+                <label class="block text-sm font-medium text-gray-500 mb-1">وقت البدء:</label>
                 <input type="time" name="start_time" required step="60"
                     class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">وقت النهاية:</label>
+                <label class="block text-sm font-medium text-gray-500 mb-1">وقت النهاية:</label>
                 <input type="time" name="end_time" required step="60"
                     class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
@@ -78,4 +80,4 @@
             </div>
         </form>
     </div>
-</x-app-layout>
+@endsection

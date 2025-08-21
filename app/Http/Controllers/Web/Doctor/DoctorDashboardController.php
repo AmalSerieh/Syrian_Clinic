@@ -20,11 +20,15 @@ class DoctorDashboardController extends Controller
     }
     public function showForceChangeForm()
     {
+
         return view('doctor.editauth.first-login'); // view فيها فورم تغيير الإيميل والباسورد
     }
 
     public function updateCredentials(Request $request)
     {
+        //dd($request->all());
+        \Log::info('UpdateCredentials Request:', $request->all());
+
         $request->validate([
             'email' => 'required|email|unique:users,email,' . auth()->id(),
             'password' => 'required|min:8|confirmed',

@@ -1,5 +1,6 @@
-<x-app-layout>
-    <div class="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-6">
+@extends('layouts.doctor.header')
+
+@section('content')    <div class="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-6">
         <h2 class="text-xl font-semibold mb-6 text-center text-blue-700">تعديل جدول دوام</h2>
 
         @if (session('info'))
@@ -101,4 +102,4 @@
             </button>
         </form>
     </div>
-</x-app-layout>
+@endsection

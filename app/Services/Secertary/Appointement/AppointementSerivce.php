@@ -26,9 +26,59 @@ class AppointementSerivce
         return $this->repo->getPendingByDoctor($doctorId);
     }
 
-    public function confirmAppointment($appointmentId)
+    public function confirmAppointment3($appointmentId)
     {
+        // تحديث الحالة وحفظها أولا
         $appointment = $this->repo->updateStatus($appointmentId, 'confirmed');
+
+        $notificationSent = false;
+        $notificationError = null;
+        $user = $appointment->patient->user ?? null;
+
+        if ($user) {
+            try {
+                // إرسال إشعار عبر Notification database
+                $user->notify(new AppointmentConfirmedNotification($appointment));
+
+                if (!empty($user->fcm_token)) {
+                    // محاولة إرسال الإشعار عبر Firebase بداخل try-catch مستقل
+                    $notificationSent = $this->sendFirebaseNotification(
+                        $user->fcm_token,
+                        'تم تأكيد الموعد',
+                        'تم تأكيد موعدك بتاريخ ' . $appointment->date
+                    );
+                    if ($notificationSent) {
+                        \Log::info("تم إرسال إشعار FCM للمستخدم ID={$user->id}");
+                    } else {
+                        \Log::warning("فشل إرسال إشعار FCM للمستخدم ID={$user->id}");
+                    }
+                } else {
+                    \Log::info("لا يوجد FCM token للمستخدم ID={$user->id}، تم حفظ الإشعار في قاعدة البيانات فقط");
+                }
+            } catch (\Exception $e) {
+                // التقاط الخطأ وعدم رفعه لمنع rollback تحديث الحالة
+                $notificationError = $e->getMessage();
+                \Log::error("خطأ في إرسال إشعار FCM: " . $notificationError);
+            }
+        } else {
+            \Log::warning("لا يوجد مريض مرتبط بالموعد ID={$appointment->id}");
+        }
+
+        // إعادة تحميل الموديل بعد التحديث
+        $appointment->refresh();
+
+        return [
+            'appointment' => $appointment,
+            'notification_sent' => $notificationSent,
+            'notification_error' => $notificationError,
+            'has_token' => !empty($user->fcm_token ?? null)
+        ];
+    }
+
+    public function confirmAppointment($appointmentId)
+    {//dd($appointmentId);
+        $appointment = $this->repo->updateStatus($appointmentId, 'confirmed');
+
         $notificationSent = false;
 
         // إرسال الإشعار للمريض فقط (fcm_token موجود)
@@ -44,6 +94,7 @@ class AppointementSerivce
                     'تم تأكيد موعدك بتاريخ ' . $appointment->date
                 );
                 if ($success) {
+                    $notificationSent = true;
                     \Log::info("تم إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
                 } else {
                     \Log::warning("فشل إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
@@ -56,10 +107,8 @@ class AppointementSerivce
 
 
         }
-        // إشعار للمريض عبر FCM + notification database
-        // $appointment->patient->user->notify(new AppointmentConfirmedNotification($appointment));
-        // إرسال إشعار Firebase
 
+        $appointment->refresh();
         return [
             'appointment' => $appointment,
             'notification_sent' => $notificationSent,
@@ -74,10 +123,15 @@ class AppointementSerivce
             \Log::warning("محاولة إرسال إشعار بدون FCM Token");
             return false;
         }
-
+        \Log::info("Attempting to send to token: {$token}");
         try {
+            $credentialPath = config('services.firebase.credentials_file');
+            if (!file_exists($credentialPath)) {
+                \Log::error('Firebase credentials file not found');
+                return false;
+            }
             $messaging = (new Factory)
-                ->withServiceAccount(config('services.firebase.credentials_file'))
+                ->withServiceAccount($credentialPath)
                 ->createMessaging();
 
             $message = CloudMessage::withTarget('token', $token)
@@ -85,10 +139,12 @@ class AppointementSerivce
                 ->withData(['type' => 'appointment_update']);
 
             $messaging->send($message);
+            \Log::info('Firebase notification sent successfully');
             return true;
         } catch (\Exception $e) {
-            \Log::error('Firebase Notification Error: ' . $e->getMessage());
-
+            \Log::error('Firebase Error: ' . $e->getMessage());
+            \Log::error('Token used: ' . $token);
+            \Log::error('Credentials path: ' . config('services.firebase.credentials_file'));
             return false;
         }
     }
@@ -97,18 +153,24 @@ class AppointementSerivce
     public function cancelAppointment($appointmentId)
     {
         $appointment = $this->repo->updateStatus($appointmentId, 'canceled_by_secretary');
-
+$result = [
+        'has_token' => false,
+        'notification_sent' => false
+    ];
         if ($appointment->patient && $appointment->patient->user) {
             $user = $appointment->patient->user;
+           // dd($user->fcm_token);
             $user->notify(new AppointmentCancelledNotification($appointment));
             // إرسال إشعار Firebase فقط إذا كان هناك token
             if (!empty($user->fcm_token)) {
+                $result['has_token'] = true;
                 $success = $this->sendFirebaseNotification(
                     $appointment->patient->user->fcm_token,
                     'تم إلغاء الموعد',
                     'تم إلغاء موعدك بتاريخ ' . $appointment->date
                 );
                 if ($success) {
+                    $result['notification_sent'] = $success;
                     \Log::info("تم إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
                 } else {
                     \Log::warning("فشل إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
@@ -118,12 +180,8 @@ class AppointementSerivce
             }
         } else {
             \Log::warning("لا يوجد مريض مرتبط بالموعد ID={$appointment->id}");
-
-
         }
-
-
-        return $appointment;
+        return $result;
     }
 
     public function getTodayAppointments()

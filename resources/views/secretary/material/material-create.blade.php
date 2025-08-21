@@ -1,14 +1,17 @@
 <!-- resources/views/secretary/material/material-create.blade.php -->
-
-<x-app-layout>
-    <x-slot name="header">
+@extends('layouts.secretary.header')
+@section('content') <x-slot name="header">
         <h2 class="text-xl font-semibold">➕ إضافة مادة جديدة</h2>
     </x-slot>
 
     <div class="p-4">
         @if ($errors->any())
             <div class="alert alert-danger">
-                <ul>@foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach</ul>
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
@@ -49,8 +52,8 @@
                 <label for="supplier_id" class="form-label">المورد</label>
                 <select name="supplier_id" class="form-control" required>
                     <option disabled selected>اختر المورد</option>
-                    @foreach(\App\Models\Supplier::all() as $supplier)
-                        <option value="{{ $supplier->id }}">{{ $supplier->supplier_name }}</option>
+                    @foreach (\App\Models\Supplier::all() as $supplier)
+                        <option value="{{ $supplier->id }}">{{ $supplier->sup_name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -59,4 +62,4 @@
             <a href="{{ route('secretary.material') }}" class="btn btn-secondary">↩ رجوع</a>
         </form>
     </div>
-</x-app-layout>
+@endsection

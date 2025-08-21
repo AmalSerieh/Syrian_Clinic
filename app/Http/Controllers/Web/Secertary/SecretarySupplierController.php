@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class SecretarySupplierController extends Controller
 {
@@ -17,19 +18,43 @@ class SecretarySupplierController extends Controller
 
     public function store(Request $request)
     {
+        // تحقق من وجود secretary للمستخدم الحالي
+        if (!auth()->user()->secretary) {
+            return redirect()
+                ->route('secretary.supplier')
+                ->with('error', 'لا يوجد سكرتير مرتبط بحسابك');
+        }
+        // تحقق من صحة البيانات المدخلة
         $validated = $request->validate([
             'sup_name' => 'required|string|max:255',
-            'sup_phone' => 'nullable|string|max:10',
+            'sup_phone' => 'required|string|max:10',
+            'sup_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
-        $supp = Supplier::create([
-            'secretary_id' => Auth::user()->secretary->id,
+        $photoPath = null;
+
+        // في حالة وجود صورة مرفوعة
+        if ($request->hasFile('sup_photo')) {
+            $photoPath = $request->file('sup_photo')->store('supplier', 'public');
+        } else {
+            // مسار صورة افتراضية في حالة عدم رفع صورة
+            $photoPath = 'supplier/supplierdefault.webp';
+        }
+
+        // إنشاء مورد جديد
+        $supplier = Supplier::create([
+            'secretary_id' => auth()->user()->secretary->id,
             'sup_name' => $validated['sup_name'],
             'sup_phone' => $validated['sup_phone'],
+            'sup_photo' => $photoPath,
         ]);
 
+        return redirect()
+            ->route('secretary.supplier')
+            ->with('status', 'تم إضافة المورد بنجاح');
+        // إرجاع JSON لعرض ديلوج بنجاح الإضافة (يمكن التحكم به في الواجهة)
 
-        return redirect()->route('secretary.supplier')->with('success', 'تم إضافة المورد بنجاح');
     }
+
     public function index()
     {
         $suppliers = Supplier::withCount('supplierMaterials')->get();
@@ -46,7 +71,8 @@ class SecretarySupplierController extends Controller
     {
         $request->validate([
             'sup_name' => 'required|string|max:255',
-            'sup_phone' => 'nullable|string|max:20',
+            'sup_phone' => 'required|string|max:10',
+            'sup_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $supplier = Supplier::findOrFail($supplierId);
@@ -55,10 +81,28 @@ class SecretarySupplierController extends Controller
             'sup_name' => $request->sup_name,
             'sup_phone' => $request->sup_phone,
         ]);
+        // 2. معالجة الصورة
+        if ($request->hasFile('sup_photo')) {
+            // 2.1 حذف الصورة القديمة
+            if ($supplier->sup_photo) {
+                Storage::disk('public')->delete($supplier->sup_photo);
+            }
+
+            // 2.2 رفع الصورة الجديدة
+            $data['sup_photo'] = $request->file('sup_photo')->store(
+                'supplier',
+                'public'
+            );
+        } else {
+            // 2.3 الاحتفاظ بالصورة الحالية
+            $data['sup_photo'] = $supplier->sup_photo;
+        }
+
+        $supplier->update($data);
 
         return redirect()
             ->route('secretary.supplier')
-            ->with('success', 'تم تعديل معلومات المورد بنجاح.');
+            ->with('status', 'تم تعديل معلومات المورد بنجاح.');
     }
     public function delete($supplierId)
     {
@@ -74,7 +118,7 @@ class SecretarySupplierController extends Controller
 
         return redirect()
             ->route('secretary.supplier')
-            ->with('success', 'تم حذف المورد وكل مواده المرتبطة به بنجاح.');
+            ->with('status', 'تم حذف المورد وكل مواده المرتبطة به بنجاح.');
     }
 
     public function deleteAll()

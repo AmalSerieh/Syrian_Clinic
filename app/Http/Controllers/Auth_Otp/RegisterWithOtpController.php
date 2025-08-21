@@ -194,9 +194,13 @@ class RegisterWithOtpController extends Controller
     }
     //to set tokenfor notification
     public function updateDeviceToken(updateDeviceTokenRequest $request)
-    {
+    {//dd($request);
         $user = auth()->user();
         $user->fcm_token = $request->token;
+        if ($user->fcm_token) {
+            $user->fcm_token = $request->token;
+            $user->update();
+        }
         $user->save();
 
         return response()->json(['message' => 'Device token updated successfully']);

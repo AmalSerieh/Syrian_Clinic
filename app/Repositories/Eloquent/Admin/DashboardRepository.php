@@ -81,13 +81,15 @@ class DashboardRepository implements DashboardRepositoryInterface
             'photo' => 'doctor-profile-photos/default.jpg',
             'room_id' => $data['room_id'],
             'date_of_appointment' => $data['date_of_appointment'],
+            'type_wage' => $data['type_wage'],
+            'wage' => $data['wage']
         ]);
         // اجلب بيانات الغرفة بشكل صريح
-    $room = Room::findOrFail($data['room_id']);
+        $room = Room::findOrFail($data['room_id']);
 
         DoctorProfile::create([
             'doctor_id' => $doctor->id,
-            'specialist_ar' =>$room->room_specialty_ar,
+            'specialist_ar' => $room->room_specialty_ar,
             'specialist_en' => $room->room_specialty_en,
             'gender' => $data['gender'],
         ]);
@@ -106,8 +108,29 @@ class DashboardRepository implements DashboardRepositoryInterface
     {
         return Room::findOrFail($roomId);
     }
-     public function getAllDoctors()
+    public function getAllDoctors()
     {
-        return Doctor::with(['user', 'doctorProfile', 'room'])->get();
+        $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        
+        return Doctor::with(['user', 'doctorProfile', 'room', 'doctorSchedule'])->get()->map(function ($doctor) use ($daysOfWeek) {
+
+            // تجهيز جدول الأسبوع كامل
+            $doctor->full_schedule = collect($daysOfWeek)->map(function ($day) use ($doctor) {
+                $schedule = $doctor->doctorSchedule->firstWhere('day', $day);
+                return [
+                    'day' => ucfirst($day),
+                    'start_time' => optional($schedule)->start_time,
+                    'end_time' => optional($schedule)->end_time,
+                    'has_shift' => !is_null($schedule),
+                ];
+            });
+
+            // تحويل الجدول إلى JSON لتسهيل تمريره
+            $doctor->full_schedule_json = $doctor->full_schedule->toJson();
+
+            return $doctor;
+        });
     }
+
 }

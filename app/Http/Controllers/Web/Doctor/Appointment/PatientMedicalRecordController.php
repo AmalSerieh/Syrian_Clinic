@@ -42,7 +42,7 @@ class PatientMedicalRecordController extends Controller
         }
 
         $record = $patient->patient_record()->with([
-            'patientProfile',
+            'patient_profile',
             'diseases',
             'medications',
             'operations',
@@ -78,7 +78,7 @@ class PatientMedicalRecordController extends Controller
         }
 
         // 3. جلب الملف الشخصي المرتبط بالسجل
-        $patientProfile = $patientRecord->patientProfile;
+        $patientProfile = $patientRecord->patient_profile;
 
         if (!$patientProfile) {
             // في حال لا يوجد ملف بعد

@@ -22,7 +22,7 @@ class DoctorScheduleController extends Controller
     {
         $request->validate([
             'year' => 'required|integer',
-            'month' => 'required|integer'
+            'month' => 'required|numeric|between:1,12'
         ]);
 
         try {
@@ -109,7 +109,7 @@ class DoctorScheduleController extends Controller
             'appointment' => $appointment
         ]);
     }
-    
+
 
 
 }

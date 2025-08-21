@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="dYl3b9yXO9JY-UtPqzPd" name="Page-1">
-        <mxGraphModel dx="630" dy="380" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="632" dy="585" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -2642,7 +2642,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="class digram" id="CwWFlyyupjgJjwraS-8d">
-        <mxGraphModel dx="2330" dy="380" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="2332" dy="585" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="QItoRTB06zP39b2J70ze-0"/>
                 <mxCell id="QItoRTB06zP39b2J70ze-1" parent="QItoRTB06zP39b2J70ze-0"/>
@@ -3002,7 +3002,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="use case" id="9vgkavpY55vAJlVreYG7">
-        <mxGraphModel dx="630" dy="380" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="632" dy="585" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -3364,7 +3364,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="الوصفة الطبية" id="vzHfF43kzTv0SxT4b4ZT">
-        <mxGraphModel dx="1002" dy="380" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="632" dy="585" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -3443,7 +3443,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="الانتظار" id="X0kuUpT2oMFQRGrtcJti">
-        <mxGraphModel dx="1002" dy="380" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="632" dy="585" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -3541,7 +3541,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="المواد الطبية" id="AGa5LoJx2xVbI55qqWNt">
-        <mxGraphModel dx="1002" dy="380" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="632" dy="585" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -3649,7 +3649,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name=" الزائر لجين" id="5vOjFulgKElhJeHoefXd">
-        <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="632" dy="585" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="tNPPg9LvZylYBqaltjqg-0"/>
                 <mxCell id="tNPPg9LvZylYBqaltjqg-1" parent="tNPPg9LvZylYBqaltjqg-0"/>
@@ -3788,7 +3788,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="المنبه" id="LT0GoIY6TF6LJhCwS_0S">
-        <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="632" dy="585" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="7oKSkclnzr8UQroGorIF-0"/>
                 <mxCell id="7oKSkclnzr8UQroGorIF-1" parent="7oKSkclnzr8UQroGorIF-0"/>
@@ -3968,7 +3968,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="التقييم" id="br8GSeK0iwrRRLprGB5M">
-        <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="632" dy="585" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="FZBsAlXxC7ecByaUCfVQ-0"/>
                 <mxCell id="FZBsAlXxC7ecByaUCfVQ-1" parent="FZBsAlXxC7ecByaUCfVQ-0"/>
@@ -4148,7 +4148,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="الزائر" id="vDLh5JZIKFNW33P21Eq1">
-        <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="632" dy="585" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="R640zpMMrBX8k2rwdaEd-0"/>
                 <mxCell id="R640zpMMrBX8k2rwdaEd-1" parent="R640zpMMrBX8k2rwdaEd-0"/>

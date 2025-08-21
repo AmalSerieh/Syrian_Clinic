@@ -52,7 +52,7 @@ return [
         'key' => env('FCM_SERVER_KEY'),
     ],
     'firebase' => [
-        'credentials_file' => storage_path('app/firebase/syrianclinic-de742-firebase-adminsdk-fbsvc-6faf9f4ff8.json'),
+        'credentials_file' => storage_path('app/firebase/tactile-carver-434717-g1-firebase-adminsdk-fbsvc-646d9c2906.json'),
     ],
 
 

@@ -56,7 +56,10 @@
                                         '{{ $doctor->user->name }}',
                                         '{{ $doctor->user->email }}',
                                         '{{ asset('storage/' . $doctor->photo) }}',
-                                        '{{ app()->getLocale() == 'ar' ? $doctor->doctorProfile->specialist_ar ?? 'specialist' : $doctor->doctorProfile->specialist_en ?? 'specialist' }}'
+                                        '{{ app()->getLocale() == 'ar' ? $doctor->doctorProfile->specialist_ar ?? 'specialist' : $doctor->doctorProfile->specialist_en ?? 'specialist' }}',
+                                        '{{ $doctor->type_wage }}',
+                                        '{{ $doctor->wage }}',
+                                         @js($doctor->full_schedule)  <!-- هذي أهم سطر -->
                                     )"
                                     class="bg-black bg-opacity-60 text-white py-3 rounded-full text-sm">
                                     View Details
@@ -130,7 +133,27 @@
                             <h3 class="text-white font-semibold text-xl" x-text="selectedDoctor.name"></h3>
                             <p class="text-gray-400 text-sm" x-text="selectedDoctor.role"></p>
                             <p class="text-gray-400 text-sm" x-text="selectedDoctor.email"></p>
-                            <div class="w-full flex flex-col gap-4 pt-20">
+                            <p class="text-gray-400 text-sm" x-text="selectedDoctor.type_wage , selectedDoctor.wage"
+                                x-text="selectedDoctor.wage"></p>
+                            <p class="text-gray-400 text-sm" x-text="selectedDoctor.wage"></p>
+
+                            <!-- Schedule -->
+                            <div class="mt-4 space-y-2">
+                                <template x-for="day in selectedDoctor.schedule" :key="day.day">
+                                    <div
+                                        class="flex justify-between items-center bg-[#02121D] px-3 py-2 rounded-lg text-sm">
+                                        <span class="text-gray-300" x-text="day.day"></span>
+                                        <span class="px-2 py-1 rounded-full text-xs font-semibold"
+                                            :class="{
+                                                'bg-red-600 text-white': !day.has_shift,
+                                                'bg-green-600 text-white': day.has_shift
+                                            }"
+                                            x-text="day.has_shift ? (day.start_time + ' - ' + day.end_time) : '🚫 لا يوجد دوام'">
+                                        </span>
+                                    </div>
+                                </template>
+                            </div>
+                                <div class="w-full flex flex-col gap-4 pt-20">
                                 <!-- Red Card -->
                                 <div
                                     class="bg-red-900/30 border border-red-700 p-4 rounded-lg shadow flex items-center justify-between gap-3 w-full">
@@ -188,15 +211,21 @@
         function doctorDetails() {
             return {
                 selectedDoctor: null,
-                viewDoctor(name, email, image, role) {
+                viewDoctor(name, email, image, role, type_wage, wage, schedule) {
                     this.selectedDoctor = {
                         name,
                         email,
                         image,
-                        role
+                        role,
+                        type_wage,
+                        wage,
+                        schedule // الآن هذا Array صالح
+
+
                     };
                 }
             }
+
         }
     </script>
 @endsection

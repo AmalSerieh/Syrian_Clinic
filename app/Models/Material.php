@@ -7,17 +7,25 @@ use Illuminate\Database\Eloquent\Model;
 class Material extends Model
 {
     protected $fillable = [
+        'secretary_id',
         'material_name',
         'material_quantity',
         'material_location',
         'material_expiration_date',
         'material_price',
-        'material_threshold'
+        'material_threshold',
+        'material_image'
     ];
 
     public function supplierMaterials()
     {
         return $this->hasMany(SupplierMaterial::class);
+    }
+    public function suppliers()
+    {
+        return $this->belongsToMany(Supplier::class, 'supplier_materials')
+            ->withPivot('sup_material_quantity', 'sup_material_price', 'sup_material_delivered_at', 'sup_material_is_damaged')
+            ->withTimestamps();
     }
 
     public function doctorMaterials()
