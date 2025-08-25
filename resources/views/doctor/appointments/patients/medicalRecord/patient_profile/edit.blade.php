@@ -1,13 +1,14 @@
 <!-- resources/views/doctor/medical-records/patient_profile/edit.blade.php -->
 
-<x-app-layout>
+@extends('layouts.doctor.header')
+@section('content')
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             ✏️ تعديل الملف الطبي للمريض
         </h2>
     </x-slot>
 
-    <div class="py-8 px-6 max-w-4xl mx-auto bg-white rounded-lg shadow">
+    <div class="py-8 px-6 max-w-4xl mx-auto text-black rounded-lg shadow">
         @if ($errors->any())
             <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
                 <ul class="list-disc list-inside">
@@ -20,7 +21,6 @@
 
         <form action="{{ route('doctor.medical-record.patient_profile.update', $patientProfile->id) }}" method="POST">
             @csrf
-            @method('PUT')
 
             <!-- الجنس -->
             <div class="mb-4">
@@ -117,4 +117,4 @@
             </div>
         </form>
     </div>
-</x-app-layout>
+@endsection

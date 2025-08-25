@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\Appointement\AppointmentController;
 use App\Http\Controllers\API\Appointement\NotoficationController;
+use App\Http\Controllers\API\Appointement\VisitController;
 use App\Http\Controllers\API\Doctor\DoctorScheduleController;
 use \App\Http\Controllers\API\PatientRecord\AllergyController;
 use App\Http\Controllers\API\Auth\Profile\ProfileController;
@@ -107,6 +108,10 @@ Route::middleware([SetLocale::class, 'auth:sanctum'])->group(function () {
     Route::get('/patient/appointments', [AppointmentController::class, 'getPatientAppointmentsGroupedByStatus']);
     Route::get('/appointments/confirmed/nearestAll', [AppointmentController::class, 'getConfirmedAppointmentsGroupedByDay']);
     Route::get('/appointments/confirmed/nearest', [AppointmentController::class, 'getNearestConfirmedAppointmentForCurrentUser']);
+    Route::get('/editMedicalRecord/visitlast', [VisitController::class, 'latestEditedVisit']);
+    Route::post('/Evaluation/{visitId}/storeEvaluation', [VisitController::class, 'storeEvaluation']);
+    Route::get('/prescription', [VisitController::class, 'getPrescription']);
+
 
 
 

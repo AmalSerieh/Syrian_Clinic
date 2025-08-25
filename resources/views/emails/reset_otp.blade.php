@@ -24,7 +24,7 @@
                     {{ $otp }}
                 </p>
 
-                <p>This OTP is valid for 10 minutes.</p>
+                <p>This OTP is valid for 1 minute.</p>
                 <p>If you did not request a password reset, please ignore this email.</p>
                 <p>Thank you,<br>Your Application Team</p>
             </td>

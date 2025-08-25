@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Mail\EmailOtpMail;
+use App\Models\Admin;
 use App\Models\Doctor;
 use App\Models\DoctorProfile;
 use App\Models\EmailOtp;
@@ -20,7 +21,7 @@ class RegisterAdminController extends Controller
 {
     public function create()
     {
-        $existingAdmin = User::where('role', 'admin')->first();
+        $existingAdmin = User::where('role', operator: 'admin')->first();
 
         if ($existingAdmin && auth()->check() && auth()->user()->role === 'admin') {
             abort(403, 'غير مصرح لك بإنشاء حساب جديد يرجى طلب المساعدة');
@@ -37,11 +38,11 @@ class RegisterAdminController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', 'min:8', Password::defaults()],
             'phone' => ['required', 'digits:10', 'numeric'],
-          //  'role' => ['required', 'in:admin'],
+            //  'role' => ['required', 'in:admin'],
         ]);
 
         // تحقق من وجود أدمن قبل الإنشاء
-        if ( User::where('role', 'admin')->exists()) {
+        if (User::where('role', 'admin')->exists()) {
             return back()
                 ->withErrors(['role' => 'يوجد بالفعل حساب آدمن في النظام'])
                 ->withInput();
@@ -54,6 +55,12 @@ class RegisterAdminController extends Controller
             'password' => Hash::make($validated['password']),
             'phone' => $validated['phone'],
             'role' => 'admin', // تأكد من استخدام القيمة المصدقة
+        ]);
+
+        // إنشاء السجل الخاص بالسكرتيرة
+        Admin::create([
+            'user_id' => $user->id,
+            'photo' => 'avatars/admin.jpg',
         ]);
 
         return redirect()->route('admin.index');

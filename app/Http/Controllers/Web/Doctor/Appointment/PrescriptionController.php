@@ -10,8 +10,11 @@ use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
 use App\Models\Visit;
+use App\Models\WaitingList;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PrescriptionController extends Controller
 {
@@ -23,15 +26,27 @@ class PrescriptionController extends Controller
             'visit_id' => 'required|exists:visits,id',
         ]);
 
-        $prescription = Prescription::create([
+        $prescription = Prescription::updateOrCreate([
             'patient_id' => $request->patient_id,
             'doctor_id' => auth()->user()->doctor->id,
             'appointment_id' => $request->appointment_id,
             'visit_id' => $request->visit_id,
+        ], [
             'notes' => null,
         ]);
 
-        return redirect()->route('doctor.prescription.addItemForm', $prescription->id);
+        // بدل redirect عادي → رجع JSON
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'id' => $prescription->id,
+            ]);
+        }
+
+        return redirect()->route('doctor.dashboard')
+            ->with('prescription_id', $prescription->id)
+            ->with('patient_id', $request->patient_id);
+
     }
 
     public function addItemForm($prescriptionId)
@@ -44,22 +59,30 @@ class PrescriptionController extends Controller
     {
         $validated =
             $request->validate([
-                'per_type' => 'required|in:chronic,current',
-                'per_name' => 'required|string|max:255',
+                'pre_type' => 'required|in:chronic,current',
+                'pre_name' => 'required|string|max:255',
                 'pre_scientific' => 'nullable|string|max:255',
                 'pre_trade' => 'nullable|string|max:255',
-                'per_start_date' => 'required|date',
-                'per_end_date' => 'nullable|date|after_or_equal:per_start_date',
-                'per_frequency' => 'required|in:once_daily,twice_daily,three_times_daily,daily,weekly,monthly,yearly',
-                'per_dosage_form' => 'required|in:tablet,capsule,pills,syrup,liquid,drops,sprays,patches,injections,powder',
-                'per_dose' => 'required|numeric|min:0.1|max:1000',
-                'per_timing' => 'required|in:before_food,after_food,morning,evening,morning_evening',
+                'pre_start_date' => 'required|date',
+                'pre_end_date' => 'nullable|date|after_or_equal:pre_start_date',
+                'pre_frequency' => 'required|in:once_daily,twice_daily,three_times_daily,daily,weekly,monthly,yearly',
+                'pre_dosage_form' => 'required|in:tablet,capsule,pills,syrup,liquid,drops,sprays,patches,injections,powder',
+                'pre_dose' => 'required|numeric|min:0.1|max:1000',
+                'pre_timing' => 'required|in:before_food,after_food,morning,evening,morning_evening',
                 'instructions' => 'nullable|string',
                 'pre_alternatives' => 'nullable|array',
                 'pre_alternatives.*' => 'string|max:255',
 
+
             ])
         ;
+
+
+        /* // تحويل string لفاصل ',' إلى array ثم إلى JSON
+        $validated['pre_alternatives'] = $validated['pre_alternatives']
+            ? json_encode(array_map('trim', explode(',', $validated['pre_alternatives'])))
+            : null; */
+
         $prescription = Prescription::findOrFail($prescriptionId);
         $doctorId = auth()->user()->doctor->id;
         $patient = Patient::with('user')->findOrFail($prescription->patient_id);
@@ -87,10 +110,9 @@ class PrescriptionController extends Controller
         $validated['pre_total_quantity'] = $this->calculateTotalQuantity($validated);
 
 
-
         $medication = Medication::firstOrCreate(
             [
-                'patient_record_id' => '$record->id',
+                'patient_record_id' => $record->id,
                 'med_type' => $validated['pre_type'],
                 'med_name' => $validated['pre_name'],
                 'med_start_date' => $validated['pre_start_date'],
@@ -101,7 +123,7 @@ class PrescriptionController extends Controller
                 'med_dose' => $validated['pre_dose'],
                 'med_timing' => $validated['pre_timing'],
                 'med_quantity_per_dose' => $validated['pre_quantity_per_dose'],
-                'med_prescribed_by_doctor' => auth()->user()->doctor->name,
+                'med_prescribed_by_doctor' => Auth::user()->name,
                 'med_total_quantity' => $validated['pre_total_quantity'],
                 'med_taken_quantity' => 0,
 
@@ -117,31 +139,34 @@ class PrescriptionController extends Controller
             patientId: $prescription->patient_id,
             visitId: $visit->id
         );
+        // dd($validated);
         $item = PrescriptionItem::create([
             'prescription_id' => $prescription->id,
             'medication_id' => $medication->id,
-            'pre_type' => $request->per_type,
-            'pre_name' => $request->per_name,
-            'pre_scientific' => $request->pre_scientific,
-            'pre_trade' => $request->pre_trade,
-            'pre_start_date' => $request->per_start_date,
-            'pre_end_date' => $request->per_end_date,
-            'pre_frequency' => $request->per_frequency,
-            'pre_frequency_value' => $request->pre_frequency_value,
-            'pre_dosage_form' => $request->pre_dosage_form,
-            'pre_dose' => $request->per_dose,
-            'pre_timing' => $request->per_timing,
-            'pre_quantity_per_dose' => $request->pre_quantity_per_dose,
-            'pre_total_quantity' => $request->pre_total_quantity,
+            'pre_type' => $validated['pre_type'],
+            'pre_name' => $validated['pre_name'],
+            'pre_scientific' => $validated['pre_scientific'],
+            'pre_trade' => $validated['pre_trade'],
+            'pre_start_date' => $validated['pre_start_date'],
+            'pre_end_date' => $validated['pre_end_date'],
+            'pre_frequency' => $validated['pre_frequency'],
+            'pre_frequency_value' => $validated['pre_frequency_value'],   // ✅ المصححة
+            'pre_dosage_form' => $validated['pre_dosage_form'],
+            'pre_dose' => $validated['pre_dose'],
+            'pre_timing' => $validated['pre_timing'],
+            'pre_quantity_per_dose' => $validated['pre_quantity_per_dose'], // ✅ المصححة
+            'pre_total_quantity' => $validated['pre_total_quantity'],       // ✅ المصححة
             'pre_taken_quantity' => 0,
-            'pre_prescribed_by_doctor' => auth()->user()->name,
-            'instructions' => $request->instructions,
-            'pre_alternatives' => isset($validated['pre_alternatives']) ? json_encode($validated['pre_alternatives']) : null,
-
+            'pre_prescribed_by_doctor' => Auth::user()->name,
+            'instructions' => $validated['instructions'] ?? null,
+            'pre_alternatives' => isset($validated['pre_alternatives'])
+                ? json_encode($validated['pre_alternatives'])
+                : null,
         ]);
 
 
-        return back()->with('success', 'تمت إضافة الدواء بنجاح.');
+
+        return back()->with('status', 'تمت إضافة الدواء بنجاح.');
     }
     public function prescription()
     {
@@ -212,7 +237,7 @@ class PrescriptionController extends Controller
     }
     public function calculateTotalQuantity(array $data): int
     {
-        $start = Carbon::parse($data['med_start_date']);
+        $start = Carbon::parse($data['pre_start_date']);
         $now = now();
 
         if ($start->gt($now)) {
@@ -221,16 +246,16 @@ class PrescriptionController extends Controller
         }
 
         // إذا كان الدواء مؤقت وله end date
-        if ($data['med_type'] === 'current' && !empty($data['med_end_date'])) {
-            $end = Carbon::parse($data['med_end_date']);
+        if ($data['pre_type'] === 'current' && !empty($data['pre_end_date'])) {
+            $end = Carbon::parse($data['pre_end_date']);
         } else {
             // chronic → بدون end_date، نحسب حتى الآن فقط
             $end = $now;
         }
 
         $days = $start->diffInDays($end) + 1;
-        $perDay = $this->getFrequencyValue($data['med_frequency']);
-        $quantityPerDose = (float) $data['med_dose'];
+        $perDay = $this->getFrequencyValue($data['pre_frequency']);
+        $quantityPerDose = (float) $data['pre_dose'];
 
         return (int) ceil($days * $perDay * $quantityPerDose);
     }
@@ -273,8 +298,7 @@ class PrescriptionController extends Controller
         if (!$appointment)
             return null;
 
-        $waiting = DB::table('waiting_list')
-            ->where('appointment_id', $appointment->id)
+        $waiting = WaitingList::where('appointment_id', $appointment->id)
             ->where('w_status', 'in_progress')
             ->exists();
 

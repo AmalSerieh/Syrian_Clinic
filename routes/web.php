@@ -26,10 +26,11 @@ use App\Http\Controllers\Web\Secertary\SecretaryMaterialController;
 use App\Http\Controllers\Web\Secertary\SecretarySupplierController;
 use App\Http\Controllers\Web\Secertary\SecretaryVisitController;
 use App\Models\Material;
+use App\Models\Appointment;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+use App\Services\Secertary\Notification\AppointementStatusArrivvedNotificationService;
 
 
 Route::get('/', function () {
@@ -86,6 +87,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
     Route::post('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
     Route::get('/admin/doctor/search', [AdminController::class, 'search'])->name('admin.doctors.search');
+    Route::put('/admin/profile/update', [LoginAdminController::class, 'updateProfile'])->name('admin.profile.update');
 
 
 
@@ -117,6 +119,7 @@ Route::middleware('guest')->group(function () {
 
 });
 Route::middleware(['auth', 'role:doctor'])->group(function () {
+    Route::post('doctor/logout', [AdminController::class, 'logout'])->name('doctor.logout');
     //force-change for first login
     Route::get('/doctor/first-login', [DoctorDashboardController::class, 'showForceChangeForm'])->name('doctor.first-login');
     Route::post('/doctor/first-login/update', [DoctorDashboardController::class, 'updateCredentials'])->name('doctor.first-login.update');
@@ -127,13 +130,15 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::put('/doctor/profile/photo', [DoctorDashboardController::class, 'updateProfilePhoto'])->name('doctor.profile.photo.update');
     Route::get('/doctor/password/edit', [ForgetPasswordController::class, 'edit'])->name('doctor.password.edit');
     Route::put('/doctor/password/update', [ForgetPasswordController::class, 'update'])->name('doctor.password.update');
+    Route::put('/doctor/profile/update', [DoctorDashboardController::class, 'updateProfile'])->name('doctor.profile.update');
+
 
     //Doctor Profile
     Route::get('/doctor/profile/create', [DoctorProfileController::class, 'createProfile'])->name('doctor-profile.create');
     Route::post('/doctor/profile/store', [DoctorProfileController::class, 'storeProfile'])->name('doctor-profile.store');
     Route::get('/doctor/profile/show', [DoctorProfileController::class, 'showProfile'])->name('doctor-profile.show');
     Route::get('/doctor-profile/{id}/edit', [DoctorProfileController::class, 'edit'])->name('doctor-profile.edit');
-    Route::put('/doctor-profile/{id}/update', [DoctorProfileController::class, 'updateProfile'])->name('doctor-profile.update');
+    Route::post('/doctor-profile/{id}/update', [DoctorProfileController::class, 'updateProfile'])->name('doctor-profile.update');
     //schedules
     Route::get('/doctor/schedules', [DoctorScheduleController::class, 'index'])->name('doctor-schedule.index');
     //عرض المرضى يلي في العيادة
@@ -148,8 +153,9 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::delete('/doctor/schedule/{schedule}', [DoctorScheduleController::class, 'destroy'])->name('doctor-schedule.destroy');
     Route::get('/doctor/{doctor}', [DoctorDashboardController::class, 'show'])->name('doctors.show');
 
- // صفحة جميع المرضى اليوم وما بعده
-    Route::get('/doctor/patients', [DoctorAppointmentController::class, 'patientsall'])->name('doctor.patients.index');
+    // صفحة جميع المرضى اليوم وما بعده
+    Route::get('/doctor/appointments/patients', [DoctorAppointmentController::class, 'patientsall'])->name('doctor.patients.index');
+    Route::post('doctor/appointments/patients/{appointment}/cancel', [DoctorAppointmentController::class, 'cancel1'])->name('doctor.patients.appointment.cancel');
 
     //أدخل المريض
     Route::post('/doctor/appointments/{appointment}/start', [DoctorAppointmentController::class, 'enterConsultation'])
@@ -162,7 +168,7 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
 
         Route::get('/{patientRecordId}/patient_profile', [PatientMedicalRecordController::class, 'patient_profile'])->name('doctor.medical-record.patient_profile');
         Route::get('/{patientProfileId}/patient_profile/edit', [PatientMedicalRecordController::class, 'patient_profile_Edit'])->name('doctor.medical-record.patient_profile.edit');
-        Route::post('/{patientProfileId}/patient_profile/update', [PatientMedicalRecordController::class, 'patient_profile_Update'])->name('doctor.medical-record.patient_profile.update');
+        Route::put('/{patientProfileId}/patient_profile/update', [PatientMedicalRecordController::class, 'patient_profile_Update'])->name('doctor.medical-record.patient_profile.update');
         Route::get('/{patientId}/patient_profile/create', [PatientMedicalRecordController::class, 'patient_profile_Create'])->name('doctor.medical-record.patient_profile.create');
         Route::post('/{patientId}/patient_profile/store', [PatientMedicalRecordController::class, 'patient_profile_Store'])->name('doctor.medical-record.patient_profile.store');
 
@@ -185,7 +191,8 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
         Route::get('/{patientRecordId}/medications/deleteAll', [PatientMedicalRecordController::class, 'medications_DeleteAll'])->name('doctor.medical-record.medicationsAll');
 
 
-        Route::get('/{patientRecordId}/operations/list', [PatientMedicalRecordController::class, 'operations'])->name('doctor.medical-record.operations');
+
+        Route::get('/{patientRecordId}/operations', [PatientMedicalRecordController::class, 'operations'])->name('doctor.medical-record.operations');
         Route::get('/{operationId}/operations/edit', [PatientMedicalRecordController::class, 'operations_Edit'])->name('doctor.medical-record.operations.edit');
         Route::post('/{operationId}/operations/update', [PatientMedicalRecordController::class, 'operations_Update'])->name('doctor.medical-record.operations.update');
         Route::get('/{patientId}/operations/create', [PatientMedicalRecordController::class, 'operations_Create'])->name('doctor.medical-record.operations.create');
@@ -227,16 +234,18 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
 
 
 
-    Route::get('doctor/prescriptions/create', [PrescriptionController::class, 'createPrescription'])->name('doctor.prescription.create');
+    Route::post('doctor/prescriptions/create', [PrescriptionController::class, 'createPrescription'])->name('doctor.prescription.create');
     Route::get('doctor/{prescriptionId}/prescriptions/addItemForm', [PrescriptionController::class, 'addItemForm'])->name('doctor.prescription.addItemForm');
-    Route::post('doctor/{prescriptionId}/prescriptions', [PrescriptionController::class, 'addMedicineToPrescription'])->name('doctor.prescription.store');
+    Route::post('doctor/{prescriptionId}/prescriptions/store', [PrescriptionController::class, 'addMedicineToPrescription'])->name('doctor.prescription.store');
     Route::get('doctor/prescriptions', [PrescriptionController::class, 'prescription'])->name('doctor.prescription');
 
     Route::prefix('doctor/materials')->middleware('auth')->group(function () {
         Route::get('/create', [DoctorMaterialController::class, 'create'])->name('doctor.material.create');
-        Route::post('/store', [DoctorMaterialController::class, 'store'])->name('doctor.material.store');
+        Route::post('/store', [DoctorMaterialController::class, 'storeMultiple'])->name('doctor.materials.storeMultiple');
         Route::get('/used', [DoctorMaterialController::class, 'index'])->name('doctor.material.index');
     });
+
+    Route::post('doctor/appointments/patients/{visitId}/finishVisit', [DoctorAppointmentController::class, 'finishVisit'])->name('doctor.visits.finish');
 
 
 
@@ -255,6 +264,7 @@ Route::middleware('guest')->group(function () {
 
 });
 Route::middleware(['web', 'auth', 'role:secretary'])->group(function () {
+
     Route::get('/secretary/dashboard', [SecretaryController::class, 'index'])->name('secretary.dashboard');
     Route::get('/secretary/patient/add', [SecretaryController::class, 'patient_add'])->name('secretary.patient.add');
     Route::post('/secretary/patient/store', [SecretaryController::class, 'patient_store'])->name('secretary.patient.store');
@@ -265,6 +275,7 @@ Route::middleware(['web', 'auth', 'role:secretary'])->group(function () {
     })->middleware('auth')->name('session.keepalive');
     //Appointement
     Route::post('/secretary/patient/moveToClinic/{appointment}', [SecretaryController::class, 'moveToClinic'])->name('secretary.patient.appointments.moveto.clinic');
+    Route::post('/secretary/patient/{appointmentId}/ConfirmPay', [SecretaryController::class, 'ConfirmPay'])->name('secretary.patient.appointments.ConfirmPay');
 
 
     // عرض قائمة المواعيد التي تحتاج تأكيد
@@ -346,6 +357,24 @@ Route::get('/materials/{material}/suppliers', function (Material $material) {
             'quality' => $supplierMaterial->sup_material_is_damaged ? 'تالفة' : 'جيدة'
         ];
     });
+});
+Route::get('/test-notification/{appointmentId}', function ($appointmentId) {
+    $appointment = Appointment::findOrFail($appointmentId);
+    $service = new AppointementStatusArrivvedNotificationService();
+
+    // اختبار إشعار Firebase
+    if ($appointment->patient->user->fcm_token) {
+        $result = $service->sendFirebaseNotification(
+            $appointment->patient->user->fcm_token,
+            'اختبار إشعار',
+            'هذا إشعار اختبار فقط',
+            $appointment->id
+        );
+
+        return response()->json(['success' => $result]);
+    }
+
+    return response()->json(['error' => 'لا يوجد token للمستخدم']);
 });
 
 require __DIR__ . '/auth.php';

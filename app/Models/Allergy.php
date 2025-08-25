@@ -46,6 +46,7 @@ class Allergy extends Model
     }
 
     // 🔐 فك التشفير عند الجلب
+    // 🔐 فك التشفير عند الجلب
     public function getAttribute($key)
     {
         $value = parent::getAttribute($key);
@@ -58,6 +59,12 @@ class Allergy extends Model
         }
         return $value;
     }
+// Accessors لكل حقل مشفر لتسهيل JSON
+    public function getDecryptedAllerNameAttribute() { return $this->getDecryptedAttribute('aller_name'); }
+    public function getDecryptedAllerCauseAttribute() { return $this->getDecryptedAttribute('aller_cause'); }
+    public function getDecryptedAllerTreatmentAttribute() { return $this->getDecryptedAttribute('aller_treatment'); }
+    public function getDecryptedAllerPerventionAttribute() { return $this->getDecryptedAttribute('aller_pervention'); }
+    public function getDecryptedAllerReasonsAttribute() { return $this->getDecryptedAttribute('aller_reasons'); }
 
 
 }

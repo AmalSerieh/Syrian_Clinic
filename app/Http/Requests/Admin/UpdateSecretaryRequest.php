@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateSecretaryRequest extends FormRequest
 {
@@ -21,12 +22,19 @@ class UpdateSecretaryRequest extends FormRequest
      */
     public function rules(): array
     {
-       return [
+        return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['required', 'digits:10'],
             'password' => ['nullable', 'confirmed', 'min:8'], // اجعلها nullable
             'date_of_appointment' => ['required', 'date'],
+            'type_wage' => ['required', Rule::in(['number', 'percentage'])],
+            'wage' => [
+                'required',
+                'numeric',
+                Rule::when(request('type_wage') === 'number', ['min:1', 'max:1000000']), // راتب
+                Rule::when(request('type_wage') === 'percentage', ['min:5', 'max:100']),  // نسبة مئوية
+            ],
         ];
     }
 }

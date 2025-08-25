@@ -39,6 +39,10 @@ class Medication extends Model
     {
         return $this->belongsTo(Visit::class);
     }
+    public function items()
+    {
+        return $this->hasMany(PrescriptionItem::class);
+    }
 
     public function getIsActiveAttribute()
     {

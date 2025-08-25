@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('appointment_id')->constrained('appointments')->cascadeOnDelete();
             $table->foreignId('doctor_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('patient_id')->constrained('users')->cascadeOnDelete();
-            $table->dateTime('v_started_at');
-            $table->dateTime('v_ended_at');
+            $table->dateTime('v_started_at')->nullable();
+            $table->dateTime('v_ended_at')->nullable();
             $table->enum('v_status', ['active', 'in_payment','completed']);
             $table->decimal('v_price', 10, 2)->nullable();
             $table->boolean('v_paid')->default(false);

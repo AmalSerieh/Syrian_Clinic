@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class StoreSecretaryRequest extends FormRequest
@@ -29,6 +30,13 @@ class StoreSecretaryRequest extends FormRequest
             'phone' => ['required', 'digits:10', 'numeric'],
             'date_of_appointment' => ['required', 'date'],
             'gender' => 'required|string|in:male,female',
+            'type_wage' => ['required', Rule::in(['number', 'percentage'])],
+            'wage' => [
+                'required',
+                'numeric',
+                Rule::when(request('type_wage') === 'number', ['min:1', 'max:1000000']), // راتب
+                Rule::when(request('type_wage') === 'percentage', ['min:5', 'max:100']),  // نسبة مئوية
+            ],
 
         ];
     }

@@ -375,7 +375,7 @@
 
                     <div class="relative">
                         <div class="overflow-y-auto" :class="!showAll ? 'max-h-[140px]' : ''">
-                            <ul class="space-y-4">
+                            <ul class="space-y-4 max-h-40 overflow-y-auto scrollbar-hide">
                                 <template x-if="!hasPatients()">
                                     <li class="text-center py-4 text-gray-400">
                                         There are no patients with this doctor.
@@ -564,7 +564,7 @@
                                 <div class="text-right">
                                     {{ $paymentPatient->visit->first()->v_price }}
                                     <form
-                                        action="{{ route('secretary.patient.appointments.moveto.clinic', $paymentPatient->id) }}"
+                                        action="{{ route('secretary.patient.appointments.ConfirmPay', $paymentPatient->id) }}"
                                         method="POST">
                                         @csrf
                                         <button type="submit"
@@ -787,5 +787,18 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
+        }
     </style>
+
 @endsection

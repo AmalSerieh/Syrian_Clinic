@@ -31,9 +31,16 @@ class Doctor extends Model
         return $this->hasMany(DoctorSchedule::class, 'doctor_id');
 
     }
+
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
+    }
+
+    public function evaluat()
+    {
+        return $this->hasMany(VisitEvaluation::class);
+
     }
 
     public function hasFinishedOrConfirmedAppointmentWith($patientId): bool

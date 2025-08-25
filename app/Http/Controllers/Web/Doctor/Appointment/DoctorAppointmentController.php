@@ -7,12 +7,17 @@ use App\Models\Appointment;
 use App\Models\DoctorMaterial;
 use App\Models\DoctorSchedule;
 use App\Models\Prescription;
+use App\Models\User;
 use App\Models\Visit;
 use App\Models\WaitingList;
+use App\Notifications\AppointmentCancelledNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
 class DoctorAppointmentController extends Controller
 {
     //عرض المرضى تبع اليوم
@@ -63,6 +68,24 @@ class DoctorAppointmentController extends Controller
             if ($appointment->location_type !== 'in_Clinic') {
                 return back()->with('error', 'المريض غير متواجد في العيادة.');
             }
+            $doctor = $appointment->doctor;
+
+            // ✅ تحقق أن الطبيب ضمن دوامه
+            $todayDay = now()->format('l'); // Sunday, Monday, ...
+            $nowTime = now()->format('H:i:s');
+
+            $doctorSchedule = DoctorSchedule::where('doctor_id', $doctor->id)
+                //->where('day', $todayDay)
+                ->where('start_time', '<=', $nowTime)
+                ->where('end_time', '>=', $nowTime)
+                ->get();
+
+
+            /* if ($doctorSchedule->isEmpty()) {
+                // dd("الطبيب ليس ضمن دوامه الآن");
+                return back()->with('error', 'الطبيب غير متواجد في العيادة الآن (خارج أوقات الدوام).');
+            } */
+
 
             // تحقق أن هذا المريض هو أول من ينتظر للدخول عند هذا الطبيب اليوم
             $firstInLine = Appointment::where('doctor_id', $appointment->doctor_id)
@@ -71,10 +94,10 @@ class DoctorAppointmentController extends Controller
                 ->where('status', 'confirmed')
                 ->orderBy('start_time')
                 ->first();
-
-            if (!$firstInLine || $firstInLine->id !== $appointment->id) {
-                return back()->with('error', 'ليس هذا دور هذا المريض بعد.');
-            }
+            /*
+           if (!$firstInLine || $firstInLine->id !== $appointment->id) {
+               return back()->with('error', 'ليس هذا دور هذا المريض بعد.');
+           } */
 
 
             // تحديث جدول الانتظار: الحالة إلى in_progress، وتسجيل وقت الدخول
@@ -86,6 +109,7 @@ class DoctorAppointmentController extends Controller
                     'w_start_time' => now()// وقت بدء المعاينة
                 ]);
             }
+
 
             // تحديث الموعد: مكان المريض في العيادة عند الطبيب
             $appointment->update([
@@ -101,11 +125,14 @@ class DoctorAppointmentController extends Controller
                 'patient_id' => $appointment->patient_id,
                 'v_started_at' => Carbon::now(),
                 'v_status' => 'active',
+                'v_ended_at' => null, // <--- هنا
             ]);
 
-            return back()->with('success', 'تم إدخال المريض إلى غرفة المعاينة.');
+
+            return back()->with('status', 'تم إدخال المريض إلى غرفة المعاينة.');
         } catch (\Exception $e) {
             \Log::error('فشل في إدخال المريض: ' . $e->getMessage());
+            //dd($e->getMessage(), $e->getFile(), $e->getLine());
             return back()->with('error', 'حدث خطأ أثناء إدخال المريض.');
         }
 
@@ -116,7 +143,7 @@ class DoctorAppointmentController extends Controller
         $visit = Visit::with('appointment')->findOrFail($id);
 
         $request->validate([
-            'v_notes' => 'required|string',
+            'v_notes' => 'nullable|string',
             'v_price' => 'required|numeric|min:1',
         ]);
 
@@ -129,10 +156,10 @@ class DoctorAppointmentController extends Controller
         }
 
         // تحقق من وجود مواد مستخدمة
-        $usedMaterials = DoctorMaterial::where('visit_id', $visit->id)->exists();
-        if (!$usedMaterials) {
-            return back()->withErrors(['error' => 'لم يتم تسجيل أي مواد مستخدمة.']);
-        }
+        /*  $usedMaterials = DoctorMaterial::where('visit_id', $visit->id)->exists();
+         if (!$usedMaterials) {
+             return back()->withErrors(['error' => 'لم يتم تسجيل أي مواد مستخدمة.']);
+         } */
 
         DB::beginTransaction();
 
@@ -147,18 +174,24 @@ class DoctorAppointmentController extends Controller
             // تحديث حالة الموعد
             $visit->appointment->update([
                 'status' => 'completed',
+                'location_type' => 'in_Payment'
             ]);
+
 
             // تحديث قائمة الانتظار
             WaitingList::where('appointment_id', $visit->appointment_id)
                 ->update([
-                    'status' => 'done',
-                    'end_time' => now(),
+                    'w_status' => 'done',
+                    'w_end_time' => now(),
                 ]);
 
             DB::commit();
 
-            return redirect()->route('doctor.dashboard')->with('success', 'تم إنهاء الزيارة بنجاح، بانتظار الدفع.');
+
+            // إعادة التوجيه مع Flash message للسعر
+            return redirect()->back()
+                ->with('success', 'تم إنهاء الزيارة بنجاح، بانتظار الدفع.')
+                ->with('v_price', $visit->v_price);
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'حدث خطأ أثناء إنهاء الزيارة: ' . $e->getMessage()]);
@@ -197,8 +230,10 @@ class DoctorAppointmentController extends Controller
             ->exists();
     }
 
-    public function patientsall(){
-        $appointments = Appointment::with('patient.user')
+    public function patientsall()
+    {
+        // الحصول على مواعيد الدكتور المؤكدة من اليوم فصاعداً
+        $appointments = Appointment::with(['patient.user', 'patient'])
             ->where('doctor_id', Auth::user()->doctor->id)
             ->whereDate('date', '>=', Carbon::today())
             ->where('status', 'confirmed')
@@ -206,9 +241,205 @@ class DoctorAppointmentController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        // تفادي التكرار إذا المريض لديه أكثر من موعد اليوم
-        $patients = $appointments->pluck('patient')->unique('id');
+        // تجميع المواعيد حسب المريض وأخذ أحدث موعد
+        $patients = collect();
 
-        return view('doctor.appointments.patientsall', compact('patients'));
+        foreach ($appointments->groupBy('patient_id') as $patientAppointments) {
+            $patient = $patientAppointments->first()->patient;
+            $latestAppointment = $patientAppointments->sortByDesc(function ($appt) {
+                return $appt->date . ' ' . $appt->start_time;
+            })->first();
+
+            $patient->latest_appointment = $latestAppointment;
+            $patients->push($patient);
+        }
+
+        return view('doctor.appointments.patientsall', compact('patients', 'appointments'));
+    }
+
+    public function cancel1(Request $request, $appointmentId)
+    {
+        \Log::info('CSRF token from input: ' . $request->input('_token'));
+        \Log::info('From header: ' . $request->header('X-CSRF-TOKEN'));
+
+        try {
+            $result = $this->cancelAppointment($appointmentId);
+
+            $message = 'تم إلغاء الموعد بنجاح';
+            $notificationDetails = '';
+
+            if (!$result['has_token']) {
+                $notificationDetails = 'لم يتم إرسال إشعار للتطبيق لأن المريض ليس لديه جهاز مسجل';
+            } elseif (!$result['token_valid']) {
+                $notificationDetails = 'لم يتم إرسال إشعار للتطبيق لأن رمز الجهاز غير صالح';
+            } elseif (!$result['notification_sent']) {
+                $notificationDetails = 'حدث خطأ في إرسال الإشعار للتطبيق';
+            }
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => true,
+                    'message' => $message,
+                    'notification_sent' => $result['notification_sent'],
+                    'notification_details' => $notificationDetails
+                ]);
+            }
+
+            return redirect()->back()->with([
+                'status' => $message,
+                'notification_warning' => $notificationDetails
+            ]);
+
+        } catch (\Exception $e) {
+            $errorMessage = 'فشل إلغاء الموعد: ' . $e->getMessage();
+            \Log::error($errorMessage);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $errorMessage
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', $errorMessage);
+        }
+    }
+    public function cancelAppointment($appointmentId)
+    {
+        $appointment = $this->updateStatus($appointmentId, 'canceled_by_doctor');
+        $result = [
+            'has_token' => false,
+            'notification_sent' => false,
+            'token_valid' => false
+        ];
+        if ($appointment->patient && $appointment->patient->user) {
+            $user = $appointment->patient->user;
+            // dd($user->fcm_token);
+            $user->notify(new AppointmentCancelledNotification($appointment));
+            // إرسال إشعار Firebase فقط إذا كان هناك token
+            if (!empty($user->fcm_token)) {
+                $result['has_token'] = true;
+                $result['token_valid'] = true;
+                $success = $this->sendFirebaseNotification(
+                    $appointment->patient->user->fcm_token,
+                    'تم إلغاء الموعد' . $appointment->doctor->user->name,
+                    'تم إلغاء موعدك بتاريخ ' . $appointment->date
+                );
+                if ($success) {
+                    $result['notification_sent'] = $success;
+                    \Log::info("تم إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
+                } else {
+                    \Log::warning("فشل إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
+                }
+            } else {
+                $result['has_token'] = !empty($user->fcm_token);
+                $result['token_valid'] = false;
+                \Log::info("لا يوجد FCM token للمستخدم ID={$user->id}، تم حفظ الإشعار في قاعدة البيانات فقط");
+            }
+        } else {
+            \Log::warning("لا يوجد مريض مرتبط بالموعد ID={$appointment->id}");
+        }
+        return $result;
+    }
+    public function sendFirebaseNotification($token, $title, $body)
+    {
+        if (empty($token)) {
+            \Log::warning("محاولة إرسال إشعار بدون FCM Token");
+            return false;
+        }
+
+        // التحقق من صحة الـ token
+        if (!$this->isValidFcmToken($token)) {
+            \Log::warning("FCM token غير صالح: {$token}");
+            return false;
+        }
+        \Log::info("Attempting to send to token: {$token}");
+        try {
+            $credentialPath = config('services.firebase.credentials_file');
+            if (!file_exists($credentialPath)) {
+                \Log::error('Firebase credentials file not found');
+                return false;
+            }
+
+
+            // التحقق من صحة ملف الاعتماد
+            $credentials = json_decode(file_get_contents($credentialPath), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                \Log::error('Invalid JSON in Firebase credentials file');
+                return false;
+            }
+
+            $messaging = (new Factory)
+                ->withServiceAccount($credentialPath)
+                ->createMessaging();
+
+            $message = CloudMessage::withTarget('token', $token)
+                ->withNotification(Notification::create($title, $body))
+                ->withData([
+                    'type' => 'appointment_update',
+                    'appointment_id' => $appointment->id ?? null,
+                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK'
+                ]);
+            $messaging->send($message);
+            \Log::info('Firebase notification sent successfully');
+            return true;
+        } catch (\Kreait\Firebase\Exception\Messaging\NotFound $e) {
+            // هذا الخطأ يعني أن الـ token غير صالح أو منتهي
+            \Log::warning('FCM token not found or invalid: ' . $e->getMessage());
+
+            // يمكنك حذف الـ token من قاعدة البيانات هنا
+            $this->removeInvalidFcmToken($token);
+            return false;
+
+        } catch (\Kreait\Firebase\Exception\Messaging\AuthenticationFailed $e) {
+            \Log::error('Firebase authentication failed: ' . $e->getMessage());
+            return false;
+
+        } catch (\Exception $e) {
+            \Log::error('Firebase Error: ' . $e->getMessage());
+            \Log::error('Token used: ' . $token);
+            \Log::error('Credentials path: ' . $credentialPath);
+            return false;
+        }
+    }
+
+    public function updateStatus($appointmentId, $status)
+    {
+        $appointment = Appointment::find($appointmentId);
+        if (!$appointment) {
+            \Log::error("الموعد {$appointmentId} غير موجود");
+            return null;
+        }
+        $appointment->status = $status;
+        $appointment->save();
+        \Log::info("تم تحديث حالة الموعد {$appointmentId} إلى {$status}");
+        return $appointment;
+    }
+
+    public function removeInvalidFcmToken($invalidToken)
+    {
+        // ابحث عن جميع المستخدمين الذين لدون هذا الـ token وقم بإزالته
+        $users = User::where('fcm_token', $invalidToken)->get();
+
+        foreach ($users as $user) {
+            $user->fcm_token = null;
+            $user->save();
+            \Log::info("تم إزالة FCM token غير الصالح للمستخدم ID: {$user->id}");
+        }
+    }
+    public function isValidFcmToken($token)
+    {
+        if (empty($token)) {
+            return false;
+        }
+
+        // التحقق من تنسيق الـ token (يجب أن يكون طوله معقولاً)
+        if (strlen($token) < 50 || strlen($token) > 300) {
+            \Log::warning("FCM token length invalid: " . strlen($token));
+            return false;
+        }
+
+        // يمكنك إضافة المزيد من التحققات حسب تنسيق الـ token
+        return true;
     }
 }

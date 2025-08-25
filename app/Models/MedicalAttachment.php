@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Crypt;
 
 class MedicalAttachment extends Model
 {
@@ -53,6 +54,14 @@ class MedicalAttachment extends Model
         return $value;
     }
 
+
+      public function decryptFields()
+    {
+        $this->ray_name = Crypt::decrypt($this->ray_name);
+        $this->ray_laboratory = Crypt::decrypt($this->ray_laboratory);
+         $this->ray_image = Crypt::decrypt($this->ray_image);
+        return $this;
+    }
 
 
 }

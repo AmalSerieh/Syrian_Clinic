@@ -9,10 +9,10 @@ class Material extends Model
     protected $fillable = [
         'secretary_id',
         'material_name',
-        'material_quantity',
-        'material_location',
-        'material_expiration_date',
-        'material_price',
+        'material_quantity',//الكمية الموجود من هذه المادة
+        'material_location',//موقع وجود المادة في العيادة
+        'material_expiration_date',//تاريخ انتهاء الصلاحية
+        'material_price',//سعر كل مادة
         'material_threshold',
         'material_image'
     ];

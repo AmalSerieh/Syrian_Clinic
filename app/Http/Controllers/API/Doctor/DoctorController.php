@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\Doctor\DoctorDetailsResource;
 use App\Http\Resources\Api\Doctor\DoctorResource;
 use App\Models\Doctor;
+use App\Models\VisitEvaluation;
 use App\Repositories\Api\Doctor\DoctorRepositoryInterface;
 use App\Services\Api\Doctor\DoctorService;
 use Illuminate\Http\Request;
@@ -61,10 +62,15 @@ class DoctorController extends Controller
 
             return $slots;
         });
-
+        $rating = VisitEvaluation::where('doctor_id', $doctor)
+            /* ->sum('final_evaluate') */ ;
+        $rating = VisitEvaluation::where('doctor_id', $doctor->id ?? $doctor)
+            ->pluck('final_evaluate');
+       
         return response()->json([
             'doctor' => new DoctorResource($doctor),
-           // 'schedule' => $schedule,
+            'rating' => $rating,
+            // 'schedule' => $schedule,
             //'time_slots' => $timeSlots,
         ]);
     }
@@ -91,12 +97,12 @@ class DoctorController extends Controller
 
         return new DoctorDetailsResource($data);
     }
-  public function getDaySlots(Request $request, $doctorId)
-{
-    $date = $request->input('date'); // ex: 2025-08-05
-    $slots = $this->service->getSlotsForDay($doctorId, $date);
+    public function getDaySlots(Request $request, $doctorId)
+    {
+        $date = $request->input('date'); // ex: 2025-08-05
+        $slots = $this->service->getSlotsForDay($doctorId, $date);
 
-    return response()->json($slots);
-}
+        return response()->json($slots);
+    }
 
 }

@@ -29,6 +29,22 @@ class Patient extends Model
     {
         return $this->hasMany(Visit::class);
     }
+    public function prescription()
+    {
+        return $this->hasMany(Prescription::class);
+    }
+    public function evaluat()
+    {
+        return $this->hasMany(VisitEvaluation::class);
+
+    }
+
+    // علاقة جديدة للزيارات الخاصة بالطبيب الحالي
+    public function visitsWithCurrentDoctor()
+    {
+        return $this->hasMany(Visit::class)->where('doctor_id', auth()->user()->doctor->id);
+    }
+
 
     // app/Models/Patient.php
     public function getPhotoUrlAttribute1()

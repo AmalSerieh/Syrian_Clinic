@@ -23,7 +23,7 @@ class DoctorResource extends JsonResource
             'specialization' => $this->doctorProfile?->{"specialist_$lang"} ?? 'غير محدد',
             'biography' => $this->doctorProfile?->biography ?? '',
             'experience_years' => $this->doctorProfile?->exp_years ?? 0,
-            'rating' => $this->doctorProfile->rating ?? 0,
+            //'rating' => $this->evaluat->sum('final_evaluate') ?? 0,
         ];
     }
 

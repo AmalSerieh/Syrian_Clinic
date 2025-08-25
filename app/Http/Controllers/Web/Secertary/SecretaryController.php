@@ -66,7 +66,9 @@ class SecretaryController extends Controller
 
 
         $waitingPatients = Appointment::with(['patient.user', 'doctor.user', 'waitinglist'])
+
             ->where('location_type', 'in_Clinic')
+            ->whereDate('date', '>=', $today)
             ->where('status', 'confirmed')
             ->whereHas('waitingList', function ($query) {
                 $query->where('w_status', 'waiting');
@@ -93,7 +95,6 @@ class SecretaryController extends Controller
                     ] : null
                 ];
             });
-
         $patientsJsonClinic = $waitingPatients->toJson();
 
         // المرضى على الطريق (سيصلون قريباً)
@@ -106,12 +107,14 @@ class SecretaryController extends Controller
         // المرضى عند الطبيب
         $DoctorPatients = Appointment::with(['patient.user', 'doctor', 'waitinglist', 'visit'])
             ->where('location_type', 'at_Doctor')
+            ->whereDate('date', $today)
             ->where('status', 'confirmed')
             ->whereHas('waitingList', function ($query) {
                 $query->where('w_status', 'in_progress');
             })
             ->get()
             ->sortBy('waitingList.w_start_time');
+        //dd( $DoctorPatients);
 
         $patientsJsonDoctor = $DoctorPatients->map(fn($item) => ['doctor_id' => $item->doctor_id])->toJson();
 
@@ -200,7 +203,37 @@ class SecretaryController extends Controller
         return back()->with('status', 'تم نقل المريض إلى العيادة وإضافته لقائمة الانتظار');
     }
 
+    public function ConfirmPay($appointmentId)
+    {
+        // جلب الموعد مع الزيارة المرتبطة
+        $appointment = Appointment::with('visit')->find($appointmentId);
 
+        if (!$appointment || !$appointment->visit) {
+            return back()->withErrors(['error' => 'الموعد أو الزيارة غير موجودة']);
+        }
+
+        $visit = $appointment->visit()->first(); // جلب موديل واحد وليس Collection
+
+        if (!$visit) {
+            return back()->withErrors(['error' => 'الزيارة غير موجودة']);
+        }
+
+        // تحديث حالة الزيارة
+        $visit->update([
+            'v_paid' => true,
+            'v_status' => 'completed',
+            'v_ended_at' => $visit->v_ended_at ?? now(),
+        ]);
+
+
+        // تحديث حالة الموعد إذا أحببت
+        $appointment->update([
+            'status' => 'completed',
+            'location_type' => 'finished',
+        ]);
+
+        return back()->with('status', 'تم تأكيد الدفع وإنهاء الزيارة بنجاح');
+    }
     public function index1()
     {
         $today = Carbon::today()->toDateString();
@@ -381,6 +414,12 @@ class SecretaryController extends Controller
                 'location_type' => 'required|in:in_Home,on_Street,in_Clinic',
                 'arrivved_time' => 'required|integer|min:1'
             ]);
+            $minutes = $request->arrivved_time;
+            $hours = floor($minutes / 60);
+            $mins = $minutes % 60;
+
+            $validated['arrivved_time'] = sprintf('%02d:%02d:00', $hours, $mins);
+
             // التحقق من شرط الموقع إذا لم يكن الموعد اليوم
             $appointmentDate = Carbon::parse($validated['date']);
             if (!$appointmentDate->isToday() && in_array($validated['location_type'], ['on_Street', 'in_Home'])) {

@@ -76,7 +76,7 @@ class AdminController extends Controller
     }
 
     public function secretary_update(UpdateSecretaryRequest $request)
-    {
+    {//dd($request);
         try {
             $this->dashboardService->updateSecretary($request->validated());
 

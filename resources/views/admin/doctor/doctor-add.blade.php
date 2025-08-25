@@ -180,8 +180,6 @@
 
 
                 <div class="flex gap-4">
-
-
                     <!-- type_wage Number (enum) -->
                     <div class="w-1/2 relative">
                         <div class="mt-4">
@@ -194,7 +192,7 @@
                                 type_wage</label>
                             <select id="type_wage" name="type_wage"
                                 class="w-full text-sm py-1.5 px-2 border border-blue-500 rounded-xl bg-gray-800 bg-opacity-10 text-blue-500">
-                                <option value="" disabled selected>Select Room</option>
+                                <option value="" disabled selected>Select wage</option>
                                 <option value="number" {{ old('gender') == 'number' ? 'selected' : '' }}>number</option>
                                 <option value="percentage" {{ old('gender') == 'percentage' ? 'selected' : '' }}>percentage
                                 </option>
@@ -220,8 +218,6 @@
 
                         </div>
                     </div>
-
-
 
                 </div>
 

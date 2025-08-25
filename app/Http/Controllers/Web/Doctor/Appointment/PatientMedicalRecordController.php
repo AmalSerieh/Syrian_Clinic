@@ -15,6 +15,7 @@ use App\Models\Patient;
 use App\Models\Patient_profile;
 use App\Models\Patient_record;
 use App\Models\Visit;
+use App\Models\WaitingList;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +23,8 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
 class PatientMedicalRecordController extends Controller
 {
 
@@ -30,15 +33,15 @@ class PatientMedicalRecordController extends Controller
     {
         $doctor = Auth::user()->doctor;
 
-        // تحقق من وجود موعد سابق أو حالي بين الطبيب وهذا المريض
-        $hasAppointment = $patient->appointments()
+        // تحقق من وجود موعد نشط بين الطبيب وهذا المريض
+        $hasValidAppointment = $patient->appointments()
             ->where('doctor_id', $doctor->id)
-            ->whereIn('status', ['confirmed', 'completed']) // أضف الحالات التي تسمح بالرؤية
-            ->whereIn('location_type', ['in_Home', 'on_Street', 'in_Clinic', 'at_Doctor', 'in_Payment', 'finished'])
+            ->validForAccess()
+            ->active()
             ->exists();
 
-        if (!$hasAppointment) {
-            abort(Response::HTTP_FORBIDDEN, 'ليس لديك إذن لرؤية سجل هذا المريض.');
+        if (!$hasValidAppointment) {
+            abort(Response::HTTP_FORBIDDEN, 'ليس لديك إذن لرؤية سجل هذا المريض. يجب أن يكون لديك موعد حالي أو مستقبلي مع المريض.');
         }
 
         $record = $patient->patient_record()->with([
@@ -56,37 +59,53 @@ class PatientMedicalRecordController extends Controller
     public function patient_profile($patient_record_id)
     {
         $doctor = Auth::user()->doctor;
+        $now = now();
 
         // 1. جلب السجل الطبي والتحقق من وجوده
         $patientRecord = Patient_record::with('patient')->findOrFail($patient_record_id);
+
         if (!$patientRecord) {
-            return redirect()->back()->with('warning', 'لا يوجد سجل طبي لهذا المريض.');
+            return redirect()->back()->with('error', 'لا يوجد سجل طبي لهذا المريض.');
         }
+
         $patient = $patientRecord->patient;
 
-
-        $recordId = $patient_record_id;
-
-        // 2. التحقق من وجود موعد حالي/سابق مع المريض
-        $hasAppointment = $patient->appointments()
+        // 2. التحقق من وجود موعد حالي أو مستقبلي مع المريض
+        $hasValidAppointment = $patient->appointments()
             ->where('doctor_id', $doctor->id)
-            ->whereIn('status', ['confirmed', 'completed'])
+            ->whereIn('status', ['confirmed', 'in_progress']) // المواعيد النشطة فقط
+            ->where(function ($query) use ($now) {
+                // تحقق من أن الموعد ليس في الماضي
+                $query->whereDate('date', '>=', $now->format('Y-m-d'))
+                    ->orWhere(function ($q) use ($now) {
+                    // إذا كان التاريخ هو اليوم، تحقق من أن الوقت لم ينته بعد
+                    $q->whereDate('date', $now->format('Y-m-d'))
+                        ->whereTime('end_time', '>=', $now->format('H:i:s'));
+                });
+            })
             ->exists();
 
-        if (!$hasAppointment) {
-            abort(Response::HTTP_FORBIDDEN, 'ليس لديك إذن لرؤية هذا القسم.');
+        if (!$hasValidAppointment) {
+            // التحقق من وجود مواعيد مكتملة حديثاً (خلال 30 يوم)
+            $hasRecentCompletedAppointment = $patient->appointments()
+                ->where('doctor_id', $doctor->id)
+                ->where('status', 'completed')
+                ->where('date', '>=', now()->subDays(30)->format('Y-m-d'))
+                ->exists();
+
+            if (!$hasRecentCompletedAppointment) {
+                abort(Response::HTTP_FORBIDDEN, 'ليس لديك إذن لرؤية هذا القسم. يجب أن يكون لديك موعد حالي أو مستقبلي مع المريض.');
+            }
         }
 
         // 3. جلب الملف الشخصي المرتبط بالسجل
         $patientProfile = $patientRecord->patient_profile;
 
-        if (!$patientProfile) {
-            // في حال لا يوجد ملف بعد
-            return redirect()->back()->with('warning', 'لا يوجد ملف شخصي طبي لهذا المريض بعد.');
-        }
+        // 4. إذا لم يكن هناك ملف شخصي، عرض رسالة مع زر الإنشاء
 
-        // 4. عرض الملف
-        return view('doctor.appointments.patients.medical-record.patient-profile.show', [
+
+        // 5. عرض الملف الشخصي
+        return view('doctor.appointments.patients.medicalRecord.patient_profile.show', [
             'patientProfile' => $patientProfile,
             'patient' => $patient
         ]);
@@ -99,10 +118,11 @@ class PatientMedicalRecordController extends Controller
 
         $visit = $this->getActiveVisitForPatientAndDoctor($patientId, $doctorId);
         if (!$visit) {
-            abort(403, 'لا تملك صلاحية التعديل على هذا الملف (لا توجد زيارة نشطة حالياً أو المريض ليس قيد المعاينة).');
+            return redirect()->back()->with('error', 'لا تملك صلاحية التعديل على هذا الملف (لا توجد زيارة نشطة حالياً أو المريض ليس قيد المعاينة).');
+            //  abort(403, 'لا تملك صلاحية التعديل على هذا الملف (لا توجد زيارة نشطة حالياً أو المريض ليس قيد المعاينة).');
         }
 
-        return view('doctor.appointments.patients.medical-record.patient-profile.edit', compact('patientProfile'));
+        return view('doctor.appointments.patients.medicalRecord.patient_profile.edit', compact('patientProfile'));
     }
 
     public function patient_profile_Update(Request $request, $id)
@@ -167,19 +187,17 @@ class PatientMedicalRecordController extends Controller
 
 
         return redirect()
-            ->route('doctor.medical-record.patient_profile', $patientProfile->patient_record_id)
-            ->with('success', '✅ تم تعديل الملف الطبي بنجاح.');
+            ->route('doctor.patients.medicalRecord.show', $patientProfile->patientRecord->patient_id)
+            ->with('status', '✅ تم تعديل الملف الطبي بنجاح.');
     }
     public function patient_profile_Create($patientId)
     {
+
         $user = auth()->user();
         $doctorId = $user->doctor->id;
         $patient = Patient::with('user')->findOrFail($patientId); // تأكد من جلب العلاقة
+        \Log::info("Patient found: {$patient->id}, Record: " . ($patient->patient_record ? 'exists' : 'null'));
 
-        // تحقق من أن المستخدم طبيب
-        if (!$user->isDoctor()) {
-            abort(403, 'Unauthorized');
-        }
 
         // تحقق من وجود سجل طبي
         $record = $patient->patient_record;
@@ -188,22 +206,19 @@ class PatientMedicalRecordController extends Controller
             return redirect()->back()->with('error', 'no have record');
         }
 
-        // تحقق من أن السكرتيرة أنشأت الحساب وليس فيه ملف طبي
-        $secretary = $patient->user->created_by == 'secretary';
-        if (!$secretary) {
-            return redirect()->back()->withErrors(['msg' => 'لا تملك صلاحية إنشاء الملف الطبي لهذا المريض.']);
-        }
-        if ($record->patient_profile || $record->profile_submitted) {
-            return redirect()->back()->with('error', 'message.profile_already_submitted');
+        if ($record->patient_profile) {
+            return redirect()->back()->with('error', 'تم إضافة الملف الشخصي مسبقًا.');
         }
 
         // تحقق من وجود موعد مؤكد بين المريض والطبيب
         $visit = $this->getActiveVisitForPatientAndDoctor($patientId, $doctorId);
-        if (!$visit) {
-            abort(403, 'لا تملك صلاحية التعديل على هذا الملف (لا توجد زيارة نشطة حالياً أو المريض ليس قيد المعاينة).');
-        }
+        /*  if (!$visit) {
 
-        return view('doctor.appointments.patients.medical-record.patient-profile.create', compact('patient'));
+             return redirect()->back()->with('error', 'لا  تملك صلاحية التعديل على هذا الملف (لا توجد زيارة نشطة حالياً أو المريض ليس قيد المعاينة');
+         } */
+
+
+        return view('doctor.appointments.patients.medicalRecord.patient_profile.create', compact('patient'));
     }
 
     public function patient_profile_Store(Request $request, $patientId)
@@ -214,31 +229,33 @@ class PatientMedicalRecordController extends Controller
             'date_birth' => 'required|date|before:today',
             'height' => 'required|numeric|min:1',
             'weight' => 'required|numeric|min:1',
-            'blood_type' => 'required|string|in:A+,B+,O+,AB+,A-,B-,O-,AB-',
+            'blood_type' => 'required|string|in:A+,B+,O+,AB+,A-,B-,O-,AB-,Gwada-',
             'smoker' => 'required|boolean',
             'alcohol' => 'required|boolean',
             'drug' => 'required|boolean',
             'matital_status' => 'required|string|in:single,married,widower,divorced',
         ]);
-
         $doctor = auth()->user()->doctor;
         $patient = Patient::with('user')->findOrFail($patientId);
         $record = $patient->patient_record;
 
-
-        if (!$record || $record->patient_profile) {
-            return redirect()->back()->with('error', 'message.profile_already_submitted');
+        if (!$record) {
+            return redirect()->back()->with('error', 'لا يوجد سجل طبي للمريض بعد.');
         }
+
+        if ($record->patient_profile) {
+            return redirect()->back()->with('error', 'تم إدخال الملف الطبي مسبقاً.');
+        }
+
         // تحقق من وجود موعد مؤكد بين المريض والطبيب
-        // تحقق من وجود موعد مؤكد
         $appointment = $patient->appointments()
             ->where('doctor_id', $doctor->id)
-            ->whereIn('status', ['confirmed', 'completed'])
+            ->where('status', 'confirmed')
             ->latest()
             ->first();
 
         if (!$appointment) {
-            return redirect()->back()->with('error', trans('message.no_appointment_with_patient'));
+            return redirect()->back()->with('error', 'لا يوجد موعد مؤكد مع هذا المريض.');
         }
 
         // تحقق من وجود زيارة نشطة
@@ -250,8 +267,6 @@ class PatientMedicalRecordController extends Controller
             return redirect()->back()->with('error', 'لا توجد زيارة نشطة حالياً.');
         }
 
-
-
         // ✅ إنشاء الملف الطبي مع ربط الزيارة والطبيب
         $profile = new Patient_profile(array_merge($validated, [
             'patient_record_id' => $record->id,
@@ -262,51 +277,74 @@ class PatientMedicalRecordController extends Controller
         // تحديث حالة السجل
         $record->update(['profile_submitted' => true]);
 
-        // ✅ تسجيل في سجل التعديلات العامة
-        $this->logMedicalRecordEdit(
-            patientId: $patient->id,
-            visitId: $visit->id
-        );
+        // تسجيل في سجل التعديلات العامة (لو موجود عندك)
+        if (method_exists($this, 'logMedicalRecordEdit')) {
+            $this->logMedicalRecordEdit(patientId: $patient->id, visitId: $visit->id);
+        }
 
-
-        return redirect()->route('doctor.medical-record.patient_profile')->with('success', trans('message.created_successfully'));
+        return redirect()->route('doctor.medical-record.patient_profile')->with('status', 'تم إنشاء الملف الطبي بنجاح.');
     }
+
 
 
     public function diseases($patient_record_id)
     {
         $doctor = Auth::user()->doctor;
+        $now = now();
 
         // 1. جلب السجل الطبي والتحقق من وجوده
         $patientRecord = Patient_record::with('patient')->findOrFail($patient_record_id);
-        $patient = $patientRecord->patient;
         if (!$patientRecord) {
-            return redirect()->back()->with('warning', 'لا يوجد سجل طبي لهذا المريض.');
+            return redirect()->back()->with('error', 'لا يوجد سجل طبي لهذا المريض.');
         }
 
-        // 2. التحقق من وجود موعد حالي/سابق مع المريض
-        $hasAppointment = $patient->appointments()
+        $patient = $patientRecord->patient;
+
+        // 2. التحقق من وجود موعد حالي أو مستقبلي مع المريض
+        $hasValidAppointment = $patient->appointments()
             ->where('doctor_id', $doctor->id)
-            ->whereIn('status', ['confirmed', 'completed'])
+            ->whereIn('status', ['confirmed', 'in_progress']) // المواعيد النشطة فقط
+            ->where(function ($query) use ($now) {
+                // تحقق من أن الموعد ليس في الماضي
+                $query->whereDate('date', '>=', $now->format('Y-m-d'))
+                    ->orWhere(function ($q) use ($now) {
+                    // إذا كان التاريخ هو اليوم، تحقق من أن الوقت لم ينته بعد
+                    $q->whereDate('date', $now->format('Y-m-d'))
+                        ->whereTime('end_time', '>=', $now->format('H:i:s'));
+                });
+            })
             ->exists();
 
-        if (!$hasAppointment) {
-            abort(Response::HTTP_FORBIDDEN, 'ليس لديك إذن لرؤية هذا القسم.');
-        }
+        if (!$hasValidAppointment) {
+            // التحقق من وجود مواعيد مكتملة حديثاً (خلال 30 يوم)
+            $hasRecentCompletedAppointment = $patient->appointments()
+                ->where('doctor_id', $doctor->id)
+                ->where('status', 'completed')
+                ->where('date', '>=', now()->subDays(30)->format('Y-m-d'))
+                ->exists();
 
+            if (!$hasRecentCompletedAppointment) {
+                return redirect()->back()->with('error', 'ليس لديك إذن لرؤية هذا القسم. يجب أن يكون لديك موعد حالي أو مستقبلي مع المريض.');
+            }
+            return redirect()->back()->with('error', 'ليس لديك إذن لرؤية هذا القسم. يجب أن يكون لديك موعد حالي أو مستقبلي مع المريض.');
+        }
         // 3. جلب الأمراض
         $diseases = $patientRecord->diseases;
 
+
         $current = $diseases->where('d_type', 'current');
         $chronic = $diseases->where('d_type', 'chronic');
+        // إذا لم يكن هناك أمراض، اجعلهم Collections فارغة بدل null
+        $current = $current ?? collect();
+        $chronic = $chronic ?? collect();
 
-        if (!$diseases) {
-            // في حال لا يوجد ملف بعد
-            return redirect()->back()->with('warning', 'لا يوجد أمراض  لهذا المريض بعد.');
-        }
+        /*  if (!$diseases) {
+             // في حال لا يوجد ملف بعد
+             return redirect()->back()->with('error', 'لا يوجد أمراض  لهذا المريض بعد.');
+         } */
 
         // 4. عرض الملف
-        return view('doctor.appointments.patients.medical-record.diseases.show', [
+        return view('doctor.appointments.patients.medicalRecord.diseases.show', [
             'diseases' => $diseases,
             'current' => $current,
             'chronic' => $chronic,
@@ -316,24 +354,23 @@ class PatientMedicalRecordController extends Controller
 
     public function diseases_Edit($diseaseId)
     {
-        $disease = Disease::findOrFail($diseaseId);
+        $diseases = Disease::findOrFail($diseaseId);
         $doctorId = auth()->user()->doctor->id;
 
-        $patientId = $disease->patientRecord->patient_id;
+        $patientId = $diseases->patientRecord->patient_id;
 
         $visit = $this->getActiveVisitForPatientAndDoctor($patientId, $doctorId);
         if (!$visit) {
             abort(403, 'لا تملك صلاحية التعديل على هذا الملف (لا توجد زيارة نشطة حالياً أو المريض ليس قيد المعاينة).');
         }
 
-        return view('doctor.appointments.patients.medical-record.diseases.edit', compact('disease'));
+        return view('doctor.appointments.patients.medicalRecord.diseases.edit', compact('diseases'));
     }
 
     public function diseases_Update(Request $request, $diseaseId)
     {
         // التحقق من صحة البيانات
         $validated = $request->validate([
-            'id' => 'required|exists:diseases,id',
             'd_type' => 'required|in:current,chronic',
             'd_name' => 'required|string',
             'd_diagnosis_date' => 'required|date',
@@ -344,7 +381,6 @@ class PatientMedicalRecordController extends Controller
 
         // جلب الملف
         $disease = Disease::findOrFail($diseaseId);
-
         // التحقق من الصلاحيات يدويًا
         $doctorId = auth()->user()->doctor->id;
 
@@ -352,7 +388,7 @@ class PatientMedicalRecordController extends Controller
 
         $visit = $this->getActiveVisitForPatientAndDoctor($patientId, $doctorId);
         if (!$visit) {
-            abort(403, 'لا تملك صلاحية التعديل على هذا الملف (لا توجد زيارة نشطة حالياً).');
+            abort(403, 'لا تملك صلاحية التعديل على هذا المرض (لا توجد زيارة نشطة حالياً).');
         }
 
         // التحديث
@@ -365,9 +401,11 @@ class PatientMedicalRecordController extends Controller
             visitId: $visit->id
         );
 
+
+        // إعادة التوجيه لعرض الملف الطبي للمريض
         return redirect()
-            ->route('doctor.medical-record.diseases', $disease->patient_record_id)
-            ->with('success', '✅ تم تعديل الملف الطبي بنجاح.');
+            ->route('doctor.patients.medicalRecord.show', $disease->patientRecord->patient_id)
+            ->with('status', '✅ تم تعديل المرض  بنجاح.');
     }
     public function diseases_Create($patientId)
     {
@@ -402,17 +440,18 @@ class PatientMedicalRecordController extends Controller
         // تحقق من وجود موعد مؤكد بين المريض والطبيب
 
 
-        return view('doctor.appointments.patients.medical-record.diseases.create', compact('patient'));
+        return view('doctor.appointments.patients.medicalRecord.diseases.create', compact('patient'));
     }
 
     public function diseases_Store(Request $request, $patientId)
     {
+
         // ✅ التحقق من صحة البيانات
         $validated = $request->validate([
             'd_type' => 'required|in:current,chronic',
             'd_name' => 'required|string',
             'd_diagnosis_date' => 'required|date',
-            'd_doctor' => 'nullable|string',
+            'd_doctor' => 'required|string',
             'd_advice' => 'nullable|string',
             'd_prohibitions' => 'nullable|string',
         ]);
@@ -432,7 +471,7 @@ class PatientMedicalRecordController extends Controller
 
         $disease = new Disease(array_merge($validated, [
             'patient_record_id' => $record->id,
-            'visit_id' => $visit->id
+            // 'visit_id' => $visit->id
         ]));
 
 
@@ -444,12 +483,14 @@ class PatientMedicalRecordController extends Controller
             patientId: $patientId,
             visitId: $visit->id
         );
-
-        return redirect()->route('doctor.medical-record.diseases', $record->id)->with('success', trans('message.created_successfully'));
+        return redirect()
+            ->route('doctor.patients.medicalRecord.show', $disease->patientRecord->patient_id)
+            ->with('status', '✅ تم إنشاء المرض بنجاج');
     }
-    public function diseases_Delete(Disease $disease)
+    public function diseases_Delete($diseaseId)
     {
         $doctorId = auth()->user()->doctor->id;
+        $disease = Disease::findOrFail($diseaseId);
         $patientId = $disease->patientRecord->patient_id;
 
         $visit = $this->getActiveVisitForPatientAndDoctor($patientId, $doctorId);
@@ -464,7 +505,7 @@ class PatientMedicalRecordController extends Controller
             visitId: $visit->id
         );
 
-        return redirect()->back()->with('success', 'تم حذف المرض بنجاح.');
+        return redirect()->back()->with('status', 'تم حذف المرض بنجاح.');
     }
 
     public function diseases_DeleteAll($patientRecordId)
@@ -492,12 +533,13 @@ class PatientMedicalRecordController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', '✅ تم حذف جميع الأمراض بنجاح.');
+            ->with('status', '✅ تم حذف جميع الأمراض بنجاح.');
     }
 
     public function medications($patient_record_id)
     {
         $doctor = auth()->user()->doctor;
+        $now = now();
         $patientRecord = Patient_record::with('patient')->findOrFail($patient_record_id);
         $patient = $patientRecord->patient;
 
@@ -505,20 +547,36 @@ class PatientMedicalRecordController extends Controller
             return redirect()->back()->with('warning', 'لا يوجد سجل طبي لهذا المريض.');
         }
 
-        $hasAppointment = $patient->appointments()
-            ->where('doctor_id', $doctor->id)
-            ->whereIn('status', ['confirmed', 'completed'])
-            ->exists();
-
-        if (!$hasAppointment) {
-            abort(403, 'ليس لديك إذن لرؤية هذا القسم.');
+        if (!$patientRecord) {
+            return redirect()->back()->with('error', 'لا يوجد سجل طبي لهذا المريض.');
         }
+
+        // 2. التحقق من وجود موعد حالي أو مستقبلي مع المريض
+        /*  $hasValidAppointment = $patient->appointments()
+             ->where('doctor_id', $doctor->id)
+             ->whereIn('status', ['confirmed', 'in_progress']) // المواعيد النشطة فقط
+             ->where(function ($query) use ($now) {
+                 // تحقق من أن الموعد ليس في الماضي
+                 $query->whereDate('date', '>=', $now->format('Y-m-d'))
+                     ->orWhere(function ($q) use ($now) {
+                     // إذا كان التاريخ هو اليوم، تحقق من أن الوقت لم ينته بعد
+                     $q->whereDate('date', $now->format('Y-m-d'))
+                         ->whereTime('end_time', '>=', $now->format('H:i:s'));
+                 });
+             })
+             ->exists();
+
+         if (!$hasValidAppointment) {
+             // التحقق من وجود مواعيد مكتملة حديثاً (خلال 30 يوم)
+             $hasRecentCompletedAppointment = $patient->appointments()
+                 ->where('doctor_id', $doctor->id)
+                 ->where('status', 'completed')
+                 ->where('date', '>=', now()->subDays(30)->format('Y-m-d'))
+                 ->exists();
+         } */
 
         $medications = $patientRecord->medications;
 
-        if ($medications->isEmpty()) {
-            return back()->with(['message' => trans('message.not_filled_yet')]);
-        }
 
         // 🔁 صياغة شكل الدواء حسب المطلوب
         $formatMedication = function ($med) {
@@ -536,7 +594,7 @@ class PatientMedicalRecordController extends Controller
                 'timing' => $med->med_timing,
                 'med_total_quantity' => intval($med->med_total_quantity),
                 'med_prescribed_by_doctor' => $med->med_prescribed_by_doctor,
-                'is_active' => $med->is_active,
+                '' => $med->is_active,
 
                 'taken_till_now' => $med->med_type === 'chronic'
                     ? $med->calculateTakenQuantity()
@@ -551,8 +609,7 @@ class PatientMedicalRecordController extends Controller
 
         $current = $medications->where('med_type', 'current')->map($formatMedication);
         $chronic = $medications->where('med_type', 'chronic')->map($formatMedication);
-
-        return view('doctor.appointments.patients.medical-record.medications.show', compact(
+        return view('doctor.appointments.patients.medicalRecord.medications.show', compact(
             'patient',
             'current',
             'chronic'
@@ -580,7 +637,7 @@ class PatientMedicalRecordController extends Controller
 
     public function medications_Store(Request $request, $patientId)
     {
-        $validated = $request->validated([
+        $validated = $request->validate([
             'med_type' => 'required|in:chronic,current',
             'med_name' => 'required|string|max:255',
             'med_start_date' => 'required|date',
@@ -635,8 +692,8 @@ class PatientMedicalRecordController extends Controller
             visitId: $visit->id
         );
 
-        return redirect()->route('doctor.medical-record.medications', $record->id)
-            ->with('success', 'تمت إضافة الدواء بنجاح.');
+        return redirect()->route('doctor.patients.medicalRecord.show', $patient->id)
+            ->with('status', 'تمت إضافة الدواء بنجاح.');
     }
 
     public function medications_Edit($medicationId)
@@ -655,22 +712,35 @@ class PatientMedicalRecordController extends Controller
 
     public function medications_Update(Request $request, $medicationId)
     {
-        $validated = $request->validate([
-            'med_type' => 'required|in:chronic,current',
-            'med_name' => 'required|string|max:255',
-            'med_start_date' => 'required|date',
-            'med_end_date' => 'nullable|date|after_or_equal:med_start_date',
-            'med_frequency' => 'required|in:once_daily,twice_daily,three_times_daily,daily,weekly,monthly,yearly',
-            'med_dosage_form' => 'required|in:tablet,capsule,pills,syrup,liquid,drops,sprays,patches,injections',
-            'powder',
-            'med_dose' => 'required|numeric|min:0.1|max:1000',
-            'med_timing' => 'nullable|in:before_food,after_food,morning,evening,morning_evening',
-            'med_prescribed_by_doctor' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validate(
+            [
+                'med_type' => 'required|in:chronic,current',
+                'med_name' => 'required|string|max:255',
+                'med_start_date' => 'required|date',
+                'med_end_date' => [
+                    Rule::requiredIf(fn() => $request->med_type === 'current'),
+                    'nullable',
+                    'date',
+                    'after_or_equal:med_start_date',
+                ],
+                'med_frequency' => 'required|in:once_daily,twice_daily,three_times_daily,daily,weekly,monthly,yearly',
+                'med_dosage_form' => 'required|in:tablet,capsule,pills,syrup,liquid,drops,sprays,patches,injections',
+                'powder',
+                'med_dose' => 'required|numeric|min:0.1|max:1000',
+                'med_timing' => 'nullable|in:before_food,after_food,morning,evening,morning_evening',
+                'med_prescribed_by_doctor' => 'nullable|string|max:255',
+            ]
+            ,
+            [
+                // رسائل مخصصة
+                'med_end_date.required' => '⚠️ يجب إدخال تاريخ نهاية العلاج إذا كان الدواء حالي.',
+            ]
+        );
         $medication = Medication::findOrFail($medicationId);
         $doctorId = auth()->user()->doctor->id;
         $patientId = $medication->patientRecord->patient_id;
         $record = $medication->patientRecord;
+
 
 
         $visit = $this->getActiveVisitForPatientAndDoctor($patientId, $doctorId);
@@ -682,7 +752,6 @@ class PatientMedicalRecordController extends Controller
         if ($validated['med_type'] === 'chronic') {
             $validated['med_end_date'] = null;
         }
-
         // الحقول المحسوبة
         $validated['visit_id'] = $visit->id;
         $validated['med_frequency_value'] = $this->getFrequencyValue($validated['med_frequency']);
@@ -704,8 +773,8 @@ class PatientMedicalRecordController extends Controller
         );
 
         return redirect()
-            ->route('doctor.medical-record.medications', $medication->patient_record_id)
-            ->with('success', '✅ تم تعديل الدواء بنجاح.');
+            ->route('doctor.patients.medicalRecord.show', $patientId)
+            ->with('status', '✅ تم تعديل الدواء بنجاح.');
     }
 
     public function medications_Delete($medicationId)
@@ -725,10 +794,11 @@ class PatientMedicalRecordController extends Controller
             patientId: $patientId,
             visitId: $visit->id
         );
-
         return redirect()
-            ->route('doctor.medical-record.medications', $medication->patient_record_id)
-            ->with('success', '🗑️ تم حذف الدواء بنجاح.');
+            ->route('doctor.patients.medicalRecord.show', $patientId)
+            ->with('status', '🗑️ تم حذف الدواء بنجاح.');
+
+
     }
 
     public function medications_DeleteAll($patientRecordId)
@@ -753,7 +823,7 @@ class PatientMedicalRecordController extends Controller
 
         return redirect()
             ->route('doctor.medical-record.medications', $patientRecordId)
-            ->with('success', '✅ تم حذف جميع الأدوية بنجاح.');
+            ->with('status', '✅ تم حذف جميع الأدوية بنجاح.');
     }
 
     public function medication_show($id)
@@ -769,7 +839,7 @@ class PatientMedicalRecordController extends Controller
             abort(403, '❌ لا يمكنك عرض بيانات هذا الدواء بدون وجود زيارة نشطة أو منتهية مع المريض.');
         }
 
-        return view('doctor.medical-record.medications.show', compact('medication'));
+        return view('doctor.appointments.patients.medicalRecord.medications.show', compact('medication'));
     }
 
 
@@ -778,22 +848,38 @@ class PatientMedicalRecordController extends Controller
     {
         $doctor = Auth::user()->doctor;
 
+        $now = now();
+
         // جلب السجل الطبي للمريض
         $patientRecord = Patient_record::with('patient')->findOrFail($patient_record_id);
         $patient = $patientRecord->patient;
 
         if (!$patientRecord) {
-            return redirect()->back()->with('warning', 'لا يوجد سجل طبي لهذا المريض.');
+            return redirect()->back()->with('error', 'لا يوجد سجل طبي لهذا المريض.');
         }
 
-        // التأكد من وجود موعد سابق أو حالي
-        $hasAppointment = $patient->appointments()
+        // 2. التحقق من وجود موعد حالي أو مستقبلي مع المريض
+        $hasValidAppointment = $patient->appointments()
             ->where('doctor_id', $doctor->id)
-            ->whereIn('status', ['confirmed', 'completed'])
+            ->whereIn('status', ['confirmed', 'in_progress']) // المواعيد النشطة فقط
+            ->where(function ($query) use ($now) {
+                // تحقق من أن الموعد ليس في الماضي
+                $query->whereDate('date', '>=', $now->format('Y-m-d'))
+                    ->orWhere(function ($q) use ($now) {
+                    // إذا كان التاريخ هو اليوم، تحقق من أن الوقت لم ينته بعد
+                    $q->whereDate('date', $now->format('Y-m-d'))
+                        ->whereTime('end_time', '>=', $now->format('H:i:s'));
+                });
+            })
             ->exists();
 
-        if (!$hasAppointment) {
-            abort(Response::HTTP_FORBIDDEN, 'ليس لديك إذن لرؤية هذا القسم.');
+        if (!$hasValidAppointment) {
+            // التحقق من وجود مواعيد مكتملة حديثاً (خلال 30 يوم)
+            $hasRecentCompletedAppointment = $patient->appointments()
+                ->where('doctor_id', $doctor->id)
+                ->where('status', 'completed')
+                ->where('date', '>=', now()->subDays(30)->format('Y-m-d'))
+                ->exists();
         }
 
         $operations = $patientRecord->operations;
@@ -848,8 +934,8 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return redirect()->route('doctor.medical-record.operations', $record->id)
-            ->with('success', '✅ تم حفظ العملية بنجاح.');
+        return redirect()->route('doctor.patients.medicalRecord.show', $patient->id)
+            ->with('status', '✅ تم حفظ العملية بنجاح.');
     }
 
     public function operations_Edit($operationId)
@@ -867,6 +953,7 @@ class PatientMedicalRecordController extends Controller
     }
     public function operations_Update(Request $request, $operationId)
     {
+
         $validated = $request->validate([
             'op_name' => ['required', 'string'],
             'op_doctor_name' => ['required', 'string'],
@@ -889,14 +976,18 @@ class PatientMedicalRecordController extends Controller
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
         return redirect()
-            ->route('doctor.medical-record.operations', $operation->patient_record_id)
-            ->with('success', '✅ تم تعديل العملية بنجاح.');
+            ->route('doctor.patients.medicalRecord.show', $patientId)
+            ->with('status', '✅ تم تعديل العملية بنجاح.');
     }
 
-    public function operations_Delete(Operation $operation)
+    public function operations_Delete($operationId)
     {
         $doctorId = auth()->user()->doctor->id;
+
+        $doctorId = auth()->user()->doctor->id;
+        $operation = Operation::findOrFail($operationId);
         $patientId = $operation->patientRecord->patient_id;
+
 
         $visit = $this->getActiveVisitForPatientAndDoctor($patientId, $doctorId);
         if (!$visit) {
@@ -907,7 +998,7 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return redirect()->back()->with('success', '✅ تم حذف العملية بنجاح.');
+        return redirect()->back()->with('status', '✅ تم حذف العملية بنجاح.');
     }
 
 
@@ -926,7 +1017,7 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return redirect()->back()->with('success', '✅ تم حذف جميع العمليات بنجاح.');
+        return redirect()->back()->with('status', '✅ تم حذف جميع العمليات بنجاح.');
     }
 
     public function operations_show($operationId)
@@ -942,7 +1033,7 @@ class PatientMedicalRecordController extends Controller
             abort(403, '❌ لا يمكنك عرض بيانات هذا الدواء بدون وجود زيارة نشطة أو منتهية مع المريض.');
         }
 
-        return view('doctor.medical-record.operations.show', compact('operation'));
+        return view('doctor.appointments.patients.medicalRecord.operations.show', compact('operation'));
     }
 
     public function allergies($patient_record_id)
@@ -950,18 +1041,33 @@ class PatientMedicalRecordController extends Controller
         $doctor = Auth::user()->doctor;
         $patientRecord = Patient_record::with('patient')->findOrFail($patient_record_id);
         $patient = $patientRecord->patient;
+        $now = now();
 
         if (!$patientRecord) {
             return redirect()->back()->with('warning', 'لا يوجد سجل طبي لهذا المريض.');
         }
-
-        $hasAppointment = $patient->appointments()
+        // 2. التحقق من وجود موعد حالي أو مستقبلي مع المريض
+        $hasValidAppointment = $patient->appointments()
             ->where('doctor_id', $doctor->id)
-            ->whereIn('status', ['confirmed', 'completed'])
+            ->whereIn('status', ['confirmed', 'in_progress']) // المواعيد النشطة فقط
+            ->where(function ($query) use ($now) {
+                // تحقق من أن الموعد ليس في الماضي
+                $query->whereDate('date', '>=', $now->format('Y-m-d'))
+                    ->orWhere(function ($q) use ($now) {
+                    // إذا كان التاريخ هو اليوم، تحقق من أن الوقت لم ينته بعد
+                    $q->whereDate('date', $now->format('Y-m-d'))
+                        ->whereTime('end_time', '>=', $now->format('H:i:s'));
+                });
+            })
             ->exists();
 
-        if (!$hasAppointment) {
-            abort(Response::HTTP_FORBIDDEN, 'ليس لديك إذن لرؤية هذا القسم.');
+        if (!$hasValidAppointment) {
+            // التحقق من وجود مواعيد مكتملة حديثاً (خلال 30 يوم)
+            $hasRecentCompletedAppointment = $patient->appointments()
+                ->where('doctor_id', $doctor->id)
+                ->where('status', 'completed')
+                ->where('date', '>=', now()->subDays(30)->format('Y-m-d'))
+                ->exists();
         }
 
         $allergies = $patientRecord->allergies;
@@ -1018,8 +1124,8 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return redirect()->route('doctor.medical-record.allergies', $record->id)
-            ->with('success', '✅ تم حفظ الحساسية بنجاح.');
+        return redirect()->route('doctor.patients.medicalRecord.show', $record->id)
+            ->with('status', '✅ تم حفظ الحساسية بنجاح.');
     }
 
     public function allergies_Edit($allergyId)
@@ -1061,10 +1167,11 @@ class PatientMedicalRecordController extends Controller
         $allergy->update($validated);
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
-
-        return redirect()
-            ->route('doctor.medical-record.allergies', $allergy->patient_record_id)
-            ->with('success', '✅ تم تعديل الحساسية بنجاح.');
+        return redirect()->route('doctor.patients.medicalRecord.show', $patientId)
+            ->with('status', '✅ تم حفظ الحساسية بنجاح.');
+        /*  return redirect()
+             ->route('doctor.medical-record.allergies', $allergy->patient_record_id)
+             ->with('status', '✅ تم تعديل الحساسية بنجاح.'); */
     }
 
     public function allergies_Delete(Allergy $allergy)
@@ -1081,7 +1188,7 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return redirect()->back()->with('success', '✅ تم حذف الحساسية بنجاح.');
+        return redirect()->back()->with('status', '✅ تم حذف الحساسية بنجاح.');
     }
 
     public function allergies_DeleteAll($patientRecordId)
@@ -1099,7 +1206,7 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return redirect()->back()->with('success', '✅ تم حذف كل الحساسية.');
+        return redirect()->back()->with('status', '✅ تم حذف كل الحساسية.');
     }
 
     public function allergies_Show($allergyId)
@@ -1114,7 +1221,7 @@ class PatientMedicalRecordController extends Controller
             abort(403, '❌ لا يمكنك عرض بيانات هذه الحساسية بدون وجود زيارة نشطة أو منتهية مع المريض.');
         }
 
-        return view('doctor.medical-record.allergies.show', compact('allergy'));
+        return view('doctor.appointments.patients.medicalRecord.allergies.show', compact('allergy'));
     }
 
 
@@ -1123,21 +1230,38 @@ class PatientMedicalRecordController extends Controller
         $doctor = Auth::user()->doctor;
         $patientRecord = Patient_record::with('patient')->findOrFail($patientRecordId);
         $patient = $patientRecord->patient;
+        $now = now();
 
         if (!$patientRecord) {
             return redirect()->back()->with('warning', 'لا يوجد سجل طبي لهذا المريض.');
         }
 
-        $hasAppointment = $patient->appointments()
+        // 2. التحقق من وجود موعد حالي أو مستقبلي مع المريض
+        $hasValidAppointment = $patient->appointments()
             ->where('doctor_id', $doctor->id)
-            ->whereIn('status', ['confirmed', 'completed'])
+            ->whereIn('status', ['confirmed', 'in_progress']) // المواعيد النشطة فقط
+            ->where(function ($query) use ($now) {
+                // تحقق من أن الموعد ليس في الماضي
+                $query->whereDate('date', '>=', $now->format('Y-m-d'))
+                    ->orWhere(function ($q) use ($now) {
+                    // إذا كان التاريخ هو اليوم، تحقق من أن الوقت لم ينته بعد
+                    $q->whereDate('date', $now->format('Y-m-d'))
+                        ->whereTime('end_time', '>=', $now->format('H:i:s'));
+                });
+            })
             ->exists();
 
-        if (!$hasAppointment) {
-            abort(Response::HTTP_FORBIDDEN, 'ليس لديك إذن لرؤية هذا القسم.');
+        if (!$hasValidAppointment) {
+            // التحقق من وجود مواعيد مكتملة حديثاً (خلال 30 يوم)
+            $hasRecentCompletedAppointment = $patient->appointments()
+                ->where('doctor_id', $doctor->id)
+                ->where('status', 'completed')
+                ->where('date', '>=', now()->subDays(30)->format('Y-m-d'))
+                ->exists();
         }
 
         $files = $patientRecord->medicalFiles()->latest()->get();
+        // dd($files);
 
         return view('doctor.appointments.patients.medicalRecord.medicalFiles.show', compact('files', 'patient'));
 
@@ -1197,9 +1321,10 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return redirect()
-            ->route('doctor.medical-record.medicalFiles', $medicalFile->patient_record_id)
-            ->with('success', '✅ تم تعديل الملف الطبي بنجاح.');
+
+
+        return redirect()->route('doctor.patients.medicalRecord.show', $patientId)
+            ->with('status', '✅ تم حفظ الملف الطبي بنجاح.');
     }
 
 
@@ -1268,8 +1393,8 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return redirect()->route('doctor.medical-record.medicalFiles', $record->id)
-            ->with('success', '✅ تم حفظ الملف الطبي بنجاح.');
+        return redirect()->route('doctor.patients.medicalRecord.show', $patientId)
+            ->with('status', '✅ تم حفظ الملف الطبي بنجاح.');
     }
 
     public function medicalFiles_Delete($medicalFileId)
@@ -1292,7 +1417,7 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return redirect()->back()->with('success', '🗑️ تم حذف الملف الطبي بنجاح.');
+        return redirect()->back()->with('status', '🗑️ تم حذف الملف الطبي بنجاح.');
     }
 
     public function medicalFiles_DeleteAll($patientRecordId)
@@ -1315,7 +1440,7 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return redirect()->back()->with('success', '🧹 تم حذف جميع الملفات الطبية بنجاح.');
+        return redirect()->back()->with('status', '🧹 تم حذف جميع الملفات الطبية بنجاح.');
     }
 
 
@@ -1324,19 +1449,35 @@ class PatientMedicalRecordController extends Controller
         $doctor = auth()->user()->doctor;
         $patientRecord = Patient_record::with('patient')->findOrFail($patientRecordId);
         $patient = $patientRecord->patient;
+        $now = now();
 
-        $hasAppointment = $patient->appointments()
+        $hasValidAppointment = $patient->appointments()
             ->where('doctor_id', $doctor->id)
-            ->whereIn('status', ['confirmed', 'completed'])
+            ->whereIn('status', ['confirmed', 'in_progress']) // المواعيد النشطة فقط
+            ->where(function ($query) use ($now) {
+                // تحقق من أن الموعد ليس في الماضي
+                $query->whereDate('date', '>=', $now->format('Y-m-d'))
+                    ->orWhere(function ($q) use ($now) {
+                    // إذا كان التاريخ هو اليوم، تحقق من أن الوقت لم ينته بعد
+                    $q->whereDate('date', $now->format('Y-m-d'))
+                        ->whereTime('end_time', '>=', $now->format('H:i:s'));
+                });
+            })
             ->exists();
 
-        if (!$hasAppointment) {
-            abort(Response::HTTP_FORBIDDEN, 'ليس لديك إذن لرؤية هذا القسم.');
+        if (!$hasValidAppointment) {
+            // التحقق من وجود مواعيد مكتملة حديثاً (خلال 30 يوم)
+            $hasRecentCompletedAppointment = $patient->appointments()
+                ->where('doctor_id', $doctor->id)
+                ->where('status', 'completed')
+                ->where('date', '>=', now()->subDays(30)->format('Y-m-d'))
+                ->exists();
         }
+
 
         $files = $patientRecord->medicalAttachment()->latest()->get();
 
-        return view('doctor.appointments.patients.medicalRecord.medicalAttachment.index', [
+        return view('doctor.appointments.patients.medicalRecord.medicalAttachment.show', [
             'files' => $files,
             'patient' => $patient
         ]);
@@ -1391,10 +1532,10 @@ class PatientMedicalRecordController extends Controller
 
         MedicalAttachment::create($validated);
 
-        $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
+        //$this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return redirect()->route('doctor.medical-record.medicalAttachments', $record->id)
-            ->with('success', 'تم حفظ الملف الطبي بنجاح.');
+        return redirect()->route('doctor.patients.medicalRecord.show', $record->id)
+            ->with('status', 'تم حفظ الملف الطبي بنجاح.');
     }
 
     public function medicalAttachments_Edit($medicalAttachmentId)
@@ -1441,8 +1582,8 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return redirect()->route('doctor.medical-record.medicalAttachments', $medicalAttachment->patient_record_id)
-            ->with('success', 'تم تعديل الملف الطبي.');
+        return redirect()->route('doctor.patients.medicalRecord.show', $patientId)
+            ->with('status', 'تم تعديل الملف الطبي.');
     }
 
     public function medicalAttachments_Delete($medicalAttachmentId)
@@ -1464,7 +1605,7 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return back()->with('success', 'تم حذف الملف الطبي.');
+        return back()->with('status', 'تم حذف الملف الطبي.');
     }
 
     public function medicalAttachments_DeleteAll($patientRecordId)
@@ -1487,7 +1628,7 @@ class PatientMedicalRecordController extends Controller
 
         $this->logMedicalRecordEdit(patientId: $patientId, visitId: $visit->id);
 
-        return back()->with('success', 'تم حذف جميع الملفات الطبية.');
+        return back()->with('status', 'تم حذف جميع الملفات الطبية.');
     }
 
 
@@ -1517,13 +1658,18 @@ class PatientMedicalRecordController extends Controller
     protected function logMedicalRecordEdit($patientId, $visitId)
     {
         //dd(auth()->user()->doctor->id);
-        MedicalRecordLogVisit::firstOrCreate([
-            'patient_id' => $patientId,
-            'doctor_id' => auth()->user()->doctor->id,
-            'visit_id' => $visitId,
-        ], [
-            'edited_at' => now(),
-        ]);
+        $log = MedicalRecordLogVisit::updateOrCreate(
+            [
+                'patient_id' => $patientId,
+                'doctor_id' => auth()->user()->doctor->id,
+                'visit_id' => $visitId,
+            ],
+            [
+                'edited_at' => now(),
+            ]
+        );
+
+        return $log;
     }
 
     private function getFrequencyValue(string $code): float
@@ -1606,27 +1752,49 @@ class PatientMedicalRecordController extends Controller
     }
     protected function getActiveVisitForPatientAndDoctor($patientId, $doctorId)
     {
-        $appointment = Appointment::where('patient_id', $patientId)
-            ->where('doctor_id', $doctorId)
-            ->where('status', 'confirmed')
-            ->where('location_type', 'at_Doctor')
-            ->first();
+        try {
+            // البحث عن موعد مؤكد اليوم
+            $appointment = Appointment::where('patient_id', $patientId)
+                ->where('doctor_id', $doctorId)
+                ->where('status', 'confirmed')
+                ->where('location_type', 'at_Doctor')
+                ->whereDate('date', now()->format('Y-m-d'))
+                ->first();
 
-        if (!$appointment)
+
+            if (!$appointment) {
+                \Log::info("No confirmed appointment found for patient: $patientId, doctor: $doctorId");
+                return null;
+            }
+
+
+            $waiting = WaitingList::where('appointment_id', $appointment->id)
+                ->where('w_status', 'in_progress')
+                ->exists();
+
+
+
+            if (!$waiting) {
+                \Log::info("Patient not in waiting list or in progress for appointment: " . $appointment->id);
+                return null;
+            }
+
+            // البحث عن زيارة نشطة
+            $visit = Visit::where('appointment_id', $appointment->id)
+                ->where('v_status', 'active')
+                ->first();
+
+
+            if (!$visit) {
+                \Log::info("No active visit found for appointment: " . $appointment->id);
+            }
+
+            return $visit;
+        } catch (\Exception $e) {
+            \Log::error("Error in getActiveVisitForPatientAndDoctor: " . $e->getMessage());
             return null;
+        }
 
-        $waiting = DB::table('waiting_list')
-            ->where('appointment_id', $appointment->id)
-            ->where('w_status', 'in_progress')
-            ->exists();
-
-        if (!$waiting)
-            return null;
-
-        return Visit::where('appointment_id', $appointment->id)
-            ->where('v_status', 'active')
-            ->first();
     }
-
 
 }

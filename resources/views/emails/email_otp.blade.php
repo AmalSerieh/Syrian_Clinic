@@ -24,7 +24,7 @@
                     {{ $otp }}
                 </p>
 
-                <p>Please use this code to complete your registeration. This OTP will expire in 10 minutes..</p>
+                <p>Please use this code to complete your registeration. This OTP will expire in 1 minute..😊😊😊..</p>
                 <p>Thank you,<br>Your Application Team</p>
             </td>
         </tr>

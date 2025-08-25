@@ -85,7 +85,7 @@ class AppointmentCancelledNotification extends Notification
         );
     }
 
-    public function toArray(object $notifiable): array
+    public function toDatabase(object $notifiable): array
     {
         return [
             'message' => 'تم إلغاء الموعد مع الطبيب ' . $this->appointment->doctor->user->name,

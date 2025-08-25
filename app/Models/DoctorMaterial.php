@@ -17,6 +17,8 @@ class DoctorMaterial extends Model
         'dm_quantity',
         'dm_quality',
         'dm_used_at',
+        'dm_price',      // سعر الوحدة
+        'dm_total_price' // السعر الإجمالي
     ];
 
     public function doctor()

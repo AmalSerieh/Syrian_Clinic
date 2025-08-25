@@ -36,7 +36,7 @@
         <select name="med_frequency" class="form-control" required>
             @foreach(['once_daily', 'twice_daily', 'three_times_daily', 'daily', 'weekly', 'monthly', 'yearly'] as $freq)
                 <option value="{{ $freq }}" {{ old('med_frequency') == $freq ? 'selected' : '' }}>
-                    {{ __('med_frequency.' . $freq) }}
+                    {{ $freq}}
                 </option>
             @endforeach
         </select>
@@ -48,7 +48,7 @@
         <select name="med_dosage_form" class="form-control" required>
             @foreach(['tablet', 'capsule', 'pills', 'syrup', 'liquid', 'drops', 'sprays', 'patches', 'injections', 'powder'] as $form)
                 <option value="{{ $form }}" {{ old('med_dosage_form') == $form ? 'selected' : '' }}>
-                    {{ __('med_dosage_form.' . $form) }}
+                    {{ $form }}
                 </option>
             @endforeach
         </select>
@@ -67,7 +67,7 @@
             <option value="">-- بدون توقيت محدد --</option>
             @foreach(['before_food', 'after_food', 'morning', 'evening', 'morning_evening'] as $timing)
                 <option value="{{ $timing }}" {{ old('med_timing') == $timing ? 'selected' : '' }}>
-                    {{ __('med_timing.' . $timing) }}
+                    {{ $timing }}
                 </option>
             @endforeach
         </select>

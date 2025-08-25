@@ -78,5 +78,10 @@ class Visit extends Model
     {
         return $this->belongsTo(Patient::class);
     }
+    public function evaluat()
+    {
+        return $this->hasMany(VisitEvaluation::class);
+
+    }
 
 }
