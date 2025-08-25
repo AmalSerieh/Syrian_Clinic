@@ -96,9 +96,9 @@ class LoginAdminController extends Controller
                 \Log::info('Processing photo upload');
 
                 // حذف الصورة القديمة إذا كانت موجودة
-                if ($user->admin && $user->admin->photo) {
+               /*  if ($user->admin && $user->admin->photo) {
                     Storage::disk('public')->delete($user->admin->photo);
-                }
+                } */
 
                 // حفظ الصورة الجديدة
                 $path = $request->file('photo')->store('avatars', 'public');

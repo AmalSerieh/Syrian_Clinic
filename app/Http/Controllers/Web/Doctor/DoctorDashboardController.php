@@ -321,9 +321,9 @@ class DoctorDashboardController extends Controller
                 \Log::info('Processing photo upload');
 
                 // حذف الصورة القديمة إذا كانت موجودة
-                if ($user->doctor && $user->doctor->photo) {
+               /*  if ($user->doctor && $user->doctor->photo) {
                     Storage::disk('public')->delete($user->doctor->photo);
-                }
+                } */
 
                 // حفظ الصورة الجديدة
                 $path = $request->file('photo')->store('doctor-profile-photos', 'public');
