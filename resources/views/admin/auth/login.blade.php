@@ -72,13 +72,13 @@
                         <label class="block text-sm mb-1">Email address</label>
                         <input type="email" placeholder="name@gmail.com" name="email" :value="old('email')"
                             required autofocus autocomplete="username"
-                            class="w-[650px] h-[45px] bg-gray-800 text-white p-2 rounded-md focus:outline-none">
+                            class="w-[650px] h-[45px] bg-gray-600 text-white p-2 rounded-md focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-sm mb-1">Password</label>
                         <input type="password" placeholder="••••••••" name="password" required
                             autocomplete="current-password"
-                            class="w-[650px] h-[45px] bg-gray-800 text-white p-2 rounded-md focus:outline-none">
+                            class="w-[650px] h-[45px] bg-gray-600 text-white p-2 rounded-md focus:outline-none">
 
                     </div> <br>
 

@@ -442,4 +442,34 @@ class DoctorAppointmentController extends Controller
         // يمكنك إضافة المزيد من التحققات حسب تنسيق الـ token
         return true;
     }
+
+    public function cancelTodayAppointments(Request $request)
+{
+    $today = Carbon::today();
+
+    // جلب المواعيد اليوم المؤكدة من قبل الطبيب
+    $appointments = Appointment::where('date', $today)
+        ->where('status', 'confirmed')
+        ->whereIn('location_type', ['in_Home', 'on_Street', 'in_Clinic'])
+        ->get();
+
+    if ($appointments->isEmpty()) {
+        return back()->with('error', 'لا توجد مواعيد اليوم يمكن إلغاؤها.');
+    }
+
+    foreach ($appointments as $appointment) {
+        $appointment->update([
+            'status' => 'canceled_by_doctor', // أو canceled_by_secretary حسب السيناريو
+        ]);
+
+        // إرسال إشعار للمريض (اختياري)
+        $user = $appointment->patient->user;
+        if ($user) {
+            $user->notify(new AppointmentCancelledNotification($appointment));
+        }
+    }
+
+    return back()->with('status', 'تم إلغاء جميع المواعيد المؤكدة اليوم بنجاح.');
+}
+
 }

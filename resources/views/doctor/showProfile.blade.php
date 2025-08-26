@@ -236,7 +236,7 @@
                             <form action="{{ route('doctor-profile.update', $doctor->doctorProfile->id) }}"
                                 method="POST" enctype="multipart/form-data" class="space-y-6">
                                 @csrf
-                                @method('PUT')
+                               {{--  @method('PUT') --}}
 
                                 <!-- اسم الطبيب (مقروء فقط) -->
                                 <div>

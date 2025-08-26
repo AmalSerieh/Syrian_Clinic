@@ -51,6 +51,7 @@ class SecretaryAppointmentController extends Controller
         foreach ($doctors as $doctor) {
             $nearestSlots[$doctor->id] = $this->getNearestAvailableRangeSlotForBlade($doctor->id);
         }
+        // dd($nearestSlots);
 
         return view('secretary.appointments.appointment-all', compact(
             'doctors',
@@ -110,7 +111,12 @@ class SecretaryAppointmentController extends Controller
             }
         }
 
-        return ['status' => 'full'];
+        return [
+            'status' => 'full',
+            'date' => null,
+            'day' => null,
+            'time' => null,
+        ];
     }
 
 
@@ -563,20 +569,48 @@ class SecretaryAppointmentController extends Controller
             'arrivved_time' => 'required|integer|min:1'
         ]);
 
+        $date = Carbon::parse($validated['date']);
+        $start_time = Carbon::parse($validated['date'] . ' ' . $validated['time']);
+        $end_time = Carbon::parse($validated['date'] . ' ' . $validated['end_time']);
 
-        $start_time = $validated['time'];
-        $end_time = $validated['end_time'];
-        // dd($validated);
+        // ✅ منع الحجز في العيادة أو الشارع إلا إذا كان الموعد اليوم
+        if (in_array($validated['location_type'], ['in_Clinic', 'on_Street']) && !$date->isToday()) {
+            return back()->withErrors(['location_type' => 'لا يمكن الحجز في العيادة أو في الشارع إلا في تاريخ اليوم فقط.']);
+        }
 
+        // ✅ التحقق: إذا اليوم، لازم الوقت يكون >= الآن
+        if ($date->isToday() && $start_time->lessThan(Carbon::now())) {
+            return back()->withErrors(['time' => 'لا يمكن حجز موعد في وقت قد مضى.']);
+        }
 
+        // ✅ التحقق: وقت النهاية لازم يكون بعد البداية
+        if ($end_time->lessThanOrEqualTo($start_time)) {
+            return back()->withErrors(['end_time' => 'وقت الانتهاء يجب أن يكون بعد وقت البداية.']);
+        }
+
+        // ✅ التحقق: الموعد ضمن دوام الدكتور
+        $doctor = Doctor::with('doctorSchedule')->findOrFail($validated['doctor_id']);
+        $dayName = $date->format('l');
+        $schedule = $doctor->doctorSchedule->firstWhere('day', $dayName);
+
+        if (!$schedule) {
+            return back()->withErrors(['date' => 'الدكتور غير متاح في هذا اليوم.']);
+        }
+
+        $workStart = Carbon::parse($validated['date'] . ' ' . $schedule->start_time);
+        $workEnd = Carbon::parse($validated['date'] . ' ' . $schedule->end_time);
+
+        if ($start_time->lt($workStart) || $end_time->gt($workEnd)) {
+            return back()->withErrors(['time' => 'الموعد يجب أن يكون ضمن ساعات عمل الدكتور: ' . $workStart->format('H:i') . ' - ' . $workEnd->format('H:i')]);
+        }
         $appointment = Appointment::create([
             'doctor_id' => $validated['doctor_id'],
             'patient_id' => $validated['patient_id'],
             'secretary_id' => Auth::user()->secretary->id,
             'date' => $validated['date'],
             'day' => Carbon::parse($validated['date'])->format('l'),
-            'start_time' => $start_time,
-            'end_time' => $end_time,
+            'start_time' => $start_time->format('H:i:s'),
+            'end_time' => $end_time->format('H:i:s'),
             'status' => 'confirmed',
             'location_type' => $validated['location_type'],
             'created_by' => 'secretary',
@@ -670,7 +704,7 @@ class SecretaryAppointmentController extends Controller
 
             if ($appointment->patient && $appointment->patient->user) {
                 $user = $appointment->patient->user;
-                
+
 
                 // Send database notification
                 $user->notify(new AppointmentCancelledNotification($appointment));

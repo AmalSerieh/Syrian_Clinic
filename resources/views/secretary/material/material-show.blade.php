@@ -331,18 +331,97 @@
                     </div>
                 @else
                     <!-- حالة عدم وجود مواد -->
-                    <div class="col-span-3 flex items-center justify-center">
-                        <div x-data="{ showCreate: false }">
-                            <button @click="showCreate = true">
-                                <div
-                                    class="p-10 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-blue-500/10 transition border-2 border-dashed border-blue-500 bg-transparent">
-                                    <div class="text-blue-500 text-8xl mb-4 font-bold select-none">+</div>
-                                    <div class="text-2xl text-blue-500 font-semibold">
-                                        إضافة أول مادة
-                                    </div>
+                    <div x-data="{ showCreate: false }" class="col-span-3 flex items-center justify-center">
+                        <button @click="showCreate = true">
+                            <div
+                                class="p-10 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-blue-500/10 transition border-2 border-dashed border-blue-500 bg-transparent">
+                                <div class="text-blue-500 text-8xl mb-4 font-bold select-none">+</div>
+                                <div class="text-2xl text-blue-500 font-semibold">
+                                    إضافة أول مادة
                                 </div>
-                            </button>
+                            </div>
+                        </button>
+                        <!-- مودال الإنشاء -->
+                        <div x-show="showCreate" x-transition
+                            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 text-black"
+                            style="display: none;" @click.self="showCreate = false">
+                            <div @click.stop class="bg-[#34589b] p-6 rounded shadow-lg w-96 text-black">
+                                <h2 class="mb-4 font-bold text-lg">➕ إضافة مادة جديدة</h2>
+
+                                <!-- نموذج الإنشاء -->
+                                <form method="POST" action="{{ route('secretary.material.store') }}"
+                                    enctype="multipart/form-data">
+                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+
+                                    <div class="mb-4">
+                                        <label for="material_name" class="block font-bold">اسم المادة</label>
+                                        <input type="text" name="material_name" id="material_name"
+                                            class="form-input w-full text-cyan-950" required>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="supplier_id" class="block font-bold ">المورد</label>
+                                        <select name="supplier_id" class="text-black " required>
+                                            <option disabled selected class=" text-white bg-black">اختر المورد</option>
+                                            @foreach ($suppliers as $supplier)
+                                                <option value="{{ $supplier->id }}" class=" text-white bg-black">
+                                                    {{ $supplier->sup_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+
+                                    <div class="mb-4">
+                                        <label for="material_quantity" class="block font-bold">الكمية</label>
+                                        <input type="number" name="material_quantity" id="material_quantity"
+                                            class="form-input w-full" required>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="material_price" class="block font-bold">السعر</label>
+                                        <input type="number" step="0.01" name="material_price" id="material_price"
+                                            class="form-input w-full" required>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="material_location" class="block font-bold">الموقع</label>
+                                        <input type="text" name="material_location" id="material_location"
+                                            class="form-input w-full">
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="material_expiration_date" class="block font-bold">تاريخ
+                                            الانتهاء</label>
+                                        <input type="date" name="material_expiration_date"
+                                            id="material_expiration_date" class="form-input w-full">
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="material_threshold" class="block font-bold">حد التنبيه</label>
+                                        <input type="number" name="material_threshold" id="material_threshold"
+                                            class="form-input w-full" placeholder="الحد الأدنى للتنبيه">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="material_image" class="block font-bold">الصورة </label>
+                                        <input type="file" name="material_image" id="material_image"
+                                            class="form-input w-full">
+                                    </div>
+
+                                    <div class="text-right">
+                                        <button type="submit"
+                                            class="bg-[#303c52] text-white px-4 py-2 rounded hover:bg-blue-700">
+                                            إضافة
+                                        </button>
+                                        <button type="button" @click="showCreate = false"
+                                            class="ml-2 bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
+                                            إلغاء
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
+
                     </div>
                 @endif
             </div>
@@ -512,4 +591,6 @@
             }
         }
     </script>
+    <script src="//unpkg.com/alpinejs" defer></script>
+
 @endsection

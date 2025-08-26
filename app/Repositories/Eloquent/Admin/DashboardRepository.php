@@ -78,7 +78,7 @@ class DashboardRepository implements DashboardRepositoryInterface
 
         $doctor = Doctor::create([
             'user_id' => $user->id,
-            'photo' => 'doctor-profile-photos/default.jpg',
+            'photo' => 'doctor-profile-photos/default.png',
             'room_id' => $data['room_id'],
             'date_of_appointment' => $data['date_of_appointment'],
             'type_wage' => $data['type_wage'],
@@ -112,7 +112,7 @@ class DashboardRepository implements DashboardRepositoryInterface
     {
         $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-        
+
         return Doctor::with(['user', 'doctorProfile', 'room', 'doctorSchedule'])->get()->map(function ($doctor) use ($daysOfWeek) {
 
             // تجهيز جدول الأسبوع كامل

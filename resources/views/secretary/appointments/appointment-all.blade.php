@@ -213,7 +213,6 @@
                     <div class="space-y-2">
                         @if (isset($doctorBookingRequests) && $doctorBookingRequests->count() > 0)
                             @foreach ($doctorBookingRequests as $request)
-
                                 <div class="flex items-center justify-between bg-[#0E2A3F] p-2 rounded-xl">
 
                                     <div class="flex items-center gap-2">
@@ -252,6 +251,9 @@
                         @endif
 
                     </div>
+                    @php
+                        $slot = $nearestSlots[$doctor->id];
+                    @endphp
                     <!-- Nearest Date Booking Section -->
                     <div class="mt-4 bg-[#072C3D] p-4 rounded-xl text-white text-sm">
                         <div class="flex items-center justify-between mb-2">
@@ -269,21 +271,24 @@
                             </div>
 
                             <!-- Book Button -->
-
                             <!-- Icon -->
-                           {{--  <a href="{{ route('secretary.appointments.book', [
-                                'doctor_id' => $doctor->id,
-                                'date' => $nearestSlots[$doctor->id]['date'],
-                                'time' => $nearestSlots[$doctor->id]['time'],
-                            ]) }}"
-                                class="flex flex-col items-center border-2 border-dashed border-blue-500 bg-blue-500/10 px-4 py-2 rounded-xl hover:bg-blue-500/20">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1 text-blue-400" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span class="text-xs font-semibold">Book</span>
-                            </a> --}}
+                            @if (isset($slot['date']) && isset($slot['time']))
+                                <a href="{{ route('secretary.appointments.book', [
+                                    'doctor_id' => $doctor->id,
+                                    'date' => $nearestSlots[$doctor->id]['date'],
+                                    'time' => $nearestSlots[$doctor->id]['time'],
+                                ]) }}"
+                                    class="flex flex-col items-center border-2 border-dashed border-blue-500 bg-blue-500/10 px-4 py-2 rounded-xl hover:bg-blue-500/20">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1 text-blue-400"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span class="text-xs font-semibold">Book</span>
+                                </a>
+                            @else
+                                <span class="text-gray-400 text-sm">غير متاح</span>
+                            @endif
 
                         </div>
                         <div class="flex justify-between gap-2 mt-4">
