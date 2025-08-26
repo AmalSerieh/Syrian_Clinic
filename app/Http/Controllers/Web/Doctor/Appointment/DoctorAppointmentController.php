@@ -444,32 +444,53 @@ class DoctorAppointmentController extends Controller
     }
 
     public function cancelTodayAppointments(Request $request)
-{
-    $today = Carbon::today();
+    {
+        $today = Carbon::today();
 
-    // جلب المواعيد اليوم المؤكدة من قبل الطبيب
-    $appointments = Appointment::where('date', $today)
-        ->where('status', 'confirmed')
-        ->whereIn('location_type', ['in_Home', 'on_Street', 'in_Clinic'])
-        ->get();
+        // جلب المواعيد اليوم المؤكدة من قبل الطبيب
+        $appointments = Appointment::where('date', $today)
+            ->where('status', 'confirmed')
+            ->whereIn('location_type', ['in_Home', 'on_Street', 'in_Clinic'])
+            ->get();
 
-    if ($appointments->isEmpty()) {
-        return back()->with('error', 'لا توجد مواعيد اليوم يمكن إلغاؤها.');
-    }
-
-    foreach ($appointments as $appointment) {
-        $appointment->update([
-            'status' => 'canceled_by_doctor', // أو canceled_by_secretary حسب السيناريو
-        ]);
-
-        // إرسال إشعار للمريض (اختياري)
-        $user = $appointment->patient->user;
-        if ($user) {
-            $user->notify(new AppointmentCancelledNotification($appointment));
+        if ($appointments->isEmpty()) {
+            return back()->with('error', 'لا توجد مواعيد اليوم يمكن إلغاؤها.');
         }
+
+        foreach ($appointments as $appointment) {
+            $appointment->update([
+                'status' => 'canceled_by_doctor', // أو canceled_by_secretary حسب السيناريو
+            ]);
+
+            // إرسال إشعار للمريض (اختياري)
+            $user = $appointment->patient->user;
+            if ($user) {
+                $user->notify(new AppointmentCancelledNotification($appointment));
+                if (!empty($user->fcm_token)) {
+                    $result['has_token'] = true;
+                    $result['token_valid'] = true;
+                    $success = $this->sendFirebaseNotification(
+                        $appointment->patient->user->fcm_token,
+                        ' تم إلغاء الموعد من قبل الطبيب' . $appointment->doctor->user->name,
+                        'تم إلغاء موعدك بتاريخ ' . $appointment->date
+                    );
+                    if ($success) {
+                        $result['notification_sent'] = $success;
+                        \Log::info("تم إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
+                    } else {
+                        \Log::warning("فشل إرسال إشعار FCM للمستخدم ID={$appointment->patient->user->id}");
+                    }
+                } else {
+                    $result['has_token'] = !empty($user->fcm_token);
+                    $result['token_valid'] = false;
+                    \Log::info("لا يوجد FCM token للمستخدم ID={$user->id}، تم حفظ الإشعار في قاعدة البيانات فقط");
+                }
+            }
+
+        }
+
+        return back()->with('status', 'تم إلغاء جميع المواعيد المؤكدة اليوم بنجاح.');
     }
 
-    return back()->with('status', 'تم إلغاء جميع المواعيد المؤكدة اليوم بنجاح.');
-}
 
 }

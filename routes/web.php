@@ -247,7 +247,7 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
 
     Route::post('doctor/appointments/patients/{visitId}/finishVisit', [DoctorAppointmentController::class, 'finishVisit'])->name('doctor.visits.finish');
 
-    Route::post('doctor/appointments/patients/cancelToday', [DoctorAppointmentController::class, 'finishVisit'])->name('doctor.cancelToday');
+    Route::post('doctor/appointments/patients/cancelToday', [DoctorAppointmentController::class, 'cancelTodayAppointments'])->name('doctor.cancelToday');
 
 
 });

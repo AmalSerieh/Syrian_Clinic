@@ -397,10 +397,15 @@
             {{-- Bottom Buttons + Case --}}
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-4 h-full">
-                    <button
-                        class="flex-1 border-2 border-dashed border-red-500 text-red-500 rounded-xl hover:bg-red-500/20 hover:text-white transition text-lg font-semibold">
-                        Cancel Today
-                    </button>
+                    <form action="{{ route('doctor.cancelToday') }}" method="POST"
+                        onsubmit="return confirm('هل أنت متأكد من إلغاء جميع المواعيد اليوم؟');">
+                        @csrf
+                        <button type="submit"
+                            class="flex-1 border-2 border-dashed border-red-500 text-red-500 rounded-xl hover:bg-red-500/20 hover:text-white transition text-lg font-semibold">
+                            Cancel Today
+                        </button>
+                    </form>
+
                     <button
                         class="flex-1 border-2 border-dashed border-yellow-500 text-yellow-500 rounded-xl hover:bg-yellow-500/20 hover:text-white transition text-lg font-semibold">
                         Postponement تأجيل المواعيد
@@ -811,7 +816,7 @@
                     <h2 class="text-lg font-bold mb-4">إضافة دواء جديد</h2>
                     @if (isset($currentPatient['visit']))
                         <form method="POST"
-                            action="{{ route('doctor.prescription.store', $currentPatient['visit']['id']??0) }}"
+                            action="{{ route('doctor.prescription.store', $currentPatient['visit']['id'] ?? 0) }}"
                             class="space-y-4">
                             @csrf
 

@@ -111,6 +111,7 @@ Route::middleware([SetLocale::class, 'auth:sanctum'])->group(function () {
     Route::get('/editMedicalRecord/visitlast', [VisitController::class, 'latestEditedVisit']);
     Route::post('/Evaluation/{visitId}/storeEvaluation', [VisitController::class, 'storeEvaluation']);
     Route::get('/prescription', [VisitController::class, 'getPrescription']);
+    Route::get('/AllVisit', [VisitController::class, 'AllVisit']);
 
 
 

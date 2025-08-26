@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\API\Appointement;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointment;
 use App\Models\MedicalRecordLogVisit;
+use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
 use App\Models\Visit;
@@ -187,7 +189,7 @@ class VisitController extends Controller
             foreach ($visitPrescriptions as $prescription) {
                 $visitData['prescriptions'][] = [
                     'prescription_id' => $prescription->id,
-                    'created_at' =>  $prescription->created_at->format('Y-m-d'),
+                    'created_at' => $prescription->created_at->format('Y-m-d'),
                     'items' => $prescription->items->map(function ($item) {
                         return [
                             'id' => $item->id,
@@ -244,5 +246,100 @@ class VisitController extends Controller
         return $prescriptions;
     }
 
+
+    public function AllVisit(Request $request, $patientId = null)
+    {
+        $user = $request->user();
+
+        // استخدام patientId من المستخدم إذا لم يُحدد
+        if (!$patientId && $user->patient) {
+            $patientId = $user->patient->id;
+        }
+
+        if (!$patientId) {
+            return response()->json([
+                'message' => 'لم يتم تحديد المريض',
+                'data' => []
+            ], 400);
+        }
+
+        $patient = Patient::find($patientId);
+        if (!$patient) {
+            return response()->json([
+                'message' => 'المريض غير موجود',
+                'data' => []
+            ], 404);
+        }
+
+        // جلب المواعيد المكتملة
+        $completedAppointments = Appointment::with('doctor')
+            ->where('patient_id', $patientId)
+            ->where('status', 'completed')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // جلب الزيارات المنتهية
+        $completedVisits = Visit::with('doctor')
+            ->where('patient_id', $patientId)
+            ->where('v_status', 'completed')
+            ->orderBy('v_ended_at', 'desc')
+            ->get();
+
+        // تحديد اللغة من الـ header (مثلاً Accept-Language: ar أو en)
+        $locale = $request->header('Accept-Language', 'ar');
+        if (!in_array($locale, ['ar', 'en'])) {
+            $locale = 'ar';
+        }
+
+
+
+        // دمج المواعيد والزيارات مع اختيار التخصص حسب اللغة لكل طبيب
+        $allCompleted = $completedAppointments->map(function ($appointment) use ($locale) {
+            $specialist = $locale === 'en'
+                ? $appointment->doctor->doctorProfile?->specialist_en
+                : $appointment->doctor->doctorProfile?->specialist_ar;
+
+            return [
+                'type' => 'appointment',
+               // 'id' => $appointment->id,
+                'date' => $appointment->date,
+                'time' => $appointment->start_time .'-'.$appointment->end_time,
+                'status' => $appointment->status,
+                'doctor' => [
+                    'id' => $appointment->doctor->id,
+                    'name' => $appointment->doctor->user->name,
+                    'specialization' => $specialist,
+                ]
+            ];
+        })->merge($completedVisits->map(function ($visit) use ($locale) {
+            $specialist = $locale === 'en'
+                ? $visit->doctor->doctorProfile?->specialist_en
+                : $visit->doctor->doctorProfile?->specialist_ar;
+
+            return [
+                'type' => 'visit',
+                'id' => $visit->id,
+                'date' => $visit->v_ended_at,
+                'status' => $visit->v_status,
+                'doctor' => [
+                    'id' => $visit->doctor->id,
+                    'name' => $visit->doctor->user->name,
+                    'specialization' => $specialist,
+                ]
+            ];
+        }));
+
+        if ($allCompleted->isEmpty()) {
+            return response()->json([
+                'message' => 'لا توجد زيارات مكتملة لهذا المريض',
+                'data' => []
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'تم جلب كل الزيارات المكتملة',
+            'data' => $allCompleted
+        ], 200);
+    }
 
 }
