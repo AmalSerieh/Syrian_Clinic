@@ -1,8 +1,8 @@
-<nav class="bg-[#001E2B] text-white px-6 py-4 flex items-center justify-between">
+<nav class="bg-[#060E0E] text-white px-6 py-6 flex items-center justify-between">
     <!-- Search input with icon -->
     <div class="relative w-1/2">
         <input type="text" placeholder="Search for Patients"
-            class="bg-[#072C3D] text-white p-2  rounded w-full focus:outline-none" />
+            class="text-white p-2  rounded-xl w-full focus:outline-none bg-[#0094e7]/10 backdrop-blur-[160px] border border-[#0094e7]/100 shadow-[0_64px_64px_-32px_rgba(41,0,0,0.56)] " />
         <!-- Search icon -->
         <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"

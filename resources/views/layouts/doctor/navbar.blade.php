@@ -1,10 +1,10 @@
 <div
-    class="bg-gradient-to-br from-[#0a0f1e] to-[#1b2236] p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow rounded-2xl">
+    class=" bg-[#060E0E]  p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow rounded-2xl">
     <h1 class="text-xl font-semibold text-white">Welcome Back, {{ Auth::user()->name }} 👋 </h1>
     <div class="relative w-full md:w-[500px]">
         <form  id="searchForm"  method="GET" action="{{ route('admin.doctors.search') }}" class="relative w-full md:w-[500px]">
             <input type="text" name="query" id="searchQuery" placeholder="Search for Doctors"
-                class="rounded-lg px-4 pr-12 py-2 w-full bg-[#12192b] border border-gray-600 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" required>
+            class="text-white p-2  rounded-xl w-full focus:outline-none bg-[#0094e7]/10 backdrop-blur-[160px] border border-[#0094e7]/100 shadow-[0_64px_64px_-32px_rgba(41,0,0,0.56)] " />
             <button type="submit" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"

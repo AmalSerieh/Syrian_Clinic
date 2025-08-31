@@ -56,6 +56,8 @@ class VisitController extends Controller
             'day_name' => $dayName,
             'month_name' => $monthName,
             'year' => $year,
+            'doctor_photo' => asset('storage/' . $latestLog->doctor->photo)?? null,
+
         ]);
     }
 
@@ -181,7 +183,9 @@ class VisitController extends Controller
             $visitData = [
                 'visit_id' => $visitId,
                 'visit_date' => $formattedDate, // التاريخ فقط بدون وقت
+
                 'doctor_name' => $visitPrescriptions->first()->doctor->user->name ?? 'غير معروف',
+                'name_patient'=>Auth::user()->name,
                 'appointment_date' => $visit->appointment->date ?? null,
                 'prescriptions' => []
             ];
@@ -301,9 +305,9 @@ class VisitController extends Controller
 
             return [
                 'type' => 'appointment',
-               // 'id' => $appointment->id,
+                // 'id' => $appointment->id,
                 'date' => $appointment->date,
-                'time' => $appointment->start_time .'-'.$appointment->end_time,
+                'time' => $appointment->start_time . '-' . $appointment->end_time,
                 'status' => $appointment->status,
                 'doctor' => [
                     'id' => $appointment->doctor->id,
@@ -325,6 +329,7 @@ class VisitController extends Controller
                     'id' => $visit->doctor->id,
                     'name' => $visit->doctor->user->name,
                     'specialization' => $specialist,
+                    'photo'=>asset('storage/'.$visit->doctor->photo)??null
                 ]
             ];
         }));

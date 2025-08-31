@@ -15,7 +15,7 @@
         @else
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @foreach ($files as $file)
-                    <div class="bg-red-400 rounded-2xl shadow p-4">
+                    <div class="bg-blue-500 rounded-2xl shadow p-4">
                         <h3 class="text-lg font-semibold mb-2">{{ $file->ray_name }}</h3>
 
                         <p class="text-sm text-gray-600 mb-1">

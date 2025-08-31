@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web\Doctor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Doctor\StoreDoctorProfileRequest;
 use App\Models\DoctorProfile;
+use App\Models\Nurse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -90,7 +91,14 @@ class DoctorProfileController extends Controller
     }
     public function showProfile()
     {
-        return view('doctor.showProfile');
+         // نجيب كل الممرضين مع المستخدم (الاسم، الايميل ...) ومع الخدمات
+        $doctor = auth()->user()->doctor; // الطبيب الحالي
+
+        // نجيب فقط ممرضين هذا الطبيب مع المستخدم والخدمات
+        $nurses = Nurse::with(['user', 'services'])
+            ->where('doctor_id', $doctor->id)
+            ->get();
+        return view('doctor.showProfile',compact('nurses'));
 
     }
     public function edit($id)

@@ -73,13 +73,18 @@
                         <input type="email" placeholder="name@gmail.com" name="email" :value="old('email')"
                             required autofocus autocomplete="username"
                             class="w-[650px] h-[45px] bg-gray-600 text-white p-2 rounded-md focus:outline-none">
+                        @error('email')
+                            <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <label class="block text-sm mb-1">Password</label>
                         <input type="password" placeholder="••••••••" name="password" required
                             autocomplete="current-password"
                             class="w-[650px] h-[45px] bg-gray-600 text-white p-2 rounded-md focus:outline-none">
-
+                        @error('password')
+                            <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
+                        @enderror
                     </div> <br>
 
                     @if (!$hasAdmin)

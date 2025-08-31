@@ -15,7 +15,7 @@
         </div>
     @else
         <div class="mt-6 overflow-x-auto">
-            <table class="min-w-full bg-red-400 border border-gray-200 rounded-lg shadow">
+            <table class="min-w-full bg-blue-500 border border-gray-200 rounded-lg shadow">
                 <thead>
                     <tr class="bg-gray-500 text-left">
                         <th class="p-3 border-b">📄 اسم الفحص</th>

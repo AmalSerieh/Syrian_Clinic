@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 class SecretaryMaterialController extends Controller
 {
 
-    // ✅ عرض كل المواد
+    // ✅ عرض كل الموادFinanceController
     public function index()
     {
         $materials = Material::with(['supplierMaterials.supplier'])->orderBy('material_name')->get();

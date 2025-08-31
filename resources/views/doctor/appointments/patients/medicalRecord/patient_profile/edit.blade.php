@@ -21,6 +21,7 @@
 
         <form action="{{ route('doctor.medical-record.patient_profile.update', $patientProfile->id) }}" method="POST">
             @csrf
+            @method('PUT')
 
             <!-- الجنس -->
             <div class="mb-4">

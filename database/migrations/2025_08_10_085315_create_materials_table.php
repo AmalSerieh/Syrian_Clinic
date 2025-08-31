@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('material_expiration_date')->nullable();
             $table->decimal('material_price', 10, 2)->nullable();
             $table->integer('material_threshold')->nullable(); // حد النفاذ
-             $table->integer('material_image')->nullable(); 
+             $table->string('material_image')->nullable();
             $table->timestamps();
         });
     }

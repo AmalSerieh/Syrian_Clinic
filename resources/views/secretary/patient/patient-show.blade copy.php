@@ -19,10 +19,10 @@
                 @if ($patient->photo)
                     <div class="relative w-[120px] h-[120px] mx-auto mb-2 flex items-center justify-center">
 
-                        <div class="absolute w-[120px] h-[120px] rounded-full bg-blue-800 z-[1]"></div>
+                        <div class="absolute w-[120px] h-[120px] rounded-full bg-blue-600 z-[1]"></div>
                         <div
                             class="absolute w-[140px] h-[140px] -top-[10px] -left-[10px] rounded-full
-                               border-[6px] border-blue-800 border-b-transparent
+                               border-[6px] border-blue-600 border-b-transparent
                                rotate-[-125deg] z-0">
                         </div>
                         <img src="{{ Storage::url($patient->photo) }}" alt="patient"
@@ -107,15 +107,15 @@
 
         <!-- المواعيد التي تنتظر التأكيد -->
         <div>
-            <h3 class="flex justify-end text-2xl font-semibold mb-4 text-yellow-600">⏳ المواعيد التي تنتظر التأكيد</h3>
+            <h3 class="text-2xl font-semibold mb-4 text-yellow-600">⏳ المواعيد التي تنتظر التأكيد</h3>
             <table class="w-full border border-gray-300 rounded-lg overflow-hidden">
-                <thead class="bg-yellow-900/30 text-yellow-200 border border-yellow-700 font-semibold">
+                <thead class="bg-yellow-200 text-yellow-900 font-semibold">
                     <tr>
-                        <th class="p-3 border-r border-yellow-700">التاريخ</th>
-                        <th class="p-3 border-r border-yellow-700">الوقت</th>
-                        <th class="p-3 border-r border-yellow-700">اسم الطبيب</th>
-                        <th class="p-3 border-r border-yellow-700">الموقع</th>
-                        <th class="p-3 border-r border-yellow-700">التأكيد</th>
+                        <th class="p-3 border-r border-yellow-300">التاريخ</th>
+                        <th class="p-3 border-r border-yellow-300">الوقت</th>
+                        <th class="p-3 border-r border-yellow-300">اسم الطبيب</th>
+                        <th class="p-3 border-r border-yellow-300">الموقع</th>
+                        <th class="p-3 border-r border-yellow-300">التأكيد</th>
                         <th class="p-3">الإلغاء</th>
                     </tr>
                 </thead>
@@ -159,15 +159,15 @@
 
         <!-- الزيارات المكتملة -->
         <div>
-            <h3 class="flex justify-end text-2xl font-semibold mb-4 text-green-700">✅ الزيارات المكتملة</h3>
+            <h3 class="text-2xl font-semibold mb-4 text-green-700">✅ الزيارات المكتملة</h3>
             <table class="w-full border border-green-300 rounded-lg overflow-hidden">
-                <thead class="bg-green-900/30 text-green-100 border border-green-700 font-semibold">
+                <thead class="bg-green-200 text-green-900 font-semibold">
                     <tr>
-                        <th class="p-3 border-r border-green-700">تاريخ البداية</th>
-                        <th class="p-3 border-r border-green-700">تاريخ النهاية</th>
-                        <th class="p-3 border-r border-green-700">اسم الطبيب</th>
-                        <th class="p-3 border-r border-green-700">السعر</th>
-                        <th class="p-3 border-r border-green-700">مدفوع</th>
+                        <th class="p-3 border-r border-green-300">تاريخ البداية</th>
+                        <th class="p-3 border-r border-green-300">تاريخ النهاية</th>
+                        <th class="p-3 border-r border-green-300">اسم الطبيب</th>
+                        <th class="p-3 border-r border-green-300">السعر</th>
+                        <th class="p-3 border-r border-green-300">مدفوع</th>
                         <th class="p-3 border-green-300"></th>
                         <th class="p-3">الملاحظات</th>
                     </tr>
@@ -194,13 +194,13 @@
 
         <!-- المواعيد الملغاة -->
         <div>
-            <h3 class="flex justify-end text-2xl font-semibold mb-4 text-red-600">❌ المواعيد الملغاة</h3>
-            <table class="w-full border border-red-700 rounded-lg overflow-hidden">
-                <thead class="bg-red-900/30 text-red-200 border border-red-700 font-semibold">
+            <h3 class="text-2xl font-semibold mb-4 text-red-600">❌ المواعيد الملغاة</h3>
+            <table class="w-full border border-red-300 rounded-lg overflow-hidden">
+                <thead class="bg-red-200 text-red-900 font-semibold">
                     <tr>
-                        <th class="p-3 border-r border-red-700">التاريخ</th>
-                        <th class="p-3 border-r border-red-700">الوقت</th>
-                        <th class="p-3 border-r border-red-700">اسم الطبيب</th>
+                        <th class="p-3 border-r border-red-300">التاريخ</th>
+                        <th class="p-3 border-r border-red-300">الوقت</th>
+                        <th class="p-3 border-r border-red-300">اسم الطبيب</th>
                         <th class="p-3">الحالة</th>
                     </tr>
                 </thead>

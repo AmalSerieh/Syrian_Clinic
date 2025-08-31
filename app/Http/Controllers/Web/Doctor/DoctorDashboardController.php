@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\DoctorMaterial;
 use App\Models\Material;
+use App\Models\Service;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -213,14 +214,15 @@ class DoctorDashboardController extends Controller
         $totalConsumption = DoctorMaterial::where('visit_id', $currentPatient['visit']['id'] ?? 0)
             ->sum('dm_total_price');
 
-
+        $services = Service::all();
         return view('doctor.home.dashboard', compact(
             'waitingPatients',
             'currentPatient',
             'prescriptions',
             'materials',
             'doctorMaterials',
-            'totalConsumption'
+            'totalConsumption',
+            'services'
         ));
         // return redirect()->route('doctor-profile.create');
     }
@@ -321,9 +323,9 @@ class DoctorDashboardController extends Controller
                 \Log::info('Processing photo upload');
 
                 // حذف الصورة القديمة إذا كانت موجودة
-               /*  if ($user->doctor && $user->doctor->photo) {
-                    Storage::disk('public')->delete($user->doctor->photo);
-                } */
+                /*  if ($user->doctor && $user->doctor->photo) {
+                     Storage::disk('public')->delete($user->doctor->photo);
+                 } */
 
                 // حفظ الصورة الجديدة
                 $path = $request->file('photo')->store('doctor-profile-photos', 'public');

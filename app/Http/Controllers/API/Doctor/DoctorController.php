@@ -62,11 +62,14 @@ class DoctorController extends Controller
 
             return $slots;
         });
-        $rating = VisitEvaluation::where('doctor_id', $doctor)
+        $rating2 = VisitEvaluation::where('doctor_id', $doctor)
             /* ->sum('final_evaluate') */ ;
-        $rating = VisitEvaluation::where('doctor_id', $doctor->id ?? $doctor)
+        $rating1 = VisitEvaluation::where('doctor_id', $doctor->id ?? $doctor)
             ->pluck('final_evaluate');
-       
+        // حساب متوسط التقييم أو إرجاع 0 إذا لم يكن هناك تقييمات
+        $rating = VisitEvaluation::where('doctor_id', $doctor->id)
+            ->avg('final_evaluate') ?? 0;
+
         return response()->json([
             'doctor' => new DoctorResource($doctor),
             'rating' => $rating,

@@ -26,33 +26,33 @@
             <div>
                 <label class="block text-sm font-medium text-gray-500 mb-1">اليوم:</label>
                 <select name="day" required
-                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="Monday">Monday</option>
-                    <option value="Tuesday">Tuesday</option>
-                    <option value="Wednesday">Wednesday</option>
-                    <option value="Thursday">Thursday</option>
-                    <option value="Friday">Friday</option>
-                    <option value="Saturday">Saturday</option>
-                    <option value="Sunday">Sunday</option>
+                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black">
+                    <option value="Monday" class="text-black">Monday</option>
+                    <option value="Tuesday"class="text-black">Tuesday</option>
+                    <option value="Wednesday"class="text-black">Wednesday</option>
+                    <option value="Thursday"class="text-black">Thursday</option>
+                    <option value="Friday"class="text-black">Friday</option>
+                    <option value="Saturday"class="text-black">Saturday</option>
+                    <option value="Sunday"class="text-black">Sunday</option>
                 </select>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1">وقت البدء:</label>
+                <label class="block text-sm font-medium text-gray-500 mb-1 text-black">وقت البدء:</label>
                 <input type="time" name="start_time" required step="60"
-                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black">
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-500 mb-1">وقت النهاية:</label>
                 <input type="time" name="end_time" required step="60"
-                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black">
             </div>
             <!-- عدد المرضى في الساعة -->
             <div class="mb-3">
                 <label for="patients_per_hour" class="form-label">عدد المرضى في الساعة</label>
                 <input type="number" min=1 name="patients_per_hour" id="patients_per_hour"
-                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black">
 
                 @error('patients_per_hour')
                     <div class="text-danger">{{ $message }}</div>

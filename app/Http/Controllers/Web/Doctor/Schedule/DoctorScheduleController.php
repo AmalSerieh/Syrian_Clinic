@@ -125,8 +125,8 @@ class DoctorScheduleController extends Controller
         $durationInMinutes = $start->diffInMinutes($end);
 
         $doctorId = Auth::user()->doctor->id;
-        $workstart = Carbon::parse('08:00');
-        $workend = Carbon::parse('20:00');
+        $workstart = Carbon::parse('07:00');
+        $workend = Carbon::parse('23:00');
         // ✅ التحقق من ساعات العمل (8 صباحاً - 8 مساءً)
         if ($start->lt($workstart) || $end->gt($workend)) {
             return back()->withErrors([

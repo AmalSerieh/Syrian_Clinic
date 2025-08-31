@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\Doctor\Appointment\DoctorAppointmentController;
 use App\Http\Controllers\Web\Doctor\Appointment\DoctorMaterialController;
 use App\Http\Controllers\Web\Doctor\Appointment\PatientMedicalRecordController;
 use App\Http\Controllers\Web\Doctor\Appointment\PrescriptionController;
+use App\Http\Controllers\Web\Secertary\FinanceController;
 use App\Http\Controllers\Web\Secertary\LoginSecretaryController;
 use App\Http\Controllers\Web\Admin\AdminController;
 use App\Http\Controllers\Web\Admin\RegisterAdminController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Web\Auth_Otp\LoginController;
 use App\Http\Controllers\Web\Auth_Otp\LoginWithOtpController;
 use App\Http\Controllers\Web\Auth_Otp\RegisterWithOtpController;
 use App\Http\Controllers\Web\Doctor\DoctorDashboardController;
+use App\Http\Controllers\Web\Doctor\NurseController;
 use App\Http\Controllers\Web\Doctor\DoctorProfileController;
 use App\Http\Controllers\Web\Doctor\Schedule\DoctorScheduleController;
 use App\Http\Controllers\Web\Secertary\SecertaryPatientController;
@@ -88,6 +90,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
     Route::get('/admin/doctor/search', [AdminController::class, 'search'])->name('admin.doctors.search');
     Route::put('/admin/profile/update', [LoginAdminController::class, 'updateProfile'])->name('admin.profile.update');
+    Route::get('/admin/finance', [FinanceController::class, 'finance'])->name('admin.finance');
 
 
 
@@ -249,6 +252,10 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
 
     Route::post('doctor/appointments/patients/cancelToday', [DoctorAppointmentController::class, 'cancelTodayAppointments'])->name('doctor.cancelToday');
 
+    Route::post('doctor/appointments/postpone', [DoctorAppointmentController::class, 'postpone'])->name('doctor.appointments.postpone');
+    Route::post('doctor/nurse/nurseStore', [NurseController::class, 'nurseStore'])->name('doctor.nurse.nurseStor');
+    Route::get('/doctor/nurses', [NurseController::class, 'index'])->name('nurses.index');
+
 
 });
 
@@ -338,6 +345,8 @@ Route::middleware(['web', 'auth', 'role:secretary'])->group(function () {
 
     Route::get('secretary/visits/pending-payments', [SecretaryVisitController::class, 'pendingPayments'])->name('secretary.visits.pendingPayments');
     Route::put('secretary/visits/{id}/confirm-payment', [SecretaryVisitController::class, 'confirmPayment'])->name('secretary.visits.confirmPayment');
+    Route::get('/secretary/finance', [FinanceController::class, 'finance'])->name('secretary.finance');
+    Route::post('/clinic-bills', [FinanceController::class, 'storeClinicBill'])->name('clinic.bills.store');
 
     Route::post('secretary/logout', [AdminController::class, 'logout'])->name('secretary.logout');
 

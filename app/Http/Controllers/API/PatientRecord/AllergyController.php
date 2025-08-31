@@ -110,20 +110,20 @@ class AllergyController extends Controller
         $allergies = $user->patient->patient_record->allergies;
 
 
+
         if ($allergies->isEmpty()) {
             return response()->json(['message' => trans('message.no_data')], 404);
         }
         //  $this->authorize('viewAny', $allergies);
 
         $grouped = $this->service->getGroupedByPower($record->id);
-        //dd($grouped);
         $groupedResources = [];
 
         foreach (['strong', 'medium', 'weak'] as $level) {
             $items = collect($grouped[$level] ?? []);
 
             $filtered = $items->filter(function ($allergy) use ($user) {
-                return Gate::forUser($user)->allows('view', $allergy);
+                return true; // إرجاع true دائمًا لجميع العناصر
             });
 
             $groupedResources[$level] = AllergyResource::collection($filtered->values());

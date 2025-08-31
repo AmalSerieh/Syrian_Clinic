@@ -28,12 +28,12 @@ class UpdateSecretaryRequest extends FormRequest
             'phone' => ['required', 'digits:10'],
             'password' => ['nullable', 'confirmed', 'min:8'], // اجعلها nullable
             'date_of_appointment' => ['required', 'date'],
-            'type_wage' => ['required', Rule::in(['number', 'percentage'])],
-            'wage' => [
+            's_type_wage' => ['required', Rule::in(['number', 'percentage'])],
+            's_wage' => [
                 'required',
                 'numeric',
-                Rule::when(request('type_wage') === 'number', ['min:1', 'max:1000000']), // راتب
-                Rule::when(request('type_wage') === 'percentage', ['min:5', 'max:100']),  // نسبة مئوية
+                Rule::when(request('s_type_wage') === 'number', ['min:1', 'max:1000000']), // راتب
+                Rule::when(request('s_type_wage') === 'percentage', ['min:5', 'max:100']),  // نسبة مئوية
             ],
         ];
     }

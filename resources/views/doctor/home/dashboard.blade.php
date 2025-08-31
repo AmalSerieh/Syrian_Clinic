@@ -405,15 +405,99 @@
                             Cancel Today
                         </button>
                     </form>
-
-                    <button
+                    <!-- زر فتح المودال -->
+                    <button id="openPostponeModalBtn"
+                        onclick="document.getElementById('postponeModal').classList.remove('hidden')"
                         class="flex-1 border-2 border-dashed border-yellow-500 text-yellow-500 rounded-xl hover:bg-yellow-500/20 hover:text-white transition text-lg font-semibold">
                         Postponement تأجيل المواعيد
                     </button>
-                    <button
-                        class="flex-1 border-2 border-dashed border-blue-500 text-blue-500 rounded-xl hover:bg-blue-500/20 hover:text-white transition text-lg font-semibold">
-                        New nurse إضافة ممرضة بحيث بيتم إدخال الرابت و يتم خصمه من قبل راتب الطبيبي الشهري
-                    </button>
+
+                    <!-- المودال -->
+                    <div id="postponeModal"
+                        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <div class="bg-blue-400/50 p-6 rounded-xl shadow-lg w-96 text-black">
+                            <h2 class="text-lg font-semibold mb-4">تأجيل جميع مواعيد اليوم</h2>
+
+                            <form action="{{ route('doctor.appointments.postpone') }}" method="POST">
+                                @csrf
+                                <div class="mb-4">
+                                    <label for="postponeMinutes" class="block text-sm font-medium">
+                                        عدد الدقائق للتأجيل:
+                                    </label>
+                                    <input type="number" id="postponeMinutes" name="minutes"
+                                        class="mt-1 block w-full border rounded-lg p-2" required min="1">
+                                </div>
+
+                                <div class="flex justify-end space-x-2">
+                                    <button type="button"
+                                        onclick="document.getElementById('postponeModal').classList.add('hidden')"
+                                        class="px-4 py-2 bg-gray-300 rounded-lg">
+                                        إلغاء
+                                    </button>
+                                    <button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded-lg">
+                                        تأكيد
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+
+
+                    <!-- الزر لفتح المودال -->
+                    <div x-data="{ open: false }">
+                        <!-- الزر لفتح المودال -->
+                        <button @click="open = true"
+                            class="flex-1 border-2 border-dashed border-blue-500 text-blue-500 rounded-xl hover:bg-blue-500/20 hover:text-white transition text-lg font-semibold">
+                            New nurse
+                        </button>
+
+                        <!-- المودال -->
+                        <div x-show="open" x-cloak
+                            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                            <div class="bg-gray-700 rounded-xl p-6 w-full max-w-lg relative text-white">
+                                <button @click="open = false"
+                                    class="absolute top-2 right-2 text-red-500 font-bold">✖</button>
+                                <h2 class="text-2xl font-bold mb-4 text-center text-blue-400">إضافة ممرضة جديدة</h2>
+
+                                <form action="{{ route('doctor.nurse.nurseStor') }}" method="POST"
+                                    enctype="multipart/form-data">
+                                    @csrf
+                                    <!-- حقول الإدخال -->
+                                    <input type="text" name="name" placeholder="اسم الممرضة" required
+                                        class="w-full mb-3 px-3 py-2 rounded text-black">
+                                    <input type="email" name="email" placeholder="البريد الإلكتروني" required
+                                        class="w-full mb-3 px-3 py-2 rounded text-black">
+                                    <input type="text" name="phone" placeholder="رقم الهاتف" required
+                                        class="w-full mb-3 px-3 py-2 rounded text-black">
+                                    <input type="date" name="date_of_appointment" required
+                                        class="w-full mb-3 px-3 py-2 rounded text-black">
+                                    <select name="gender" required class="w-full mb-3 px-3 py-2 rounded text-black">
+                                        <option value="female">أنثى</option>
+                                        <option value="male">ذكر</option>
+                                    </select>
+
+                                    <div class="mb-3 max-h-48 overflow-y-auto border p-2 rounded bg-gray-800">
+                                        @foreach ($services as $service)
+                                            <label class="flex items-center gap-2">
+                                                <input type="checkbox" name="services[]" value="{{ $service->id }}">
+                                                {{ $service->serv_name }} - ({{ $service->serv_price }}$)
+                                            </label>
+                                        @endforeach
+                                    </div>
+
+                                    <input type="file" name="photo" accept="image/*"
+                                        class="w-full mb-3 text-black">
+
+                                    <button type="submit"
+                                        class="bg-blue-500 hover:bg-blue-600 w-full py-2 rounded font-bold mt-3">إضافة
+                                        الممرضة</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
                 <div>
                     <p class="text-lg">case description</p>
@@ -756,31 +840,46 @@
 
                     $.ajax({
                         url: url,
-                        type: 'PATCH',
+                        type: 'POST', // 👈 لازم تضيف هذا
                         data: data,
                         success: function(response) {
-                            // تحديث مجموع الاستهلاك والسعر النهائي
                             if (response.success) {
-                                $('#finishVisitMsg').html(`<div class="bg-green-600 text-white p-2 rounded">
-                        ${response.message}<br>سعر الزيارة: ${response.v_price} $
-                    </div>`);
+                                $('#finishVisitMsg').html(`
+                <div class="bg-green-600 text-white p-2 rounded">
+                    ${response.message}<br>سعر الزيارة: ${response.v_price} $
+                </div>
+            `);
                                 $('#totalConsumption').text(response.totalConsumption + ' $');
-
-                                // تعطيل الفورم بعد الإنهاء
                                 form.find('input, textarea, button').prop('disabled', true);
                             }
                         },
                         error: function(xhr) {
-                            let errors = xhr.responseJSON.errors;
+                            let errors = xhr.responseJSON?.errors;
                             let html = '<ul class="list-disc list-inside text-red-500">';
-                            $.each(errors, function(key, value) {
-                                html += `<li>${value[0]}</li>`;
-                            });
+                            if (errors) {
+                                $.each(errors, function(key, value) {
+                                    html += `<li>${value[0]}</li>`;
+                                });
+                            } else {
+                                html += '<li>خطأ غير متوقع</li>';
+                            }
                             html += '</ul>';
                             $('#finishVisitMsg').html(html);
                         }
                     });
+
                 });
+                success: function(response) {
+                    if (response.success) {
+                        $('#finishVisitMsg').html(`
+            <div class="bg-green-600 text-white p-2 rounded">
+                ${response.message}<br>سعر الزيارة: ${response.v_price} $
+            </div>
+        `);
+                        $('#totalConsumption').text(response.totalConsumption + ' $');
+                        form.find('input, textarea, button').prop('disabled', true);
+                    }
+                }
             </script>
 
 
@@ -992,5 +1091,7 @@
             });
         </script>
 
+
+        <script src="//unpkg.com/alpinejs" defer></script>
 
     @endsection

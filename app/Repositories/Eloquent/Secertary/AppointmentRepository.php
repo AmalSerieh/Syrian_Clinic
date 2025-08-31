@@ -41,9 +41,13 @@ class AppointmentRepository implements AppointmentRepositoryInterface
         }
         $appointment->status = $status;
         $appointment->save();
+
         \Log::info("تم تحديث حالة الموعد {$appointmentId} إلى {$status}");
+        \Log::info("DB check: " . Appointment::find($appointmentId)->status);
+
         return $appointment;
     }
+
 
     public function fetchConfirmedAppointmentsToday()
     {

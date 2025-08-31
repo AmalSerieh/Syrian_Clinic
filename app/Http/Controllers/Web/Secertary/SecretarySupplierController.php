@@ -18,6 +18,7 @@ class SecretarySupplierController extends Controller
 
     public function store(Request $request)
     {
+
         // تحقق من وجود secretary للمستخدم الحالي
         if (!auth()->user()->secretary) {
             return redirect()
@@ -28,7 +29,7 @@ class SecretarySupplierController extends Controller
         $validated = $request->validate([
             'sup_name' => 'required|string|max:255',
             'sup_phone' => 'required|string|max:10',
-            'sup_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'sup_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:4096',
         ]);
         $photoPath = null;
 
@@ -39,6 +40,8 @@ class SecretarySupplierController extends Controller
             // مسار صورة افتراضية في حالة عدم رفع صورة
             $photoPath = 'supplier/supplierdefault.webp';
         }
+        $photoPath = $request->file('sup_photo')->store('supplier', 'public');
+
 
         // إنشاء مورد جديد
         $supplier = Supplier::create([
@@ -49,7 +52,7 @@ class SecretarySupplierController extends Controller
         ]);
 
         return redirect()
-            ->route('secretary.supplier')
+            ->route('secretary.material')
             ->with('status', 'تم إضافة المورد بنجاح');
         // إرجاع JSON لعرض ديلوج بنجاح الإضافة (يمكن التحكم به في الواجهة)
 

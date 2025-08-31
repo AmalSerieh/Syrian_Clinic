@@ -3,7 +3,7 @@
 @section('content')
     <x-auth-session-status class="mb-8" :status="session('status')" />
 
-    <div class="p-6 space-y-6">
+    <div class="bg-[#060E0E] p-6 space-y-6">
 
         <!-- Top Stats Cards -->
         <div class="grid grid-cols-3 gap-4 -mt-8">
@@ -66,7 +66,7 @@
         <!-- Table and Chart -->
         <div class="grid grid-cols-12 gap-6 mt-2">
             <!-- Top Products -->
-            <div class="bg-[#162133] p-6 rounded-2xl shadow-lg col-span-9 overflow-x-auto">
+            <div class="bg-[#0094E733] p-6 rounded-2xl shadow-lg col-span-9 overflow-x-auto">
                 <h2 class="text-white text-lg font-semibold mb-0">Top Products</h2>
                 <table class="w-full text-sm text-left text-gray-400 min-w-[600px]">
                     <thead class="text-xs uppercase text-gray-500">
@@ -143,7 +143,7 @@
             </div>
 
             <!-- Customer Fulfilment -->
-            <div class="bg-[#032427] rounded-2xl p-6 shadow-lg col-span-3 flex flex-col justify-between">
+            <div class="bg-[#0094E733] rounded-2xl p-6 shadow-lg col-span-3 flex flex-col justify-between">
                 <h2 class="text-white text-sm font-semibold mb-4 leading-snug">
                     Dates of Previous Month<br />and This Month
                 </h2>
@@ -173,7 +173,7 @@
             <div class="col-span-2 flex flex-col items-start gap-6">
                 @if ($roomsFull)
                     <div
-                        class="border-2 border-dashed border-orange-400 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md bg-[#12192b] hover:scale-105 transition-transform duration-300">
+                        class="border-2 border-dashed border-orange-400 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md  hover:scale-105 transition-transform duration-300">
 
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -199,7 +199,7 @@
                 @else
                     <a href="{{ route('admin.doctor.add') }}" class="block">
                         <div
-                            class="border-2 border-dashed border-orange-400 text-white-300 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md bg-[#12192b] hover:scale-105 transition-transform duration-300">
+                            class="border-2 border-dashed border-orange-400 text-white-300 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md  hover:scale-105 transition-transform duration-300">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                 class="lucide lucide-user-round-plus-icon text-orange-300">
@@ -215,7 +215,7 @@
                 @if ($secretary)
                     <a href="{{ route('admin.secretary.replace', [$secretary->id]) }}">
                         <div
-                            class="border-2 border-dashed border-red-500 text-white-300 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md bg-[#12192b] hover:scale-105 transition-transform duration-300">
+                            class="border-2 border-dashed border-red-500 text-white-300 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md  hover:scale-105 transition-transform duration-300">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                 class="lucide lucide-repeat-icon text-red-300">
@@ -230,7 +230,7 @@
                 @else
                     <a href="{{ route('admin.secretary.add') }}" class="block">
                         <div
-                            class="border-2 border-dashed border-red-500 text-white-300 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md bg-[#12192b] hover:scale-105 transition-transform duration-300">
+                            class="border-2 border-dashed border-red-500 text-white-300 px-6 py-5 rounded-lg w-full flex items-center gap-4 shadow-md  hover:scale-105 transition-transform duration-300">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                 class="lucide lucide-user-round-plus-icon text-orange-300">

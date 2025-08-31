@@ -167,6 +167,7 @@ class SecretaryAppointmentController extends Controller
         //dd($appointmentId);
         \Log::info('CSRF token from input: ' . $request->input('_token'));
         \Log::info('From header: ' . $request->header('X-CSRF-TOKEN'));
+         $result = $this->service->confirmAppointment($appointmentId);
 
         try {
             $result = $this->service->confirmAppointment($appointmentId);

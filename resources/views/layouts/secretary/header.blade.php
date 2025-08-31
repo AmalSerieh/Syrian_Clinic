@@ -11,12 +11,12 @@
     <script src="//unpkg.com/alpinejs" defer></script>
 
 </head>
-<body class="bg-gray-900 text-white">
+<body class="bg-[#060E0E] text-white">
     <div class="flex">
         @include('layouts.secretary.sidebar')
-        <div class="flex-1 flex flex-col">
+        <div class="flex-1 flex flex-col ">
             @include('layouts.secretary.navbar')
-            <main class="p-6">
+            <main class="p-6 pt-0">
                 @yield('content')
             </main>
         </div>

@@ -87,6 +87,8 @@ class DashboardService
 
             $this->repo->updateSecretaryProfile($secretary, [
                 'date_of_appointment' => $data['date_of_appointment'],
+                's_wage' => $data['s_wage'],
+                's_type_wage' => $data['s_type_wage'],
             ]);
 
             DB::commit();

@@ -13,7 +13,7 @@
         <x-auth-session-status class="mb-4" :status="session('status')" />
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 mt-4">
             <!-- بطاقة السكرتيرة -->
-            <div class="bg-[#19222f] rounded-2xl p-6 text-center h-[400px]">
+            <div class="bg-[#0094E733] rounded-2xl p-6 text-center h-[400px]">
                 <img src=" {{ asset('storage/' . $secretary->secretary->photo) }}" alt="Secretary"
                     class="w-48 h-48 mx-auto rounded-full mb-4 object-cover border-4 border-blue-900 mt-6">
                 <h3 class="text-4xl font-semibold mt-6">{{ $secretary->name }}</h3>
@@ -21,7 +21,7 @@
             </div>
 
             <!-- تفاصيل الموعد -->
-            <div class="bg-[#19222f] rounded-2xl p-6 text-left space-y-6">
+            <div class="bg-[#0094E733] rounded-2xl p-6 text-left space-y-6">
                 <div>
                     <label class="text-blue-400 text-sm block mb-1">Phone Number</label>
                     <p class="w-full border-b border-gray-600 text-white text-lg pb-1">
@@ -42,6 +42,13 @@
                         {{ $secretary->secretary->gender }}
                     </p>
                 </div>
+                 <div>
+                    <label class="text-blue-400 text-sm block mb-1">Wage</label>
+                    <p class="w-full border-b border-gray-600 text-white text-lg pb-1 capitalize">
+                        {{ $secretary->secretary->s_wage }}$
+                    </p>
+                </div>
+
             </div>
         </div>
 
@@ -69,7 +76,7 @@
             <!-- الزر الثاني -->
             <a href="{{ route('admin.secretary.replace', [$secretary->id]) }}">
             <div
-                class="ml-8 border-2 border-dashed border-red-500 text-white rounded-3xl w-[550px] h-[100px] flex flex-row items-center justify-center gap-4 shadow-md bg-[#12192b] hover:scale-[1.02] transition-transform duration-300 text-center">
+                class="ml-8 border-2 border-dashed border-red-500 text-white rounded-3xl w-[550px] h-[100px] flex flex-row items-center justify-center gap-4 shadow-md  hover:scale-[1.02] transition-transform duration-300 text-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="lucide lucide-repeat text-red-400">

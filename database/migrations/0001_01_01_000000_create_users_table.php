@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('language')->default('en'); // en or ar
-            $table->enum('role', ['admin', 'secretary', 'doctor', 'patient'])->default('patient'); // نوع المستخدم
+            $table->enum('role', ['admin', 'secretary', 'doctor', 'patient','nurse'])->default('patient'); // نوع المستخدم
             $table->string('phone')->nullable(); // en or ar
             $table->string('google_id')->nullable();
             // معلومات من أنشأ الحساب

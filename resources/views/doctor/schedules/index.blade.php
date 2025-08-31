@@ -1,11 +1,11 @@
 @extends('layouts.doctor.header')
 
 @section('content')
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 py-8 px-4" x-data="{ showEditModal: false }">
+    <div class="min-h-screen bg-gradient-to-br from-gray-800 py-8 px-4 rounded-2xl" x-data="{ showEditModal: false }">
         <div class="max-w-7xl mx-auto">
             <!-- Header -->
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 bg-white rounded-2xl shadow-lg px-8 py-4 inline-block">
+                <h1 class="text-3xl font-bold text-white bg-[#060E0E] rounded-2xl shadow-lg px-8 py-4 inline-block">
                     📅 جداول مواعيد الطبيب
                 </h1>
                 @if (session('success'))
@@ -19,16 +19,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 @foreach ($schedules as $schedule)
                     <div
-                        class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                        class="bg-gray-900 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                         <!-- Card Header -->
-                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white text-center">
+                        <div class="bg-gradient-to-r from-blue-800 to-indigo-900 p-6 text-white text-center">
                             <h3 class="text-xl font-bold mb-2">{{ __($schedule->day) }}</h3>
                             <div class="flex justify-center items-center gap-2">
-                                <span class="bg-blue-400 px-3 py-1 rounded-full text-sm">
+                                <span class="bg-blue-400 px-3 py-1 rounded-full text-sm text-black">
                                     🕒 {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}
                                 </span>
                                 <span class="text-white">-</span>
-                                <span class="bg-blue-400 px-3 py-1 rounded-full text-sm">
+                                <span class="bg-blue-400 px-3 py-1 rounded-full text-sm text-black">
                                     🕒 {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
                                 </span>
                             </div>
@@ -38,25 +38,25 @@
                         <div class="p-6">
                             <!-- Stats Grid -->
                             <div class="grid grid-cols-2 gap-4 mb-6">
-                                <div class="text-center bg-blue-50 rounded-xl p-3">
+                                <div class="text-center bg-gray-800 rounded-xl p-3">
                                     <div class="text-2xl font-bold text-blue-600">{{ $schedule->patients_per_hour }}</div>
-                                    <div class="text-sm text-gray-600">مريض/ساعة</div>
+                                    <div class="text-sm text-blue-600">مريض/ساعة</div>
                                 </div>
-                                <div class="text-center bg-green-50 rounded-xl p-3">
+                                <div class="text-center bg-gray-800 rounded-xl p-3">
                                     <div class="text-2xl font-bold text-green-600">{{ $schedule->appointment_duration }}
                                     </div>
-                                    <div class="text-sm text-gray-600">دقيقة/موعد</div>
+                                    <div class="text-sm text-green-600">دقيقة/موعد</div>
                                 </div>
-                                <div class="text-center bg-purple-50 rounded-xl p-3 col-span-2">
+                                <div class="text-center bg-gray-800 rounded-xl p-3 col-span-2">
                                     <div class="text-2xl font-bold text-purple-600">{{ $schedule->max_patients }}</div>
-                                    <div class="text-sm text-gray-600">الحد الأقصى</div>
+                                    <div class="text-sm text-purple-600">الحد الأقصى</div>
                                 </div>
                             </div>
 
                             <!-- Actions -->
                             <div class="flex gap-3">
                                 <button @click="showEditModal = true"
-                                    class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-xl text-center hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2">
+                                    class="flex-1 bg-blue-700 text-white py-2 px-4 rounded-xl text-center hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
@@ -69,7 +69,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" onclick="return confirm('هل أنت متأكد من حذف هذا الجدول؟')"
-                                        class="w-full bg-red-600 text-white py-2 px-4 rounded-xl hover:bg-red-700 transition-colors duration-200 flex items-center justify-center gap-2">
+                                        class="w-full bg-red-700 text-white py-2 px-4 rounded-xl hover:bg-red-700 transition-colors duration-200 flex items-center justify-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
@@ -85,18 +85,18 @@
 
                 <!-- Add New Schedule Card -->
                 <div
-                    class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-dashed border-gray-300">
+                    class="bg-gray-800 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-dashed border-blue-600">
                     <div class="p-6 h-full flex flex-col items-center justify-center text-center">
-                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-4">
                             <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2">إضافة جدول جديد</h3>
-                        <p class="text-gray-600 mb-4">أضف جدول مواعيد جديد لأيام الأسبوع</p>
+                        <h3 class="text-lg font-semibold text-white mb-2">إضافة جدول جديد</h3>
+                        <p class="text-white mb-4">أضف جدول مواعيد جديد لأيام الأسبوع</p>
                         <a href="{{ route('doctor-schedule.create') }}"
-                            class="bg-gradient-to-r from-green-500 to-green-600 text-white py-2 px-6 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200">
+                            class="bg-gradient-to-r from-blue-700 to-blue-800 text-white py-2 px-6 rounded-xl hover:from-blue-800 hover:to-blue-900 transition-all duration-200">
                             + إضافة جدول
                         </a>
                     </div>

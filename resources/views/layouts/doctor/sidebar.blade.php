@@ -6,6 +6,7 @@
             <img src="{{ asset('storage/' . Auth::user()->doctor->photo) }}" alt="Avatar"
                 class="w-20 h-20 rounded-full mb-3 border-2 border-gray-400">
 
+
             <!-- أيقونة القلم للتعديل -->
             <button onclick="openEditModal()"
                 class="absolute bottom-2 right-2 bg-blue-600 p-1 rounded-full shadow-md hover:bg-blue-700">
@@ -16,6 +17,10 @@
                 </svg>
             </button>
         </div>
+          <div class="text-center">
+            <div class="text-sm text-gray-300">DOCTOR CLINIC</div>
+            <div class="font-semibold">{{ Auth::user()->name }}</div>
+        </div>
     </div>
 
     <!-- خط رايق بعد الصورة -->
@@ -25,6 +30,7 @@
     <div class="text-xs text-gray-400 mb-4 pl-1">Main</div>
 
     <!-- Navigation -->
+  <!-- Navigation -->
     <nav class="flex flex-col gap-4 ">
         <a href="{{ route('doctor.dashboard') }}"
             class="flex items-center gap-3 p-3 rounded  hover:bg-blue-500/15 transition-colors duration-200">
@@ -63,8 +69,7 @@
             Schedule
         </a>
 
-        <a href="{{ route('doctor.patients.index') }}"
-            class="flex items-center gap-3 p-3 rounded hover:bg-[#0f2f41]/50">
+        <a href="#" class="flex items-center gap-3 p-3 rounded hover:bg-[#0f2f41]/50">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="lucide lucide-chart-spline-icon lucide-chart-spline">
@@ -73,7 +78,7 @@
             </svg>
             Appointments
         </a>
-        <form action="{{ route('doctor.logout') }}" method="POST">
+        <form action="{{ route('admin.logout') }}" method="POST">
             @csrf
             <button type="submit" class="flex items-center gap-3 p-3 rounded hover:bg-[#0f2f41]/50 w-full text-left">
                 <!-- أيقونة تسجيل الخروج -->

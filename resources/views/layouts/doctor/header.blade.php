@@ -10,7 +10,7 @@
 
 
 </head>
-<body class="bg-gray-900 text-white">
+<body class="bg-[#060E0E] text-white">
     <div class="flex">
         @include('layouts.doctor.sidebar')
         <div class="flex-1 flex flex-col">

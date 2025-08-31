@@ -102,8 +102,7 @@
             <div class="grid grid-cols-3 gap-4">
                 {{-- Dates Table  #2F80ED20  --}}
 
-                <div class="col-span-2 bg-[#2F80ED33] p-4 rounded-2xl overflow-y-auto"
-                    style="-ms-overflow-style:none;scrollbar-width:none;">
+                <div class="col-span-2 bg-[#062E47] p-4 rounded-2xl overflow-y-auto "style="-ms-overflow-style:none;scrollbar-width:none;">
                     <h2 class="text-lg mb-2">
                         Dates - <span class="text-blue-400">{{ $doctorAppointments->count() }}</span>
                         <span class="text-gray-400">date at day</span>
@@ -207,60 +206,56 @@
                     </div>
                 </div>
 
-                {{-- Booking + Nearest Section --}}
-                <div class="bg-[#060E0E]  rounded-2xl text-white space-y-3 shadow-lg flex flex-col">
+                {{-- Booking Requests --}}
+                <div class="bg-[#062E47] p-4 rounded-2xl text-white">
 
-                    {{-- الصف الأول: Booking Requests --}}
-                    <div class="w-full bg-[#2F80ED33] p-4 rounded-xl">
-                        <h2 class="text-lg mb-4 font-semibold text-white">📋 Booking Requests</h2>
-                        <div class="space-y-2 overflow-y-auto max-h-64 pr-2"
-                            style="-ms-overflow-style:none;scrollbar-width:none;">
-                            @if (isset($doctorBookingRequests) && $doctorBookingRequests->count() > 0)
-                                @foreach ($doctorBookingRequests as $request)
-                                    <div class="flex items-center justify-between bg-[#1B3A52] p-3 rounded-xl">
-                                        <div class="flex items-center gap-2">
-                                            <img src="{{ asset('storage/' . $request->patient->photo) }}"
-                                                class="w-10 h-10 rounded-full object-cover border-2 border-slate-700"
-                                                alt="صورة المريض">
-                                            <div class="flex flex-col">
-                                                <span class="font-medium">{{ $request->patient->user->name }} wants
-                                                    booking</span>
-                                                <span class="text-xs text-gray-400">({{ $request->date }})</span>
-                                            </div>
-                                        </div>
+                    <h2 class="text-lg mb-4">Booking requests</h2>
+                    <div class="space-y-2">
+                        @if (isset($doctorBookingRequests) && $doctorBookingRequests->count() > 0)
+                            @foreach ($doctorBookingRequests as $request)
+                                <div class="flex items-center justify-between bg-[#0E2A3F] p-2 rounded-xl">
 
-                                        <div class="flex gap-1 text-xs">
-                                            <form method="POST"
-                                                action="{{ route('secretary.appointment.confirm', $appointment->id) }}">
-                                                @csrf
-                                                <button
-                                                    class="text-green-300 border border-green-300 bg-green-900/60 px-3 py-1 rounded-3xl hover:bg-green-800/70">
-                                                    Confirm
-                                                </button>
-                                            </form>
-                                            <form method="POST"
-                                                action="{{ route('secretary.appointment.cancel', $appointment->id) }}">
-                                                @csrf
-                                                <button
-                                                    class="text-red-400 border border-red-400 bg-red-800/30 px-3 py-1 rounded-3xl hover:bg-red-700/40">
-                                                    Cancel
-                                                </button>
-                                            </form>
+                                    <div class="flex items-center gap-2">
+                                        <img src="{{ asset('storage/' . $request->patient->photo) }}"
+                                            class="w-10 h-10 rounded-full object-cover border-2 border-slate-700"
+                                            alt="صورة المريض">
+                                        <div class="flex flex-col">
+
+                                            <span>{{ $request->patient->user->name }} wants booking</span>
+                                            <span class="text-xs text-gray-500">({{ $request->date }})</span>
                                         </div>
                                     </div>
-                                @endforeach
-                            @else
-                                <div class="text-center text-gray-400  p-4 rounded-xl">
-                                    There are no reservation requests currently.
+
+                                    <div class="flex gap-1 textxs">
+                                        {{-- {{ dd($appointment) }} --}}
+                                        <form method="POST"
+                                            action="{{ route('secretary.appointment.confirm', $appointment->id) }}">
+                                            @csrf
+                                            <button
+                                                class="text-green-300 border border-green-300  bg-green-900/60 px-2 py-1 rounded-3xl">Confirm</button>
+                                        </form>
+                                        <form method="POST"
+                                            action="{{ route('secretary.appointment.cancel', $appointment->id) }}">
+                                            @csrf
+                                            <button
+                                                class="text-red-500  border border-red-500 bg-red-800/30  px-2 py-1 rounded-3xl">Cancel</button>
+
+                                        </form>
+                                    </div>
                                 </div>
-                            @endif
-                        </div>
+                            @endforeach
+                        @else
+                            <div class="text-center text-gray-400 bg-[#0E2A3F] p-4 rounded-xl">
+                                There are no reservation requests currently.
+                            </div>
+                        @endif
+
                     </div>
                     @php
                         $slot = $nearestSlots[$doctor->id];
                     @endphp
-                    {{-- الصف الثاني: Nearest Date --}}
-                    <div class="w-full bg-[#060E0E] p-4 rounded-xl text-white text-sm">
+                    <!-- Nearest Date Booking Section -->
+                    <div class="mt-4 bg-[#072C3D] p-4 rounded-xl text-white text-sm">
                         <div class="flex items-center justify-between mb-2">
                             <div class="border-2 border-blue-200 bg-blue-500/10 px-4 py-2 rounded-2xl">
                                 <p class="text-gray-300">The nearest empty date</p>
@@ -272,7 +267,9 @@
                                 @else
                                     <p class="text-red-400 font-semibold text-base mt-1">لا يوجد موعد متاح</p>
                                 @endif
+
                             </div>
+
                             <!-- Book Button -->
                             <!-- Icon -->
                             @if (isset($slot['date']) && isset($slot['time']))
@@ -294,9 +291,8 @@
                             @endif
 
                         </div>
-
                         <div class="flex justify-between gap-2 mt-4">
-                            {{-- Cancel Button --}}
+                            <!-- Cancel Button -->
                             @if ($canCancelAll)
                                 <form action="{{ route('secretary.appointments.cancelAll', $doctor->id) }}"
                                     method="POST"
@@ -317,17 +313,19 @@
                                 </button>
                             @endif
 
-                            {{-- Done Button --}}
+
+
+                            <!-- Done Button -->
                             <button
-                                class="w-1/2 border-2 border-green-500 bg-green-500/10 px-4 py-2 rounded-xl text-center hover:bg-green-500/20">
+                                class="w-1/2 border-2  border-green-500 bg-green-500/10  px-4 py-2 rounded-xl text-center hover:bg-green-500/20">
                                 <div class="text-green-400 text-lg font-bold">Done</div>
                                 <div class="text-xs font-semibold">{{ $confirmedCount }} Date</div>
                             </button>
                         </div>
+
                     </div>
 
                 </div>
-
             </div>
         @endforeach
     </div>

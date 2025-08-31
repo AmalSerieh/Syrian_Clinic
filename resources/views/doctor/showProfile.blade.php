@@ -7,8 +7,8 @@
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gradient-to-br from-blue-500 to-indigo-100 min-h-screen" x-data="{ showEditModal: false }">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 space-y-8">
+     <div class="py-12 bg-gradient-to-r from-[#0094E733] to-indigo-900 min-h-screen rounded-2xl" x-data="{ showEditModal: false }">
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 space-y-8 ro">
 
             @php
                 $doctor = Auth::user()->doctor;
@@ -18,11 +18,11 @@
             @if ($doctor)
                 <!-- Header Section -->
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-                    <h1 class="text-3xl font-bold text-gray-800 bg-white px-6 py-3 rounded-2xl shadow-lg">
+                    <h1 class="text-3xl font-bold text-white bg-gradient-to-r from-[#0094E733] to-indigo-900 px-6 py-3 rounded-2xl shadow-lg">
                         الملف المهني للطبيب
                     </h1>
                     <button @click="showEditModal = true"
-                        class="inline-flex items-center bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-medium px-6 py-3 rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 transform hover:-translate-y-1">
+                        class="inline-flex items-center bg-gradient-to-r from-[#0094E733] to-indigo-900 text-white font-medium px-6 py-3 rounded-xl shadow-lg hover:from-[#0094E733] hover:to-indigo-800 transition-all duration-300 transform hover:-translate-y-1">
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
@@ -35,13 +35,13 @@
 
 
                 <!-- Main Profile Card -->
-                <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
                     <!-- Profile Header -->
-                    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
+                    <div class="bg-gradient-to-r from-blue-800 to-indigo-900 p-6 text-white">
                         <div class="flex flex-col md:flex-row items-center gap-6">
                             <div class="relative">
                                 <img src="{{ asset('storage/' . $doctor->photo) }}" alt="Doctor"
-                                    class="w-32 h-32 object-cover rounded-full border-4 border-white shadow-2xl">
+                                    class="w-32 h-32 object-cover rounded-full border-4 border-blue-300 shadow-2xl">
                                 <div class="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-2 shadow-lg">
                                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
@@ -65,10 +65,10 @@
                         <!-- Personal Information Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                             <!-- Gender Card -->
-                            <div class="bg-blue-50 rounded-xl p-4 border-l-4 border-blue-400">
+                            <div class="bg-gray-800 rounded-xl p-4 border-l-4 border-blue-700">
                                 <div class="flex items-center gap-3">
-                                    <div class="bg-blue-100 p-3 rounded-full">
-                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor"
+                                    <div class="bg-blue-600 p-3 rounded-full">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
@@ -76,19 +76,21 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="text-sm text-gray-600">الجنس</p>
-                                        <p class="font-semibold text-gray-800">
-                                            {{ $doctor->doctorProfile->gender == 'male' ? 'ذكر' : 'أنثى' }}</p>
+                                        <p class="text-sm text-gray-400">الجنس</p>
+                                        <p class="font-semibold text-white">
+                                            {{ $doctor->doctorProfile->gender == 'male' ? 'ذكر' : 'أنثى' }}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
 
 
+
                             <!-- Birth Date Card -->
-                            <div class="bg-purple-50 rounded-xl p-4 border-l-4 border-purple-400">
+                            <div class="bg-gray-800  rounded-xl p-4 border-l-4 border-purple-600">
                                 <div class="flex items-center gap-3">
-                                    <div class="bg-purple-100 p-3 rounded-full">
-                                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor"
+                                    <div class="bg-purple-600 p-3 rounded-full">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
@@ -96,8 +98,8 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="text-sm text-gray-600">تاريخ الميلاد</p>
-                                        <p class="font-semibold text-gray-800">
+                                        <p class="text-sm text-gray-400">تاريخ الميلاد</p>
+                                        <p class="font-semibold text-white">
                                             {{ \Carbon\Carbon::parse($doctor->doctorProfile->date_birth)->format('d/m/Y') }}
                                         </p>
                                     </div>
@@ -106,18 +108,18 @@
 
 
                             <!-- Experience Years Card -->
-                            <div class="bg-green-50 rounded-xl p-4 border-l-4 border-green-400">
+                            <div class="bg-gray-800 rounded-xl p-4 border-l-4 border-green-600">
                                 <div class="flex items-center gap-3">
-                                    <div class="bg-green-100 p-3 rounded-full">
-                                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
+                                    <div class="bg-green-600 p-3 rounded-full">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="text-sm text-gray-600">سنوات الخبرة</p>
-                                        <p class="font-semibold text-gray-800">{{ $doctor->doctorProfile->exp_years }} سنة
+                                        <p class="text-sm text-gray-400">سنوات الخبرة</p>
+                                        <p class="font-semibold text-white">{{ $doctor->doctorProfile->exp_years }} سنة
                                         </p>
                                     </div>
                                 </div>
@@ -127,8 +129,8 @@
 
                         <!-- Biography Section -->
                         <div class="mb-8">
-                            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor"
+                            <h3 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
@@ -136,8 +138,8 @@
                                 </svg>
                                 السيرة الذاتية
                             </h3>
-                            <div class="bg-gray-50 rounded-xl p-6 border-2 border-dashed border-gray-200">
-                                <p class="text-gray-700 leading-relaxed text-justify">
+                            <div class="bg-gray-800 rounded-xl p-6 border  border-purple-600">
+                                <p class="text-white leading-relaxed text-justify overflow-x-auto" style="-ms-overflow-style:none;scrollbar-width:none;">
                                     {{ $doctor->doctorProfile->biography }}
                                 </p>
                             </div>
@@ -146,7 +148,7 @@
 
                         <!-- Certificates Section -->
                         <div class="mb-8">
-                            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <h3 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
                                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
@@ -154,19 +156,19 @@
                                 </svg>
                                 الشهادات العلمية
                             </h3>
-                            <div class="bg-blue-50 rounded-xl p-6 border-2 border-blue-100">
+                            <div class="bg-gray-800 rounded-xl p-6 border border-blue-600">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <p class="text-sm text-blue-600 mb-1">اسم الشهادة</p>
-                                        <p class="font-semibold text-gray-800">{{ $doctor->doctorProfile->cer_name }}</p>
+                                        <p class="font-semibold text-white">{{ $doctor->doctorProfile->cer_name }}</p>
                                     </div>
                                     <div>
                                         <p class="text-sm text-blue-600 mb-1">مكان الحصول</p>
-                                        <p class="font-semibold text-gray-800">{{ $doctor->doctorProfile->cer_place }}</p>
+                                        <p class="font-semibold text-white">{{ $doctor->doctorProfile->cer_place }}</p>
                                     </div>
                                     <div>
                                         <p class="text-sm text-blue-600 mb-1">تاريخ الشهادة</p>
-                                        <p class="font-semibold text-gray-800">{{ $doctor->doctorProfile->cer_date }}</p>
+                                        <p class="font-semibold text-white">{{ $doctor->doctorProfile->cer_date }}</p>
                                     </div>
                                     @if ($doctor->doctorProfile->cer_images)
                                         <div class="md:col-span-2">
@@ -183,7 +185,7 @@
 
                         <!-- Experience Section -->
                         <div>
-                            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <h3 class="text-xl font-semibold text-white mb-4 flex items-center gap-2 ">
                                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -192,15 +194,15 @@
                                 </svg>
                                 الخبرة العملية
                             </h3>
-                            <div class="bg-green-50 rounded-xl p-6 border-2 border-green-100">
+                            <div class="bg-gray-800 rounded-xl p-6 border border-green-600">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <p class="text-sm text-green-600 mb-1">مكان العمل</p>
-                                        <p class="font-semibold text-gray-800">{{ $doctor->doctorProfile->exp_place }}</p>
+                                        <p class="font-semibold text-white">{{ $doctor->doctorProfile->exp_place }}</p>
                                     </div>
                                     <div>
                                         <p class="text-sm text-green-600 mb-1">مدة الخبرة</p>
-                                        <p class="font-semibold text-gray-800">{{ $doctor->doctorProfile->exp_years }} سنة
+                                        <p class="font-semibold text-white">{{ $doctor->doctorProfile->exp_years }}
                                         </p>
                                     </div>
                                 </div>
@@ -236,7 +238,7 @@
                             <form action="{{ route('doctor-profile.update', $doctor->doctorProfile->id) }}"
                                 method="POST" enctype="multipart/form-data" class="space-y-6">
                                 @csrf
-                               {{--  @method('PUT') --}}
+                                @method('PUT')
 
                                 <!-- اسم الطبيب (مقروء فقط) -->
                                 <div>
@@ -357,7 +359,50 @@
             @endif
 
         </div>
+         <div class="container mx-auto mt-6">
+        <h1 class="text-2xl font-bold mb-6 text-center text-blue-700">قائمة الممرضين</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach ($nurses as $nurse)
+                <div class="bg-blue-500/50 shadow-lg rounded-2xl p-4">
+                    {{-- صورة الممرضة --}}
+                    <div class="flex justify-center mb-4">
+                        @if ($nurse->photo)
+                            <img src="{{ asset('storage/' . $nurse->photo) }}"
+                                class="w-24 h-24 rounded-full object-cover border-2 border-blue-500" alt="صورة الممرضة">
+                        @else
+                            <img src="https://via.placeholder.com/100"
+                                class="w-24 h-24 rounded-full object-cover border-2 border-blue-500" alt="صورة الممرضة">
+                        @endif
+                    </div>
+
+                    {{-- بيانات أساسية --}}
+                    <h2 class="text-lg font-bold text-center text-gray-800">{{ $nurse->user->name ?? '---' }}</h2>
+                    <p class="text-center text-gray-500 mb-2">الجنس: {{ $nurse->gender }}</p>
+                    <p class="text-center text-green-600 font-semibold mb-2">الراتب:
+                        {{ number_format($nurse->salary, 0) }} ل.س</p>
+                    <p class="text-center text-sm text-gray-400">تاريخ التعيين: {{ $nurse->date_of_appointment }}</p>
+
+                    {{-- الخدمات --}}
+                    <div class="mt-4">
+                        <h3 class="text-sm font-bold text-blue-500 mb-2">الخدمات:</h3>
+                        @if ($nurse->services->count() > 0)
+                            <ul class="list-disc list-inside text-sm text-gray-700">
+                                @foreach ($nurse->services as $service)
+                                    <li>{{ $service->serv_price }}:{{ $service->serv_name }}</li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="text-sm text-gray-400">لا توجد خدمات</p>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+        </div>
     </div>
+    </div>
+
+
 
     <script src="//unpkg.com/alpinejs" defer></script>
 @endsection

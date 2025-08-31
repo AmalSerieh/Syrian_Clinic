@@ -1,5 +1,5 @@
 <!-- Sidebar -->
-<div class="w-60 min-h-screen bg-[#0094E733] text-white flex flex-col p-4">
+<div class="w-60 min-h-screen bg-[#162133] text-white flex flex-col p-4">
     <div class="flex flex-col items-center mb-6 relative">
         <!-- صورة الطبيب -->
         <div class="relative">
@@ -64,20 +64,8 @@
             </svg>
             Secretary
         </a>
-        <a href="{{ route('admin.finance') }}"
-            class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
-            <!-- Visits icon -->
-            <!-- Visits Icon - Modern Design -->
-            <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M2 12h20M12 2v20M5 5l14 14" />
-                <circle cx="12" cy="12" r="10" />
-            </svg>
-            Finance
-        </a>
 
-        {{--   <a href="{{ route('admin.reports') }}" class="flex items-center gap-3 p-3 rounded hover:bg-[#0f2f41]/50">
+      {{--   <a href="{{ route('admin.reports') }}" class="flex items-center gap-3 p-3 rounded hover:bg-[#0f2f41]/50">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="lucide lucide-chart-spline-icon lucide-chart-spline">

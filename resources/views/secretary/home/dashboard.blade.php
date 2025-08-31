@@ -32,11 +32,11 @@
                 </div>
             @endif
         </div>
-        <div class="grid grid-cols-3 gap-6 -mt-8 ">
+        <div class="grid grid-cols-3 gap-6  ">
             {{-- قسم الثلثين --}}
             <div class="col-span-2 space-y-2 -ml-5">
                 {{-- Today's Sales --}}
-                <div class="bg-[#062E47] p-4 rounded-xl w-full h-[200px] space-y-1">
+                <div class="bg-[#2F80ED33] p-4 rounded-xl w-full h-[200px] space-y-1">
                     <h6 class="text-lg font-semibold text-white ">Today's Sales {{ $today }}</h6>
                     <div class="relative">
                         <!-- زر التمرير لليسار -->
@@ -52,7 +52,7 @@
                         <!-- حاوية العناصر مع التمرير -->
                         <div class="flex overflow-x-auto scroll-smooth space-x-4 py-2 px-1 hide-scrollbar"
                             id="stats-container">
-                            <div class="bg-gray-900 p-4 rounded-xl text-white min-w-[175px] flex-shrink-0">
+                            <div class="bg-[#060E0E] p-4 rounded-xl text-white min-w-[175px] flex-shrink-0">
                                 <!-- محتوى البطاقة الأولى -->
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -69,7 +69,7 @@
                             </div>
 
                             <!-- باقي البطاقات بنفس الهيكل -->
-                            <div class="bg-gray-900 p-4 rounded-xl text-white min-w-[175px] flex-shrink-0">
+                            <div class="bg-[#060E0E] p-4 rounded-xl text-white min-w-[175px] flex-shrink-0">
                                 <!-- محتوى البطاقة الأولى -->
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -84,7 +84,7 @@
                                 <span class="text-orange-300 text-xs">+10% from yesterday</span>
                             </div>
                             <!-- باقي البطاقات بنفس الهيكل -->
-                            <div class="bg-gray-900 p-4 rounded-xl text-white min-w-[175px] flex-shrink-0">
+                            <div class="bg-[#060E0E] p-4 rounded-xl text-white min-w-[175px] flex-shrink-0">
                                 <!-- محتوى البطاقة الأولى -->
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -99,7 +99,7 @@
                                 <span class="text-orange-300 text-xs">+10% from yesterday</span>
                             </div>
                             <!-- باقي البطاقات بنفس الهيكل -->
-                            <div class="bg-gray-900 p-4 rounded-xl text-white min-w-[175px] flex-shrink-0">
+                            <div class="bg-[#060E0E] p-4 rounded-xl text-white min-w-[175px] flex-shrink-0">
                                 <!-- محتوى البطاقة الأولى -->
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -114,7 +114,7 @@
                                 <span class="text-orange-300 text-xs">+10% from yesterday</span>
                             </div>
                             <!-- باقي البطاقات بنفس الهيكل -->
-                            <div class="bg-gray-900 p-4 rounded-xl text-white min-w-[175px] flex-shrink-0">
+                            <div class="bg-[#060E0E] p-4 rounded-xl text-white min-w-[175px] flex-shrink-0">
                                 <!-- محتوى البطاقة الأولى -->
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -128,7 +128,7 @@
                                 <span class="text-orange-300 text-xs">+10% from yesterday</span>
                             </div>
                             <!-- باقي البطاقات بنفس الهيكل -->
-                            <div class="bg-gray-900 p-4 rounded-xl text-white min-w-[175px] flex-shrink-0">
+                            <div class="bg-[#060E0E] p-4 rounded-xl text-white min-w-[175px] flex-shrink-0">
                                 <!-- محتوى البطاقة الأولى -->
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -162,7 +162,7 @@
                     </div>
                 </div>
 
-                <div class="bg-[#062E47] p-4 rounded-xl ">
+                <div class="bg-[#2F80ED33] p-4 rounded-xl  " >
 
                     {{-- Dates Table --}}
                     <h2 class="text-lg font-semibold mb-4">Dates</h2>
@@ -254,7 +254,7 @@
                         {{-- Add Doctor Buttons --}}
                         <div class="flex flex-col gap-4 w-1/2">
                             <a href="{{ route('secretary.patient.book.add') }}"
-                                class="border-2 border-dashed border-blue-600 p-6 rounded-3xl text-center text-white block">
+                                class="border-2 border-dashed border-blue-600 p-4 rounded-3xl text-center text-white block">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mx-auto mb-2 text-blue-500"
                                     width="24" height="24" viewBox="0 0 24 24" fill="none"
                                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -270,7 +270,7 @@
                                 <p>Add Appointment</p>
                             </a>
                             <a href="{{ route('secretary.patient.add') }}"
-                                class="border-2 border-dashed border-orange-600 p-6 rounded-3xl text-center text-orange block">
+                                class="border-2 border-dashed border-orange-600 p-4 rounded-3xl text-center text-orange block">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mx-auto mb-2 text-orange-500"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round" viewBox="0 0 24 24">
@@ -286,7 +286,7 @@
 
 
                         {{-- النص اليمين (Notes for me) --}}
-                        <div x-data="notesComponent()" class="w-[50%] bg-[#062E47] p-4 rounded-xl text-white">
+                        <div x-data="notesComponent()" class="w-[50%] bg-[#2F80ED33] p-4 rounded-xl text-white">
                             {{-- Header --}}
                             <div class="flex justify-between items-center mb-4">
                                 <h2 class="text-lg font-semibold">Notes for me</h2>
@@ -295,7 +295,7 @@
                             </div>
 
                             {{-- Notes List --}}
-                            <ul class="space-y-2">
+                            <ul class="space-y-2 overflow-y-auto max-h-48 " style="-ms-overflow-style:none;scrollbar-width:none;">
                                 <template x-for="(note, index) in notes" :key="index">
                                     <li class="flex justify-between items-center bg-[#0E2A3F] p-2 rounded">
                                         <span x-text="note"></span>
@@ -345,7 +345,7 @@
             <div class="col-span-1 space-y-4">
                 {{-- Patients in the clinic --}}
 
-                <div class="bg-[#062E47] p-6 rounded-xl" x-data="{
+                <div class="bg-[#2F80ED33] p-6 rounded-xl " x-data="{
                     selectedDoctorClinic: 'all',
                     visiblePatients: 2,
                     showAll: false,
@@ -375,7 +375,7 @@
 
                     <div class="relative">
                         <div class="overflow-y-auto" :class="!showAll ? 'max-h-[140px]' : ''">
-                            <ul class="space-y-4 max-h-40 overflow-y-auto scrollbar-hide">
+                            <ul class="space-y-4">
                                 <template x-if="!hasPatients()">
                                     <li class="text-center py-4 text-gray-400">
                                         There are no patients with this doctor.
@@ -407,12 +407,12 @@
                                                 </template>
                                             </div>
                                         </div>
-                                        <div class="text-right">
+                                        {{-- <div class="text-right">
                                             <button @click="cancelAppointment(patient.id)"
                                                 class="text-blue-400 text-xs bg-transparent border border-blue-400 px-2 py-1 rounded hover:bg-blue-400 hover:text-white transition">
                                                 Cancel
                                             </button>
-                                        </div>
+                                        </div> --}}
                                     </li>
 
                                 </template>
@@ -456,7 +456,7 @@
                         <!-- فلترة حسب الطبيب -->
                         <div class="relative">
                             <select x-model="selectedDoctor"
-                                class="bg-[#062E47] text-blue-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1 pr-1">
+                                class="bg-[#2F80ED33] text-blue-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1 pr-1">
                                 <option value="all">All Doctors</option>
                                 @foreach ($doctors as $doctor)
                                     <option value="{{ $doctor->id }}">Dr. {{ $doctor->user->name }}</option>
@@ -564,7 +564,7 @@
                                 <div class="text-right">
                                     {{ $paymentPatient->visit->first()->v_price }}
                                     <form
-                                        action="{{ route('secretary.patient.appointments.ConfirmPay', $paymentPatient->id) }}"
+                                        action="{{ route('secretary.patient.appointments.moveto.clinic', $paymentPatient->id) }}"
                                         method="POST">
                                         @csrf
                                         <button type="submit"
@@ -787,18 +787,5 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            /* IE and Edge */
-            scrollbar-width: none;
-            /* Firefox */
-        }
-
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-            /* Chrome, Safari, Opera */
-        }
     </style>
-
 @endsection

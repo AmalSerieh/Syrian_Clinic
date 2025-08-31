@@ -422,7 +422,7 @@ class SecretaryController extends Controller
 
             // التحقق من شرط الموقع إذا لم يكن الموعد اليوم
             $appointmentDate = Carbon::parse($validated['date']);
-            if (!$appointmentDate->isToday() && in_array($validated['location_type'], ['on_Street', 'in_Home'])) {
+            if (!$appointmentDate->isToday() && in_array($validated['location_type'], ['on_Street', 'in_Clinic'])) {
                 throw new \Exception('لا يمكن حجز موعد في الشارع أو في العيادة إلا لمواعيد اليوم نفسه');
             }
 

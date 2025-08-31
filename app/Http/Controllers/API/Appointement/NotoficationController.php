@@ -12,7 +12,14 @@ class NotoficationController extends Controller
 
     public function all(Request $request)
     {
-        $notifications = $request->user()->notifications()->latest()->paginate(20);
+        $user = $request->user();
+        if (!$user) {
+            return response()->json([
+                'message' => 'المستخدم غير مصادق'
+            ], 401);
+        }
+
+        $notifications = $user->notifications()->latest()->paginate(20);
         if ($notifications->isEmpty()) {
             return response()->json([
                 'message' => 'لا توجد إشعارات لعرضها',
@@ -24,8 +31,15 @@ class NotoficationController extends Controller
 
     public function unread(Request $request)
     {
-        $notifications = $request->user()->unreadNotifications()->latest()->get();
-         if ($notifications->isEmpty()) {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json([
+                'message' => 'المستخدم غير مصادق'
+            ], 401);
+        }
+
+        $notifications = $user->unreadNotifications()->latest()->get();
+        if ($notifications->isEmpty()) {
             return response()->json([
                 'message' => 'لا توجد إشعارات غير مقروءة',
                 'data' => []
@@ -33,6 +47,7 @@ class NotoficationController extends Controller
         }
         return NotificationResource::collection($notifications);
     }
+
 
     public function markAsRead(Request $request, $id)
     {
@@ -43,7 +58,8 @@ class NotoficationController extends Controller
     }
 
     public function markAllAsRead(Request $request)
-    { $unreadCount = $request->user()->unreadNotifications->count();
+    {
+        $unreadCount = $request->user()->unreadNotifications->count();
 
         if ($unreadCount === 0) {
             return response()->json([

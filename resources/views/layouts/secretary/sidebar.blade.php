@@ -64,7 +64,7 @@
             Patients
         </a>
 
-        <a href="{{ route('secretary.patients') }}"
+        <a href="{{ route('secretary.finance') }}"
             class="flex items-center gap-3 py-2 px-4 rounded hover:bg-[#114B6B] transition-colors">
             <!-- Visits icon -->
             <!-- Visits Icon - Modern Design -->
@@ -74,7 +74,7 @@
                 <path d="M2 12h20M12 2v20M5 5l14 14" />
                 <circle cx="12" cy="12" r="10" />
             </svg>
-            Visits
+            Finance
         </a>
 
         <a href="{{ route('secretary.supplier') }}"

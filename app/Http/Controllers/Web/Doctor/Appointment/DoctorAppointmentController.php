@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Visit;
 use App\Models\WaitingList;
 use App\Notifications\AppointmentCancelledNotification;
+use App\Notifications\AppointmentPostponedNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,10 @@ use Illuminate\Support\Facades\DB;
 use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
+use Illuminate\Support\Facades\Notification as LaravelNotification;
+use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
+
+
 class DoctorAppointmentController extends Controller
 {
     //عرض المرضى تبع اليوم
@@ -139,7 +144,6 @@ class DoctorAppointmentController extends Controller
     }
     public function finishVisit(Request $request, $id)
     {
-
         $visit = Visit::with('appointment')->findOrFail($id);
 
         $request->validate([
@@ -147,22 +151,17 @@ class DoctorAppointmentController extends Controller
             'v_price' => 'required|numeric|min:1',
         ]);
 
-        // تحقق من وصفة الطبيب
         $hasPrescription = Prescription::where('visit_id', $visit->id)->exists();
         $isFollowUp = $visit->appointment->type === 'followup';
 
         if (!$isFollowUp && !$hasPrescription) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'errors' => ['يجب إدخال وصفة طبية لهذا الموعد.']], 422);
+            }
             return back()->withErrors(['error' => 'يجب إدخال وصفة طبية لهذا الموعد.']);
         }
 
-        // تحقق من وجود مواد مستخدمة
-        /*  $usedMaterials = DoctorMaterial::where('visit_id', $visit->id)->exists();
-         if (!$usedMaterials) {
-             return back()->withErrors(['error' => 'لم يتم تسجيل أي مواد مستخدمة.']);
-         } */
-
         DB::beginTransaction();
-
         try {
             $visit->update([
                 'v_notes' => $request->v_notes,
@@ -171,14 +170,11 @@ class DoctorAppointmentController extends Controller
                 'v_ended_at' => now(),
             ]);
 
-            // تحديث حالة الموعد
             $visit->appointment->update([
                 'status' => 'completed',
                 'location_type' => 'in_Payment'
             ]);
 
-
-            // تحديث قائمة الانتظار
             WaitingList::where('appointment_id', $visit->appointment_id)
                 ->update([
                     'w_status' => 'done',
@@ -187,16 +183,33 @@ class DoctorAppointmentController extends Controller
 
             DB::commit();
 
+            // ✅ إذا الطلب AJAX
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم إنهاء الزيارة بنجاح، بانتظار الدفع.',
+                    'v_price' => $visit->v_price,
+                    'totalConsumption' => DoctorMaterial::where('visit_id', $visit->id)
+                        ->sum(DB::raw('dm_quantity * dm_price'))
+                ]);
+            }
 
-            // إعادة التوجيه مع Flash message للسعر
+            // ✅ إذا الطلب عادي (submit عادي)
             return redirect()->back()
-                ->with('success', 'تم إنهاء الزيارة بنجاح، بانتظار الدفع.')
+                ->with('status', 'تم إنهاء الزيارة بنجاح، بانتظار الدفع.')
                 ->with('v_price', $visit->v_price);
+
         } catch (\Exception $e) {
             DB::rollBack();
+
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'errors' => ['حدث خطأ: ' . $e->getMessage()]], 500);
+            }
+
             return back()->withErrors(['error' => 'حدث خطأ أثناء إنهاء الزيارة: ' . $e->getMessage()]);
         }
     }
+
 
     //✅ 1. إدخال السعر (من الطبيب)
 
@@ -491,6 +504,191 @@ class DoctorAppointmentController extends Controller
 
         return back()->with('status', 'تم إلغاء جميع المواعيد المؤكدة اليوم بنجاح.');
     }
+    public function postpone1(Request $request, Appointment $appointment)
+    {
+        $request->validate([
+            'minutes' => 'required|integer|min:1'
+        ]);
+
+        $doctor = $appointment->doctor;
+        $minutes = $request->minutes;
+        $doctorEndTime = Carbon::parse($doctor->end_time);
+
+        $newTime = Carbon::parse($appointment->time)->addMinutes($minutes);
+
+        if ($newTime->gt($doctorEndTime)) {
+            return response()->json([
+                'message' => 'التأجيل يتجاوز دوام الطبيب'
+            ], 400);
+        }
+
+        DB::transaction(function () use ($appointment, $minutes, $doctor, $doctorEndTime) {
+            // جلب جميع المواعيد لليوم نفسه
+            $appointments = Appointment::where('doctor_id', $doctor->id)
+                ->where('date', $appointment->date)
+                ->orderBy('time')
+                ->get();
+            // 1️⃣ تأجيل الموعد المحدد
+            //$appointment->time = Carbon::parse($appointment->time)->addMinutes($minutes)->format('H:i:s');
+            //$appointment->save();
+
+            Notification::send($appointment->patient, new AppointmentPostponedNotification($appointment));
+
+            // إشعار FCM
+            $this->sendFirebaseNotification1(
+                $appointment->patient->user->fcm_token ?? null,
+                'تم تأجيل موعدك',
+                'تم تأجيل موعدك مع ' . $appointment->doctor->name . ' إلى ' . $appointment->time,
+                [
+                    'appointment_id' => $appointment->id,
+                    'type' => 'appointment_update'
+                ]
+            );
+
+            // 2️⃣ المواعيد التالية
+            $nextAppointments = Appointment::where('doctor_id', $doctor->id)
+                ->where('date', $appointment->date)
+                ->where('time', '>', $appointment->time)
+                ->orderBy('time')
+                ->get();
+
+            foreach ($nextAppointments as $next) {
+                $proposedTime = Carbon::parse($next->time)->addMinutes($minutes);
+
+                if ($proposedTime->gt($doctorEndTime)) {
+                    continue;
+                }
+
+                $next->time = $proposedTime->format('H:i:s');
+                $next->save();
+
+                LaravelNotification::send($next->patient, new AppointmentPostponedNotification($next));
+
+                $this->sendFirebaseNotification1(
+                    $next->patient->user->fcm_token ?? null,
+                    'تم تأجيل موعدك',
+                    'تم تأجيل موعدك مع ' . $next->doctor->name . ' إلى ' . $next->time,
+                    [
+                        'appointment_id' => $next->id,
+                        'type' => 'appointment_update'
+                    ]
+                );
+            }
+        });
+
+        return response()->json([
+            'message' => 'تم تأجيل الموعد والمواعيد التالية بنجاح'
+        ]);
+    }
+    public function postpone(Request $request)
+    {
+        $request->validate([
+            'minutes' => 'required|integer|min:1'
+        ]);
+
+        $doctor = auth()->user()->doctor; // الطبيب الحالي
+        $minutes = (int) $request->minutes;
+
+        // وقت انتهاء دوام الطبيب
+        $doctorEndTime = Carbon::parse($doctor->end_time);
+
+        // 🟢 نجيب كل المواعيد المؤكدة لليوم الحالي
+        $appointments = Appointment::where('doctor_id', $doctor->id)
+            ->whereDate('date', Carbon::today()) // اليوم فقط
+            ->where('status', 'confirmed')       // فقط المؤكدة
+            ->orderBy('start_time')
+            ->get();
+
+        if ($appointments->isEmpty()) {
+
+            return redirect()->back()
+                ->with('error', 'لا يوجد مواعيد مؤكدة اليوم ليتم تأجيلها');
+        }
+
+        // ✅ تحقق مسبقاً إذا كان أي موعد بعد التأجيل سيتجاوز دوام الطبيب
+        foreach ($appointments as $apt) {
+            $newTime = Carbon::parse($apt->time)->addMinutes($minutes);
+            if ($newTime->gt($doctorEndTime)) {
+
+                return redirect()->back()
+                    ->with('status', 'التأجيل يتجاوز دوام الطبيب، لا يمكن تأجيل المواعيد');
+            }
+        }
+
+        // ⏳ إذا كل شيء تمام → نعمل التأجيل
+        DB::transaction(function () use ($appointments, $minutes, $doctor) {
+            foreach ($appointments as $apt) {
+                $newTime = Carbon::parse($apt->time)->addMinutes($minutes);
+                $apt->time = $newTime->format('H:i:s');
+                $apt->save();
+
+                // إشعار Laravel Notifications
+                Notification::send($apt->patient, new AppointmentPostponedNotification($apt));
+
+                // إشعار عبر Firebase (إذا عندك fcm_token)
+                if (!empty($apt->patient->user->fcm_token)) {
+                    $this->sendFirebaseNotification1(
+                        $apt->patient->user->fcm_token,
+                        'تم تأجيل موعدك',
+                        'تم تأجيل موعدك مع ' . $doctor->name . ' إلى ' . $apt->time,
+                        [
+                            'appointment_id' => $apt->id,
+                            'type' => 'appointment_update'
+                        ]
+                    );
+                }
+            }
+        });
+
+
+
+        return redirect()->back()
+            ->with('status', 'تم تأجيل جميع المواعيد المؤكدة لهذا اليوم بنجاح');
+    }
+
+
+    public function sendFirebaseNotification1($token, $title, $body, array $data = [])
+    {
+        if (empty($token)) {
+            \Log::warning("محاولة إرسال إشعار بدون FCM Token");
+            return false;
+        }
+
+        try {
+            $credentialPath = config('services.firebase.credentials_file');
+            if (!file_exists($credentialPath)) {
+                \Log::error('Firebase credentials file not found');
+                return false;
+            }
+
+            $messaging = (new Factory)
+                ->withServiceAccount($credentialPath)
+                ->createMessaging();
+
+            $message = CloudMessage::withTarget('token', $token)
+                ->withNotification(FirebaseNotification::create($title, $body))
+                ->withData(array_merge($data, [
+                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK'
+                ]));
+
+            $messaging->send($message);
+            \Log::info("Firebase notification sent successfully to token={$token}");
+            return true;
+
+        } catch (\Kreait\Firebase\Exception\Messaging\NotFound $e) {
+            \Log::warning("FCM token not found or invalid: {$e->getMessage()}");
+            $this->removeInvalidFcmToken($token);
+            return false;
+
+        } catch (\Exception $e) {
+            \Log::error("Firebase Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+
+
 
 
 }
